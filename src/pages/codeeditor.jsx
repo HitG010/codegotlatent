@@ -1,6 +1,6 @@
 // filepath: /Users/hiteshgupta/Documents/codegotlatent/src/pages/codeeditor.jsx
 import React, { useState } from "react";
-import { executeCode } from "../api/api";
+import { executeCode, pollSubmissionStatus } from "../api/api";
 
 const CodeEditor = () => {
   const [code, setCode] = useState("// Write your code here...");
@@ -16,7 +16,19 @@ const CodeEditor = () => {
     // Simulate an API call to execute the code
     const result = await executeCode(code);
     if (result) {
-      setResult(result);
+      // setResult(result);
+
+      // long poll the server for submission status
+      const submissionId = result.token;
+      console.log("Submission ID:", submissionId);
+      try {
+        const data = await pollSubmissionStatus(submissionId);
+        console.log("Polling Response:", data);
+        setResult(data);
+      } catch (error) {
+        console.error("Error polling submission status:", error);
+        setError(error);
+      }
     }
   };
 

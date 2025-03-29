@@ -1,5 +1,7 @@
 // import dotenv from "dotenv";
 // dotenv.config();
+import axios from "axios";
+
 async function api() {
   const options = {
     method: "GET",
@@ -43,22 +45,40 @@ async function executeCode(code) {
     stdin: "",
     callback_url: "http://localhost:5000/callback",
   };
-  const url = `${import.meta.env.VITE_JUDGE0_API}/submissions`;
+  const url = `${import.meta.env.VITE_BASE_URL}/submission`;
   console.log("URL:", url);
-  return await fetch(url, options, body)
-    .then((response) => {
-      console.log("Response:", response);
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .catch((error) => {
-      console.error(
-        "There has been a problem with your fetch operation:",
-        error
-      );
-    });
+  console.log("Body:", body);
+  const response = await axios.post(url, body, options);
+  console.log("Response:", response.data);
+  // await pollSubmissionStatus(response.data.token).then((data) => {
+  //   console.log("Polling Response:", data);
+  // });
+  return response.data;
 }
 
-export { api, executeCode };
+// long polling judge0 server for submission status
+const pollSubmissionStatus = async (submissionId) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/submission/${submissionId}`;
+  console.log("Polling URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Polling Response:", response.data);
+    if(response.data.status.id < 3){
+      console.log("Submission is still processing...");
+      // Wait for a few seconds before polling again
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      return pollSubmissionStatus(submissionId);
+    }
+    else return response.data;
+  } catch (error) {
+    console.error("Error polling submission status:", error);
+    throw error;
+  }
+}
+
+export { api, executeCode, pollSubmissionStatus };
