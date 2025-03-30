@@ -35,14 +35,7 @@ app.post("/submission", async (req, res) => {
   console.log("Submission received:", req.body);
   // send submission to judge0 server
   const body = await req.body;
-  // console.log(await req.body);
   console.log("Body:", body);
-  // const body = JSON.stringify({
-  //   source_code: req.body.source_code,
-  //   language_id: req.body.language_id,
-  //   stdin: req.body.stdin,
-  //   callback_url: req.body.callback_url,
-  // });
   console.log("Body:", body);
   const url = `${process.env.JUDGE0_API}/submissions`;
   console.log("URL:", url);
