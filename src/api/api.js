@@ -68,21 +68,20 @@ const pollSubmissionStatus = async (submissionId) => {
       },
     });
     console.log("Polling Response:", response.data);
-    if(response.data.status.id < 3){
+    if (response.data.status.id < 3) {
       console.log("Submission is still processing...");
       // Wait for a few seconds before polling again
       await new Promise((resolve) => setTimeout(resolve, 200));
       return pollSubmissionStatus(submissionId);
-    }
-    else return response.data;
+    } else return response.data;
   } catch (error) {
     console.error("Error polling submission status:", error);
     throw error;
   }
-}
+};
 
 const fetchProblems = async () => {
-  const url = `${import.meta.env.VITE_BASE_URL}/problems`;
+  const url = `${import.meta.env.VITE_BASE_URL}/allProblems`;
   console.log("URL:", url);
   try {
     const response = await axios.get(url, {
@@ -92,9 +91,56 @@ const fetchProblems = async () => {
       },
     });
     console.log("Response:", response.data);
+    return response.data;
   } catch (error) {
     console.error("Error fetching problems:", error);
   }
 };
 
-export { api, executeCode, pollSubmissionStatus, fetchProblems };
+const fetchProblem = async (problemId) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/problem/${problemId}`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching problem:", error);
+    throw error;
+  }
+};
+
+const fetchTestcases = async (problemId) => {
+  console.log("Problem ID:", problemId.problemId);
+  const url = `${import.meta.env.VITE_BASE_URL}/getTestcases/${
+    problemId.problemId
+  }`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching test cases:", error);
+    throw error;
+  }
+};
+
+export {
+  api,
+  executeCode,
+  pollSubmissionStatus,
+  fetchProblems,
+  fetchProblem,
+  fetchTestcases,
+};

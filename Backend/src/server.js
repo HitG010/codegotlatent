@@ -126,13 +126,35 @@ app.post("/submitProblem", async (req, res) => {
   }
 });
 
-// app.get("/getTableStructure", async (req, res) => {
-//   // Get the table structure of the Problem table
-//   const tableStructure = await prisma.$queryRaw`SELECT * FROM information_schema.columns WHERE table_name = 'Problem'`;
-//   console.log("Table Structure:", tableStructure);
-//   res.status(200).json(tableStructure);
-// }
-// );
+app.get("/allProblems", async (req, res) => {
+  const problems = await prisma.Problem.findMany();
+  console.log(problems);
+  res.status(200).json(problems);
+});
+
+app.get("/problem/:id", async (req, res) => {
+  const problemId = req.params.id;
+  console.log("Problem ID:", problemId);
+  const problem = await prisma.Problem.findUnique({
+    where: {
+      id: problemId,
+    },
+  });
+  console.log(problem);
+  res.status(200).json(problem);
+});
+
+app.get("/getTestcases/:problemId", async (req, res) => {
+  const problemId = req.params.problemId;
+  console.log("Problem ID:", problemId);
+  const testCases = await prisma.TestCase.findMany({
+    where: {
+      problemId: problemId,
+    },
+  });
+  console.log(testCases);
+  res.status(200).json(testCases);
+});
 
 app.post("/submitTestCases/:probId", async (req, res) => {
   const { probId } = req.params;
