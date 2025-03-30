@@ -3,6 +3,11 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
 
+import { PrismaClient } from "@prisma/client/edge";
+import { withAccelerate } from "@prisma/extension-accelerate";
+
+const prisma = new PrismaClient().$extends(withAccelerate());
+
 // const submissionRoutes = require("./routes/index");
 
 const app = express();
