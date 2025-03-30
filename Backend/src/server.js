@@ -126,4 +126,53 @@ app.post("/submitProblem", async (req, res) => {
   }
 });
 
+app.get("/allProblems", async (req, res) => {
+  const problems = await prisma.Problem.findMany();
+  console.log(problems);
+  res.status(200).json(problems);
+});
 
+app.get("/problem/:id", async (req, res) => {
+  const problemId = req.params.id;
+  console.log("Problem ID:", problemId);
+  const problem = await prisma.Problem.findUnique({
+    where: {
+      id: problemId,
+    },
+  });
+  console.log(problem);
+  res.status(200).json(problem);
+});
+
+app.get("/getTestcases/:problemId", async (req, res) => {
+  const problemId = req.params.problemId;
+  console.log("Problem ID:", problemId);
+  const testCases = await prisma.TestCase.findMany({
+    where: {
+      problemId: problemId,
+    },
+  });
+  console.log(testCases);
+  res.status(200).json(testCases);
+});
+
+app.post("/submitTestCases/:probId", async (req, res) => {
+  const { probId } = req.params;
+  const testCases = req.body;
+  console.log("Request Body:", testCases);
+  try {
+    const Testcases = testCases.map((testCase) => ({
+      input: JSON.stringify(testCase.input),
+      output: JSON.stringify(testCase.output),
+      problemId: probId,
+    }));
+    const result = await prisma.TestCase.createMany({
+      data: Testcases,
+    });
+    console.log("Test Cases:", result);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error creating problem:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});

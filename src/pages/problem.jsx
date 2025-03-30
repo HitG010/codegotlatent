@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
 import "../App.css";
-import { api } from "../api/api";
+import { fetchProblem } from "../api/api";
 import CodeEditor from "../pages/codeeditor";
-import TestcasesList from "../components/Testcases";
-
+import TestCases from "../components/Testcases";
+import { useParams } from "react-router-dom";
 
 function Problem() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const { id } = useParams();
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await api();
+      const response = await fetchProblem(id);
       setData(response);
     } catch (err) {
       setError(err);
@@ -56,13 +57,14 @@ function Problem() {
 
   return (
     <>
-      <h1>HELLLO</h1>
-      <h2>Data</h2>
-      <pre>{JSON.stringify(data)}</pre>
+      <h1>{data.title}</h1>
+      <h2>{data.description}</h2>
+      <h2>{data.difficulty}</h2>
+      <p>{data.max_time_limit}</p>
+      <p>{data.max_memory_limit / 1024}</p>
       <h2>Code Editor</h2>
-      <ProblemStatement/>
       <CodeEditor></CodeEditor>
-      <TestcasesList/>
+      <TestCases problemId={id} />
     </>
   );
 }
