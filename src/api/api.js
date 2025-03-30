@@ -81,4 +81,20 @@ const pollSubmissionStatus = async (submissionId) => {
   }
 }
 
-export { api, executeCode, pollSubmissionStatus };
+const fetchProblems = async () => {
+  const url = `${import.meta.env.VITE_BASE_URL}/problems`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+  } catch (error) {
+    console.error("Error fetching problems:", error);
+  }
+};
+
+export { api, executeCode, pollSubmissionStatus, fetchProblems };

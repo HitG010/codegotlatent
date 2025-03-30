@@ -1,47 +1,34 @@
-import { useState, useEffect } from "react";
-import "./App.css";
-import { api } from "./api/api";
-import CodeEditor from "./pages/codeeditor";
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import ProblemSet from './pages/ProblemSet';
+import Problem from './pages/problem';
+import Home from './pages/home';
 
-function App() {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+const App = () => {
+  const location = useLocation();
+  // run testcases flow
+  // problemID
+  // fetch testcases for problemID
+  // submit the code with testcases (batch submission)
+  // get the tokens for the submissions
+  // poll the server for submission status
+  // get the results for the submissions
+  // show the results in UI
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await api();
-      setData(response);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-  if (!data) {
-    return <div>No data available</div>;
-  }
+  // submit code flow
+  // get the code from the editor
+  // submit the code to the server
+  // get the token for the submission
+  // poll the server for submission status
+  // get the result for the submission
+  // show the result in UI
+  // populate database with submission result
 
   return (
-    <>
-      <h1>HELLLO</h1>
-      <h2>Data</h2>
-      <pre>{JSON.stringify(data)}</pre>
-      <h2>Code Editor</h2>
-      <CodeEditor></CodeEditor>
-    </>
+    <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Home />}/>
+            <Route path="/problemSet" element={<ProblemSet />} />
+            <Route path="/problem/:id" element={<Problem/>} />
+    </Routes>
   );
 }
 

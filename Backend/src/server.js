@@ -95,3 +95,35 @@ app.post("/populateDatabase", async (req, res) => {
     });
   res.send("Database populated");
 });
+
+app.post("/submitProblem", async (req, res) => {
+  // title       String
+  // description String
+  // difficulty  String    // "Easy", "Medium", "Hard"
+  // max_time_limit Int    @default(2)
+  // max_memory_limit Int  @default(262144) // 256MB in kBs
+  // testCases   TestCase[]
+  const { title, description, difficulty, max_time_limit, max_memory_limit } =
+    req.body;
+  console.log("Request Body:", req.body);
+  // body = JSON.parse(body);
+  // console.log("Parsed Body:", body);
+  try {
+    const problem = await prisma.Problem.create({
+      data: {
+        title,
+        description,
+        difficulty,
+        max_time_limit,
+        max_memory_limit,
+      },
+    });
+    console.log(problem);
+    res.status(200).json(problem);
+  } catch (error) {
+    console.error("Error creating problem:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+

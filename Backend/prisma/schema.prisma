@@ -42,6 +42,8 @@ model Problem {
   title       String
   description String
   difficulty  String    // "Easy", "Medium", "Hard"
+  max_time_limit Int    @default(2)
+  max_memory_limit Int  @default(262144) // 256MB in kBs
   testCases   TestCase[]
   submissions Submission[]
   createdAt   DateTime  @default(now())
