@@ -126,4 +126,31 @@ app.post("/submitProblem", async (req, res) => {
   }
 });
 
+// app.get("/getTableStructure", async (req, res) => {
+//   // Get the table structure of the Problem table
+//   const tableStructure = await prisma.$queryRaw`SELECT * FROM information_schema.columns WHERE table_name = 'Problem'`;
+//   console.log("Table Structure:", tableStructure);
+//   res.status(200).json(tableStructure);
+// }
+// );
 
+app.post("/submitTestCases/:probId", async (req, res) => {
+  const { probId } = req.params;
+  const testCases = req.body;
+  console.log("Request Body:", testCases);
+  try {
+    const Testcases = testCases.map((testCase) => ({
+      input: JSON.stringify(testCase.input),
+      output: JSON.stringify(testCase.output),
+      problemId: probId,
+    }));
+    const result = await prisma.TestCase.createMany({
+      data: Testcases,
+    });
+    console.log("Test Cases:", result);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error creating problem:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
