@@ -3,8 +3,8 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
 
-import { PrismaClient } from "@prisma/client/edge";
-import { withAccelerate } from "@prisma/extension-accelerate";
+const { PrismaClient } = require("@prisma/client/edge");
+const { withAccelerate } = require("@prisma/extension-accelerate");
 
 const prisma = new PrismaClient().$extends(withAccelerate());
 
@@ -70,4 +70,28 @@ app.get("/submission/:id", async (req, res) => {
 
   // res.status(200).send("OK");
   res.send(data);
+});
+
+app.post("/populateDatabase", async (req, res) => {
+  async function main() {
+    const user = await prisma.User.create({
+      data: {
+        username: "Alice",
+        email: "abc@gmail.com",
+        password: "123456",
+      },
+    });
+    console.log(user);
+  }
+
+  main()
+    .then(async () => {
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      await prisma.$disconnect();
+      process.exit(1);
+    });
+  res.send("Database populated");
 });

@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @default(uuid())  // Unique user ID
+  username   String    @unique
+  email      String    @unique
+  password   String    // Hashed password
+  rating     Int       @default(1500)        // Rating starts at 1500 (ELO system)
+  contests   ContestUser[]
+  submissions Submission[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Contest {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  participants ContestUser[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Problem {
+  id          String    @id @default(uuid())
+  contestId   String?   // Nullable for problems not in contests
+  title       String
+  description String
+  difficulty  String    // "Easy", "Medium", "Hard"
+  testCases   TestCase[]
+  submissions Submission[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+
+
+model ContestUser {
+  id        String  @id @default(uuid())
+  userId    String
+  contestId String
+  rankGuess Int?    // User's guessed rank
+  actualRank Int?   // Actual rank (calculated post-contest)
+  ratingChange Int? // How much rating changed after the contest
+
+  user      User    @relation(fields: [userId], references: [id])
+  contest   Contest @relation(fields: [contestId], references: [id])
+
+  @@unique([userId, contestId]) // Ensure no duplicate participation
+}
+
+model Submission {
+  id         String   @id @default(uuid())
+  userId     String
+  problemId  String
+  language   String   // "Python", "JavaScript", "C++", etc.
+  code       String
+  verdict    String   // "Accepted", "Wrong Answer", "Time Limit Exceeded", etc.
+  score      Int      @default(0) // Score awarded based on correctness
+  executionTime Float? // Execution time in ms
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+  problem    Problem  @relation(fields: [problemId], references: [id])
+}
+
+model TestCase {
+  id        String  @id @default(uuid())
+  problemId String
+  input     String
+  output    String
+  isPublic  Boolean @default(false) // Public test cases vs. hidden ones
+
+  problem   Problem @relation(fields: [problemId], references: [id])
+}
