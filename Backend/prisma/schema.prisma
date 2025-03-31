@@ -85,6 +85,7 @@ model TestCase {
   id        String  @id @default(uuid())
   problemId String
   input     String
+  stdin    String   @default("")
   output    String
   isPublic  Boolean @default(false) // Public test cases vs. hidden ones
 
