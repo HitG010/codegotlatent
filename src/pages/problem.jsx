@@ -12,6 +12,7 @@ function Problem() {
   const [testCases, setTestCases] = useState([]);
   const [testCaseLoading, setTestCaseLoading] = useState(true);
   const [testCaseError, setTestCaseError] = useState(null);
+  const [langId, setLangId] = useState(71);
   const { id } = useParams();
 
   const fetchTestCases = async () => {
@@ -79,13 +80,15 @@ function Problem() {
       <p>{data.max_time_limit}</p>
       <p>{data.max_memory_limit / 1024}</p>
       <h2>Code Editor</h2>
-      <CodeEditor problemId={id} />
       {testCaseLoading ? (
         <div>Loading Test Cases...</div>
       ) : testCaseError ? (
         <div>Error: {testCaseError.message}</div>
       ) : (
-        <TestCases testCases={testCases} />
+        <>
+          <CodeEditor problemId={id} testCases={testCases} langId={langId} />
+          <TestCases testCases={testCases} />
+        </>
       )}
     </>
   );

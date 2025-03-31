@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import { executeCode, pollSubmissionStatus } from "../api/api";
 
-const CodeEditor = (problemId, testCases, langId) => {
+const CodeEditor = ({ testCases, langId }) => {
   const [code, setCode] = useState("// Write your code here...");
   const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  // Removed unused error state
 
   const handleEditorChange = (event) => {
     setCode(event.target.value);
@@ -14,22 +14,17 @@ const CodeEditor = (problemId, testCases, langId) => {
   const handleSubmit = async () => {
     console.log("Submitted Code:", code);
     // Simulate an API call to execute the code
-    const result = await executeCode(code, testCases, langId);
-    if (result) {
-      // setResult(result);
-
-      // long poll the server for submission status
-      const submissionId = result.token;
-      console.log("Submission ID:", submissionId);
-      try {
-        const data = await pollSubmissionStatus(submissionId);
+    executeCode(code, testCases, langId)
+      .then(async (result) => {
+        // long poll the server for submission status
+        const data = await pollSubmissionStatus(result);
         console.log("Polling Response:", data);
         setResult(data);
-      } catch (error) {
-        console.error("Error polling submission status:", error);
-        setError(error);
-      }
-    }
+      })
+      .catch((error) => {
+      console.error("Error executing code:", error);
+      setError(error);
+      });
   };
 
   return (
@@ -50,12 +45,12 @@ const CodeEditor = (problemId, testCases, langId) => {
       <button
         onClick={handleSubmit}
         style={{
-          padding: "10px 20px",
-          backgroundColor: "#007BFF",
+          marginTop: "10px",
+          padding: "10px",
+          backgroundColor: "#007bff",
           color: "#fff",
           border: "none",
-          cursor: "pointer",
-          marginTop: "10px",
+          borderRadius: "4px",
         }}
       >
         Submit Code

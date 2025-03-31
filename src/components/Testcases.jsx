@@ -20,6 +20,9 @@ const Testcases = (testCases) => {
             <strong>Input:</strong> {testCase.input}
           </p>
           <p>
+            <strong>Input:</strong> {testCase.stdin}
+          </p>
+          <p>
             <strong>Expected Output:</strong> {JSON.stringify(testCase.output)}
           </p>
         </div>

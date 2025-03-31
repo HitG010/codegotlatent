@@ -32,20 +32,30 @@ app.put("/callback", (req, res) => {
 });
 
 app.post("/batchSubmission", async (req, res) => {
-  console.log("Submission received:", req.body);
-  // send submission to judge0 server
   const body = await req.body;
-  console.log("Body:", body);
-  console.log("Body:", body);
-  const url = `${process.env.JUDGE0_API}/submissions`;
-  console.log("URL:", url);
+  const { testcases, language_id, source_code } = body;
+
+  const submissions = [];
+  console.log("Submissions:", submissions);
+  testcases.forEach((testCase) => {
+    const submission = {
+      "source_code": source_code,
+      "language_id": language_id,
+      "stdin": testCase.stdin,
+      "expected_output": testCase.stdout,
+    };
+    submissions.push(submission);
+  });
+  console.log("Submissions:", submissions);
+
+  const url = `${process.env.JUDGE0_API}/submissions/batch`;
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ "submissions": submissions }),
   });
   const data = await response.json();
   console.log("Response:", data);
@@ -53,10 +63,27 @@ app.post("/batchSubmission", async (req, res) => {
   // res.status(200).send("OK");
   res.send(data);
 });
-
+// long polling
 app.get("/submission/:id", async (req, res) => {
   console.log(req.params);
   const url = `${process.env.JUDGE0_API}/submissions/${req.params.id}`;
+  console.log("URL:", url);
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
+  const data = await response.json();
+  console.log("Response:", data);
+
+  // res.status(200).send("OK");
+  res.send(data);
+});
+// long polling
+app.get("/pollSubmission/:id", async (req, res) => {
+  const url = `${process.env.JUDGE0_API}/submissions/batch?tokens=${req.params.id}`;
   console.log("URL:", url);
   const response = await fetch(url, {
     method: "GET",

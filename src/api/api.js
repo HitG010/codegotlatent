@@ -31,6 +31,7 @@ async function api() {
     });
 }
 
+// batch submission
 async function executeCode(code, testCases, langId) {
   console.log("Code:", typeof code);
   const options = {
@@ -54,12 +55,14 @@ async function executeCode(code, testCases, langId) {
   // await pollSubmissionStatus(response.data.token).then((data) => {
   //   console.log("Polling Response:", data);
   // });
-  return response.data;
+  const tokensString = response.data.map((item) => item.token).join(",");
+  console.log("Tokens String:", tokensString);
+  return tokensString;
 }
 
 // long polling judge0 server for submission status
 const pollSubmissionStatus = async (submissionId) => {
-  const url = `${import.meta.env.VITE_BASE_URL}/submission/${submissionId}`;
+  const url = `${import.meta.env.VITE_BASE_URL}/pollSubmission/${submissionId}`;
   console.log("Polling URL:", url);
   try {
     const response = await axios.get(url, {
@@ -69,12 +72,21 @@ const pollSubmissionStatus = async (submissionId) => {
       },
     });
     console.log("Polling Response:", response.data);
-    if (response.data.status.id < 3) {
-      console.log("Submission is still processing...");
-      // Wait for a few seconds before polling again
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return pollSubmissionStatus(submissionId);
-    } else return response.data;
+    let count = 0;
+    for(let i = 0; i < response.data.submissions.length; i++) {
+      if (response.data.submissions[i].status.id < 3) {
+        count++;
+        console.log("Submission is still processing...");
+        // Wait for a few seconds before polling again
+        new Promise((resolve) => setTimeout(resolve, 200));
+        await pollSubmissionStatus(submissionId);
+        break;
+      }
+    }
+    if(count == 0){
+      console.log(response.data, "Final Response");
+      return response.data;
+    }
   } catch (error) {
     console.error("Error polling submission status:", error);
     throw error;
