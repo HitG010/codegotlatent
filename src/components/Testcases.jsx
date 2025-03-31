@@ -1,40 +1,16 @@
 import React from "react";
-import { fetchTestcases } from "../api/api";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const Testcases = (problemId) => {
-  const [testCases, setTestCases] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchTestCases = async () => {
-    try {
-      const response = await fetchTestcases(problemId);
-      setTestCases(response);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchTestCases();
-  }, []);
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
+const Testcases = (testCases) => {
   if (!testCases) {
     return <div>No test cases available</div>;
   }
-
+  const testCasesData = testCases.testCases;
   // console.log(JSON.parse(testCases[0].input));
   return (
     <div>
-      {testCases.map((testCase, index) => (
+      {testCasesData.map((testCase, index) => (
         <div
           key={index}
           style={{ margin: "10px", padding: "10px", border: "1px solid #ccc" }}

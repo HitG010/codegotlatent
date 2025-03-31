@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "../App.css";
-import { fetchProblem } from "../api/api";
+import { fetchProblem, fetchTestcases } from "../api/api";
 import CodeEditor from "../pages/codeeditor";
 import TestCases from "../components/Testcases";
 import { useParams } from "react-router-dom";
@@ -9,8 +9,23 @@ function Problem() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [testCases, setTestCases] = useState([]);
+  const [testCaseLoading, setTestCaseLoading] = useState(true);
+  const [testCaseError, setTestCaseError] = useState(null);
   const { id } = useParams();
+
+  const fetchTestCases = async () => {
+    try {
+      const response = await fetchTestcases(id);
+      setTestCases([...response]);
+      console.log("Test Cases:", response);
+    } catch (err) {
+      setTestCaseError(err);
+    } finally {
+      setTestCaseLoading(false);
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -25,6 +40,7 @@ function Problem() {
 
   useEffect(() => {
     fetchData();
+    fetchTestCases();
   }, []);
 
   if (loading) {
@@ -63,8 +79,14 @@ function Problem() {
       <p>{data.max_time_limit}</p>
       <p>{data.max_memory_limit / 1024}</p>
       <h2>Code Editor</h2>
-      <CodeEditor></CodeEditor>
-      <TestCases problemId={id} />
+      <CodeEditor problemId={id} />
+      {testCaseLoading ? (
+        <div>Loading Test Cases...</div>
+      ) : testCaseError ? (
+        <div>Error: {testCaseError.message}</div>
+      ) : (
+        <TestCases testCases={testCases} />
+      )}
     </>
   );
 }

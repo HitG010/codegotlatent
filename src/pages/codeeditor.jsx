@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { executeCode, pollSubmissionStatus } from "../api/api";
 
-const CodeEditor = () => {
+const CodeEditor = (problemId, testCases, langId) => {
   const [code, setCode] = useState("// Write your code here...");
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -14,7 +14,7 @@ const CodeEditor = () => {
   const handleSubmit = async () => {
     console.log("Submitted Code:", code);
     // Simulate an API call to execute the code
-    const result = await executeCode(code);
+    const result = await executeCode(code, testCases, langId);
     if (result) {
       // setResult(result);
 

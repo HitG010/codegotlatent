@@ -1,6 +1,7 @@
 // import dotenv from "dotenv";
 // dotenv.config();
 import axios from "axios";
+import test from "node:test";
 
 async function api() {
   const options = {
@@ -30,7 +31,7 @@ async function api() {
     });
 }
 
-async function executeCode(code) {
+async function executeCode(code, testCases, langId) {
   console.log("Code:", typeof code);
   const options = {
     method: "POST",
@@ -41,11 +42,11 @@ async function executeCode(code) {
   };
   const body = {
     source_code: code,
-    language_id: "71",
-    stdin: "",
+    language_id: langId,
+    testcases: testCases,
     callback_url: "http://localhost:5000/callback",
   };
-  const url = `${import.meta.env.VITE_BASE_URL}/submission`;
+  const url = `${import.meta.env.VITE_BASE_URL}/batchSubmission`;
   console.log("URL:", url);
   console.log("Body:", body);
   const response = await axios.post(url, body, options);
@@ -116,10 +117,8 @@ const fetchProblem = async (problemId) => {
 };
 
 const fetchTestcases = async (problemId) => {
-  console.log("Problem ID:", problemId.problemId);
-  const url = `${import.meta.env.VITE_BASE_URL}/getTestcases/${
-    problemId.problemId
-  }`;
+  console.log("Problem ID:", problemId);
+  const url = `${import.meta.env.VITE_BASE_URL}/getTestcases/${problemId}`;
   console.log("URL:", url);
   try {
     const response = await axios.get(url, {

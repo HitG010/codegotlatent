@@ -31,7 +31,7 @@ app.put("/callback", (req, res) => {
   res.status(200).send("OK");
 });
 
-app.post("/submission", async (req, res) => {
+app.post("/batchSubmission", async (req, res) => {
   console.log("Submission received:", req.body);
   // send submission to judge0 server
   const body = await req.body;
@@ -150,6 +150,7 @@ app.get("/getTestcases/:problemId", async (req, res) => {
   const testCases = await prisma.TestCase.findMany({
     where: {
       problemId: problemId,
+      isPublic: true,
     },
   });
   console.log(testCases);
