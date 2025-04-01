@@ -39,10 +39,10 @@ app.post("/batchSubmission", async (req, res) => {
   console.log("Submissions:", submissions);
   testcases.forEach((testCase) => {
     const submission = {
-      "source_code": source_code,
-      "language_id": language_id,
-      "stdin": testCase.stdin,
-      "expected_output": testCase.stdout,
+      source_code: source_code,
+      language_id: language_id,
+      stdin: testCase.stdin,
+      expected_output: testCase.stdout,
     };
     submissions.push(submission);
   });
@@ -55,7 +55,45 @@ app.post("/batchSubmission", async (req, res) => {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
     },
-    body: JSON.stringify({ "submissions": submissions }),
+    body: JSON.stringify({ submissions: submissions }),
+  });
+  const data = await response.json();
+  console.log("Response:", data);
+
+  // res.status(200).send("OK");
+  res.send(data);
+});
+
+app.post("/batchSubmitProblem", async (req, res) => {
+  const body = await req.body;
+  const { problem_id, language_id, source_code } = body;
+
+  const testcases = await prisma.TestCase.findMany({
+    where: {
+      problemId: problem_id,
+    },
+  });
+  const submissions = [];
+  console.log("Submissions:", submissions);
+  testcases.forEach((testCase) => {
+    const submission = {
+      source_code: source_code,
+      language_id: language_id,
+      stdin: testCase.stdin,
+      expected_output: testCase.stdout,
+    };
+    submissions.push(submission);
+  });
+  console.log("Submissions:", submissions);
+
+  const url = `${process.env.JUDGE0_API}/submissions/batch`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify({ submissions: submissions }),
   });
   const data = await response.json();
   console.log("Response:", data);
@@ -82,8 +120,9 @@ app.get("/submission/:id", async (req, res) => {
   res.send(data);
 });
 // long polling
-app.get("/pollSubmission/:id", async (req, res) => {
-  const url = `${process.env.JUDGE0_API}/submissions/batch?tokens=${req.params.id}`;
+
+const getSubmissionStatus = async (id) => {
+  const url = `${process.env.JUDGE0_API}/submissions/batch?tokens=${id}`;
   console.log("URL:", url);
   const response = await fetch(url, {
     method: "GET",
@@ -94,9 +133,24 @@ app.get("/pollSubmission/:id", async (req, res) => {
   });
   const data = await response.json();
   console.log("Response:", data);
+  let count = 0;
+  for (let i = 0; i < data.submissions.length; i++) {
+    if (data.submissions[i].status.id < 3) {
+      count++;
+    }
+  }
+  if (count == 0) {
+    console.log(data, "Final data");
+    return data.submissions;
+  } else {
+    return await getSubmissionStatus(id);
+  }
+};
 
-  // res.status(200).send("OK");
-  res.send(data);
+app.get("/pollSubmission/:id", async (req, res) => {
+  const response = await getSubmissionStatus(req.params.id);
+  console.log("Response:", response);
+  res.send(response);
 });
 
 app.post("/populateDatabase", async (req, res) => {
