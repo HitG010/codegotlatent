@@ -86,8 +86,8 @@ function Problem() {
         <div>Error: {testCaseError.message}</div>
       ) : (
         <>
-          <CodeEditor problemId={id} testCases={testCases} langId={langId} />
-          <TestCases testCases={testCases} />
+          <CodeEditor problemId={id} langId={langId} />
+          {/* <TestCases testCases={testCases} /> */}
         </>
       )}
     </>

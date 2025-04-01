@@ -76,16 +76,14 @@ const pollSubmissionStatus = async (submissionId) => {
     for(let i = 0; i < response.data.submissions.length; i++) {
       if (response.data.submissions[i].status.id < 3) {
         count++;
-        console.log("Submission is still processing...");
-        // Wait for a few seconds before polling again
-        new Promise((resolve) => setTimeout(resolve, 200));
-        await pollSubmissionStatus(submissionId);
-        break;
       }
     }
     if(count == 0){
       console.log(response.data, "Final Response");
-      return response.data;
+      return response.data.submissions;
+    }
+    else{
+      return await pollSubmissionStatus(submissionId);
     }
   } catch (error) {
     console.error("Error polling submission status:", error);

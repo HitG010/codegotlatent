@@ -1,11 +1,27 @@
 // filepath: /Users/hiteshgupta/Documents/codegotlatent/src/pages/codeeditor.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { executeCode, pollSubmissionStatus } from "../api/api";
+import Testcases from "../components/Testcases";
+import {fetchTestcases} from "../api/api";
 
-const CodeEditor = ({ testCases, langId }) => {
+const CodeEditor = ({ problemId, langId }) => {
   const [code, setCode] = useState("// Write your code here...");
-  const [result, setResult] = useState(null);
-  // Removed unused error state
+  const [result, setResult] = useState([]);
+  const [testCases, setTestCases] = useState([]);
+  const [testCaseLoading, setTestCaseLoading] = useState(true);
+  const [testCaseError, setTestCaseError] = useState(null);
+
+  const fetchTestCases = async () => {
+    try {
+      const response = await fetchTestcases(problemId);
+      setTestCases([...response]);
+      console.log("Test Cases:", response);
+    } catch (err) {
+      setTestCaseError(err);
+    } finally {
+      setTestCaseLoading(false);
+    }
+  };
 
   const handleEditorChange = (event) => {
     setCode(event.target.value);
@@ -14,18 +30,28 @@ const CodeEditor = ({ testCases, langId }) => {
   const handleSubmit = async () => {
     console.log("Submitted Code:", code);
     // Simulate an API call to execute the code
-    executeCode(code, testCases, langId)
+   executeCode(code, testCases, langId)
       .then(async (result) => {
         // long poll the server for submission status
-        const data = await pollSubmissionStatus(result);
-        console.log("Polling Response:", data);
-        setResult(data);
+        console.log("Result:", result);
+        pollSubmissionStatus(result)
+        .then((data) => {
+          console.log("Polling Response:", data);
+          setResult(data);
+        })
+        .catch((error) => {
+          console.error("Error polling submission status:", error);
+        });
       })
       .catch((error) => {
       console.error("Error executing code:", error);
       setError(error);
       });
   };
+
+  useEffect(() => {
+      fetchTestCases();
+    }, []);
 
   return (
     <div style={{ height: "40vh", display: "flex", flexDirection: "column" }}>
@@ -67,6 +93,16 @@ const CodeEditor = ({ testCases, langId }) => {
           <h3>Result:</h3>
           <pre>{JSON.stringify(result)}</pre>
         </div>
+      )}
+      {testCaseLoading ? (
+        <div>Loading Test Cases...</div>
+      ) : testCaseError ? (
+        <div>Error: {testCaseError.message}</div>
+      ) : (
+        <>
+          {/* <CodeEditor problemId={id} testCases={testCases} langId={langId} /> */}
+          <Testcases testCases={testCases} testcasesStatus={result} />
+        </>
       )}
     </div>
   );
