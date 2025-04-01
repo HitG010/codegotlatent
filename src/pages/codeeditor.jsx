@@ -1,8 +1,8 @@
 // filepath: /Users/hiteshgupta/Documents/codegotlatent/src/pages/codeeditor.jsx
 import React, { useState, useEffect } from "react";
-import { executeCode, pollSubmissionStatus } from "../api/api";
+import { executeCode, pollSubmissionStatus, submitCode } from "../api/api";
 import Testcases from "../components/Testcases";
-import {fetchTestcases} from "../api/api";
+import { fetchTestcases } from "../api/api";
 
 const CodeEditor = ({ problemId, langId }) => {
   const [code, setCode] = useState("// Write your code here...");
@@ -10,6 +10,7 @@ const CodeEditor = ({ problemId, langId }) => {
   const [testCases, setTestCases] = useState([]);
   const [testCaseLoading, setTestCaseLoading] = useState(true);
   const [testCaseError, setTestCaseError] = useState(null);
+  const [submissionResult, setSubmissionResult] = useState([]);
 
   const fetchTestCases = async () => {
     try {
@@ -27,31 +28,52 @@ const CodeEditor = ({ problemId, langId }) => {
     setCode(event.target.value);
   };
 
-  const handleSubmit = async () => {
+  const handleRunSubmit = async () => {
     console.log("Submitted Code:", code);
     // Simulate an API call to execute the code
-   executeCode(code, testCases, langId)
+    executeCode(code, testCases, langId)
       .then(async (result) => {
         // long poll the server for submission status
         console.log("Result:", result);
         pollSubmissionStatus(result)
-        .then((data) => {
-          console.log("Polling Response:", data);
-          setResult(data);
-        })
-        .catch((error) => {
-          console.error("Error polling submission status:", error);
-        });
+          .then((data) => {
+            console.log("Polling Response:", data);
+            setResult(data);
+          })
+          .catch((error) => {
+            console.error("Error polling submission status:", error);
+          });
       })
       .catch((error) => {
-      console.error("Error executing code:", error);
-      setError(error);
+        console.error("Error executing code:", error);
+        setError(error);
+      });
+  };
+  const handleSubmit = async () => {
+    console.log("Submitted Code:", code);
+    // Simulate an API call to execute the code
+    submitCode(code, problemId, langId)
+      .then(async (result) => {
+        // long poll the server for submission status
+        console.log("Result:", result);
+        pollSubmissionStatus(result)
+          .then((data) => {
+            console.log("Polling Response:", data);
+            setSubmissionResult(data);
+          })
+          .catch((error) => {
+            console.error("Error polling submission status:", error);
+          });
+      })
+      .catch((error) => {
+        console.error("Error executing code:", error);
+        setError(error);
       });
   };
 
   useEffect(() => {
-      fetchTestCases();
-    }, []);
+    fetchTestCases();
+  }, []);
 
   return (
     <div style={{ height: "40vh", display: "flex", flexDirection: "column" }}>
@@ -64,23 +86,40 @@ const CodeEditor = ({ problemId, langId }) => {
           fontFamily: "monospace",
           border: "1px solid #ccc",
           borderRadius: "4px",
+          minHeight: "200px",
         }}
         value={code}
         onChange={handleEditorChange}
       />
-      <button
-        onClick={handleSubmit}
-        style={{
-          marginTop: "10px",
-          padding: "10px",
-          backgroundColor: "#007bff",
-          color: "#fff",
-          border: "none",
-          borderRadius: "4px",
-        }}
-      >
-        Submit Code
-      </button>
+      <div className="submission flex flex-col">
+        <button
+          onClick={handleRunSubmit}
+          style={{
+            marginTop: "10px",
+            padding: "10px",
+            backgroundColor: "#007bff",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+          }}
+        >
+          Run Code
+        </button>
+        <button
+          onClick={handleSubmit}
+          style={{
+            marginTop: "10px",
+            padding: "10px",
+            backgroundColor: "#007bff",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+          }}
+        >
+          Submit Code
+        </button>
+      </div>
+
       {result && (
         <div
           style={{
@@ -92,6 +131,19 @@ const CodeEditor = ({ problemId, langId }) => {
         >
           <h3>Result:</h3>
           <pre>{JSON.stringify(result)}</pre>
+        </div>
+      )}
+      {submissionResult.length > 0 && (
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "10px",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "4px",
+          }}
+        >
+          <h3>Submission Result:</h3>
+          <pre>{JSON.stringify(submissionResult)}</pre>
         </div>
       )}
       {testCaseLoading ? (

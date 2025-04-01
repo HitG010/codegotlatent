@@ -12,7 +12,7 @@ function Problem() {
   const [testCases, setTestCases] = useState([]);
   const [testCaseLoading, setTestCaseLoading] = useState(true);
   const [testCaseError, setTestCaseError] = useState(null);
-  const [langId, setLangId] = useState(71);
+  const [langId, setLangId] = useState(54);
   const { id } = useParams();
 
   const fetchTestCases = async () => {

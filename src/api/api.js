@@ -60,31 +60,48 @@ async function executeCode(code, testCases, langId) {
   return tokensString;
 }
 
+async function submitCode(code, probId, langId) {
+  console.log("Code:", typeof code);
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+  const body = {
+    source_code: code,
+    language_id: langId,
+    problem_id: probId,
+    callback_url: "http://localhost:5000/callback",
+  };
+  const url = `${import.meta.env.VITE_BASE_URL}/batchSubmitProblem`;
+  console.log("URL:", url);
+  console.log("Body:", body);
+  const response = await axios.post(url, body, options);
+  console.log("Response:", response.data);
+  // await pollSubmissionStatus(response.data.token).then((data) => {
+  //   console.log("Polling Response:", data);
+  // });
+  const tokensString = response.data.map((item) => item.token).join(",");
+  console.log("Tokens String:", tokensString);
+  return tokensString;
+}
+
 // long polling judge0 server for submission status
 const pollSubmissionStatus = async (submissionId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/pollSubmission/${submissionId}`;
   console.log("Polling URL:", url);
   try {
+    console.log("Waiting for response at Front");
     const response = await axios.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Polling Response:", response.data);
-    let count = 0;
-    for(let i = 0; i < response.data.submissions.length; i++) {
-      if (response.data.submissions[i].status.id < 3) {
-        count++;
-      }
-    }
-    if(count == 0){
-      console.log(response.data, "Final Response");
-      return response.data.submissions;
-    }
-    else{
-      return await pollSubmissionStatus(submissionId);
-    }
+    console.log("Polling Response:", response);
+    return response.data;
   } catch (error) {
     console.error("Error polling submission status:", error);
     throw error;
@@ -152,4 +169,5 @@ export {
   fetchProblems,
   fetchProblem,
   fetchTestcases,
+  submitCode,
 };

@@ -1,17 +1,16 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import statusCode from "../data/statusCode";
 import { useEffect, useState } from "react";
 
-const Testcases = ({testCases, testcasesStatus}) => {
+const Testcases = ({ testCases, testcasesStatus }) => {
   const [status, setStatus] = useState([]);
 
   const handleSetStatus = async (testcasesStatus) => {
     setStatus(testcasesStatus);
-  }
+  };
   useEffect(() => {
     handleSetStatus(testcasesStatus);
-  }
-  , [testcasesStatus]);
+  }, [testcasesStatus]);
 
   if (!testCases) {
     return <div>No test cases available</div>;
@@ -36,10 +35,12 @@ const Testcases = ({testCases, testcasesStatus}) => {
           <p>
             <strong>Expected Output:</strong> {JSON.stringify(testCase.output)}
           </p>
-          {testcasesStatus.length > 0 && (
-          <p>
-             <strong>Status:</strong> {testcasesStatus[index].status.id}
-          </p>)}
+          {testcasesStatus.length > index && (
+            <p>
+              <strong>Status:</strong>{" "}
+              {statusCode[testcasesStatus[index].status.id - 1]}
+            </p>
+          )}
         </div>
       ))}
     </div>
