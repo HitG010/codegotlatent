@@ -35,7 +35,7 @@ const CodeEditor = ({ problemId, langId }) => {
       .then(async (result) => {
         // long poll the server for submission status
         console.log("Result:", result);
-        pollSubmissionStatus(result)
+        pollSubmissionStatus(result, problemId, 0, code, langId)
           .then((data) => {
             console.log("Polling Response:", data);
             setResult(data);
@@ -56,7 +56,7 @@ const CodeEditor = ({ problemId, langId }) => {
       .then(async (result) => {
         // long poll the server for submission status
         console.log("Result:", result);
-        pollSubmissionStatus(result)
+        pollSubmissionStatus(result, problemId, 1, code, langId)
           .then((data) => {
             console.log("Polling Response:", data);
             setSubmissionResult(data);

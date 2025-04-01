@@ -1,7 +1,6 @@
 // import dotenv from "dotenv";
 // dotenv.config();
 import axios from "axios";
-import test from "node:test";
 
 async function api() {
   const options = {
@@ -89,17 +88,26 @@ async function submitCode(code, probId, langId) {
 }
 
 // long polling judge0 server for submission status
-const pollSubmissionStatus = async (submissionId) => {
+const pollSubmissionStatus = async (submissionId, problemId, flag, sourceCode, langId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/pollSubmission/${submissionId}`;
   console.log("Polling URL:", url);
   try {
     console.log("Waiting for response at Front");
-    const response = await axios.get(url, {
+    const options = {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
-    });
+    }
+    const body = {
+      submissionId: submissionId,
+      problemId: problemId,
+      flag: flag,
+      sourceCode: sourceCode,
+      languageId: langId,
+    };
+    const response = await axios.post(url, body, options);
     console.log("Polling Response:", response);
     return response.data;
   } catch (error) {

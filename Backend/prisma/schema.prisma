@@ -70,11 +70,12 @@ model Submission {
   id         String   @id @default(uuid())
   userId     String
   problemId  String
-  language   String   // "Python", "JavaScript", "C++", etc.
+  language   Int   // "Python", "JavaScript", "C++", etc.
   code       String
   verdict    String   // "Accepted", "Wrong Answer", "Time Limit Exceeded", etc.
   score      Int      @default(0) // Score awarded based on correctness
   executionTime Float? // Execution time in ms
+  memoryUsage   Float? // Memory usage
   createdAt  DateTime @default(now())
 
   user       User     @relation(fields: [userId], references: [id])

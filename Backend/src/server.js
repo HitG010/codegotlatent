@@ -147,9 +147,48 @@ const getSubmissionStatus = async (id) => {
   }
 };
 
-app.get("/pollSubmission/:id", async (req, res) => {
+app.post("/pollSubmission/:id", async (req, res) => {
   const response = await getSubmissionStatus(req.params.id);
   console.log("Response:", response);
+  // const body = await req.body;
+  const { problemId, flag, languageId, sourceCode } = req.body;
+  console.log("Request Body:", req.body);
+  // console.log("Flag:", body.flag);
+  console.log(flag, "Flag");
+  if(flag === 1) {
+    // create a submission entry on the database
+    // first, create the final verdict from response
+    let finalVerdict = "Accepted";
+    let passedTestcasesCnt = 0;
+    let executionTime = 0;
+    let memory = 0;
+    // let errorToken = null;
+    for(let i = 0; i < response.length; i++) {
+      if(response[i].status.id > 3) {
+        finalVerdict = response[i].status.description;
+      }
+      else if(response[i].status.id == 3) {
+        passedTestcasesCnt++;
+      }
+      executionTime += parseFloat(response[i].time);
+      memory += response[i].memory;
+    }
+
+    const submission = await prisma.Submission.create({
+      data: {
+        problemId: problemId,
+        userId: '1',
+        language: languageId,
+        code: sourceCode,
+        verdict: finalVerdict,
+        score: passedTestcasesCnt,
+        executionTime : executionTime,
+        memoryUsage: memory,
+      }
+    });
+    console.log("Submission:", submission);
+    console.log("submission created successfully. Verdict:", finalVerdict);
+  }
   res.send(response);
 });
 
