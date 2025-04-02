@@ -2,6 +2,10 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import ProblemSet from './pages/ProblemSet';
 import Problem from './pages/problem';
 import Home from './pages/home';
+import Landing from './pages/Landing';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import UserProvider from './providers/userProvider';
 
 const App = () => {
   const location = useLocation();
@@ -24,11 +28,16 @@ const App = () => {
   // populate database with submission result
 
   return (
-    <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<Home />}/>
-            <Route path="/problemSet" element={<ProblemSet />} />
-            <Route path="/problem/:id" element={<Problem/>} />
-    </Routes>
+    <UserProvider>
+      <Routes location={location} key={location.pathname}>
+        <Route path='/' element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/home" element={<Home />}/>
+        <Route path="/problemSet" element={<ProblemSet />} />
+        <Route path="/problem/:id" element={<Problem/>} />
+      </Routes>
+    </UserProvider>
   );
 }
 
