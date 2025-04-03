@@ -1,11 +1,18 @@
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import ProblemSet from './pages/ProblemSet';
-import Problem from './pages/problem';
-import Home from './pages/home';
-import Landing from './pages/Landing';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import UserProvider from './providers/userProvider';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
+import ProblemSet from "./pages/ProblemSet";
+import Problem from "./pages/problem";
+import Home from "./pages/home";
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import UserProvider from "./providers/userProvider";
+import Contests from "./pages/Contests";
+import Contest from "./pages/Contest";
 
 const App = () => {
   const location = useLocation();
@@ -30,15 +37,18 @@ const App = () => {
   return (
     <UserProvider>
       <Routes location={location} key={location.pathname}>
-        <Route path='/' element={<Landing />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/home" element={<Home />}/>
+        <Route path="/home" element={<Home />} />
         <Route path="/problemSet" element={<ProblemSet />} />
-        <Route path="/problem/:id" element={<Problem/>} />
+        <Route path="/problem/:id" element={<Problem />} />
+        <Route path="/contests" element={<Contests />} />
+        <Route path="/contest/:contestId" element={<Contest />} />
+        {/* Add more routes as needed */}
       </Routes>
     </UserProvider>
   );
-}
+};
 
 export default App;

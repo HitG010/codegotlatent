@@ -77,7 +77,7 @@ async function submitCode(code, probId, langId) {
   const url = `${import.meta.env.VITE_BASE_URL}/batchSubmitProblem`;
   console.log("URL:", url);
   console.log("Body:", body);
-  const response = await axios.post(url, body, options);
+  const response = await axios.post(url, body, options3);
   console.log("Response:", response.data);
   // await pollSubmissionStatus(response.data.token).then((data) => {
   //   console.log("Polling Response:", data);
@@ -88,7 +88,13 @@ async function submitCode(code, probId, langId) {
 }
 
 // long polling judge0 server for submission status
-const pollSubmissionStatus = async (submissionId, problemId, flag, sourceCode, langId) => {
+const pollSubmissionStatus = async (
+  submissionId,
+  problemId,
+  flag,
+  sourceCode,
+  langId
+) => {
   const url = `${import.meta.env.VITE_BASE_URL}/pollSubmission/${submissionId}`;
   console.log("Polling URL:", url);
   try {
@@ -99,7 +105,7 @@ const pollSubmissionStatus = async (submissionId, problemId, flag, sourceCode, l
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
-    }
+    };
     const body = {
       submissionId: submissionId,
       problemId: problemId,
@@ -170,6 +176,42 @@ const fetchTestcases = async (problemId) => {
   }
 };
 
+const fetchContests = async () => {
+  const url = `${import.meta.env.VITE_BASE_URL}/contests`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contests:", error);
+    throw error;
+  }
+};
+
+const getContest = async (contestId) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contest:", error);
+    throw error;
+  }
+};
+
 export {
   api,
   executeCode,
@@ -178,4 +220,6 @@ export {
   fetchProblem,
   fetchTestcases,
   submitCode,
+  fetchContests,
+  getContest,
 };

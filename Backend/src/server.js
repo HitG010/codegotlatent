@@ -155,7 +155,7 @@ app.post("/pollSubmission/:id", async (req, res) => {
   console.log("Request Body:", req.body);
   // console.log("Flag:", body.flag);
   console.log(flag, "Flag");
-  if(flag === 1) {
+  if (flag === 1) {
     // create a submission entry on the database
     // first, create the final verdict from response
     let finalVerdict = "Accepted";
@@ -163,11 +163,10 @@ app.post("/pollSubmission/:id", async (req, res) => {
     let executionTime = 0;
     let memory = 0;
     // let errorToken = null;
-    for(let i = 0; i < response.length; i++) {
-      if(response[i].status.id > 3) {
+    for (let i = 0; i < response.length; i++) {
+      if (response[i].status.id > 3) {
         finalVerdict = response[i].status.description;
-      }
-      else if(response[i].status.id == 3) {
+      } else if (response[i].status.id == 3) {
         passedTestcasesCnt++;
       }
       executionTime += parseFloat(response[i].time);
@@ -177,14 +176,14 @@ app.post("/pollSubmission/:id", async (req, res) => {
     const submission = await prisma.Submission.create({
       data: {
         problemId: problemId,
-        userId: '1',
+        userId: "1",
         language: languageId,
         code: sourceCode,
         verdict: finalVerdict,
         score: passedTestcasesCnt,
-        executionTime : executionTime,
+        executionTime: executionTime,
         memoryUsage: memory,
-      }
+      },
     });
     console.log("Submission:", submission);
     console.log("submission created successfully. Verdict:", finalVerdict);
@@ -247,7 +246,11 @@ app.post("/submitProblem", async (req, res) => {
 });
 
 app.get("/allProblems", async (req, res) => {
-  const problems = await prisma.Problem.findMany();
+  const problems = await prisma.Problem.findMany({
+    where: {
+      isPublic: true,
+    },
+  });
   console.log(problems);
   res.status(200).json(problems);
 });
@@ -294,6 +297,38 @@ app.post("/submitTestCases/:probId", async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     console.error("Error creating problem:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/contests", async (req, res) => {
+  try {
+    const contests = await prisma.Contest.findMany({
+      include: {
+        participants: false,
+      },
+    });
+    console.log("Contests:", contests);
+    res.status(200).json(contests);
+  } catch (error) {
+    console.error("Error fetching contests:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/contest/:id", async (req, res) => {
+  const contestId = req.params.id;
+  console.log("Contest ID:", contestId);
+  try {
+    const contest = await prisma.Contest.findUnique({
+      where: {
+        id: contestId,
+      },
+    });
+    console.log("Contest:", contest);
+    res.status(200).json(contest);
+  } catch (error) {
+    console.error("Error fetching contest:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

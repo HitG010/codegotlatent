@@ -32,9 +32,12 @@ model Contest {
   startTime   DateTime
   endTime     DateTime
   participants ContestUser[]
+  numberOfParticipants Int? @default(0) // Number of participants
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
+
+
 
 model Problem {
   id          String    @id @default(uuid())
@@ -48,6 +51,7 @@ model Problem {
   submissions Submission[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  isPublic    Boolean  @default(false) // Public vs. private problems
 }
 
 
