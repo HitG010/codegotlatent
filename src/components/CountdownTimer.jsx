@@ -1,0 +1,36 @@
+import { useState, useEffect } from "react";
+
+const CountdownTimer = ({ startTime }) => {
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(startTime));
+
+  function calculateTimeLeft(startTime) {
+    const contestStart = new Date(startTime).getTime();
+    const now = new Date().getTime();
+    const difference = contestStart - now;
+
+    if (difference <= 0) return { hours: 0, minutes: 0, seconds: 0 };
+
+    return {
+      hours: Math.floor(difference / (1000 * 60 * 60)),
+      minutes: Math.floor((difference / (1000 * 60)) % 60),
+      seconds: Math.floor((difference / 1000) % 60),
+    };
+  }
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft(startTime));
+    }, 1000);
+
+    return () => clearInterval(timer); // Cleanup on unmount
+  }, [startTime]);
+
+  return (
+    <div className="text-lg font-bold text-blue-600">
+      Contest starts in: {timeLeft.hours}h {timeLeft.minutes}m{" "}
+      {timeLeft.seconds}s
+    </div>
+  );
+};
+
+export default CountdownTimer;
