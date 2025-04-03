@@ -9,16 +9,20 @@ import {
 import { parseDate, calculateDuration } from "../utils/date";
 import { UserContext } from "../providers/userProvider";
 import { useContext } from "react";
-
 import CountdownTimer from "../components/CountdownTimer";
 import { Link, useParams } from "react-router-dom";
+import io from "socket.io-client";
+
+const socket = io(import.meta.env.VITE_BASE_URL);
+
 export default function Contest() {
   const [contest, setContest] = useState([]);
   const [loading, setLoading] = useState(true);
-  const userId = useContext(UserContext);
+  const user = useContext(UserContext);
   const [redirectUrl, setRedirectUrl] = useState(false);
 
   const [isRegistered, setIsRegistered] = useState(false);
+  const [contestStatus, setContestStatus] = useState("Upcoming");
   const { contestId } = useParams();
 
   const handleClickRegister = async () => {
@@ -27,7 +31,7 @@ export default function Contest() {
       return;
     }
     console.log("Registering for the contest:", contestId);
-    const response = await registerUser(contestId, userId);
+    const response = await registerUser(contestId, user.uuid);
     isUserRegistered();
     console.log("Registering for contest:", contestId);
   };
@@ -36,7 +40,7 @@ export default function Contest() {
       console.log("Not registered for the contest");
       return;
     }
-    const response = await unregisterUser(contestId, userId);
+    const response = await unregisterUser(contestId, user.uuid);
     isUserRegistered();
     console.log("Unregistering from contest:", contestId);
   };
@@ -46,6 +50,7 @@ export default function Contest() {
       const response = await getContest(contestId);
       //   console.log("Response:", response);
       setContest(response);
+      setContestStatus(response.status);
     } catch (error) {
       console.error("Error fetching contest:", error);
     } finally {
@@ -54,7 +59,7 @@ export default function Contest() {
   };
   const isUserRegistered = async () => {
     // Check if the user is registered for the contest
-    const response = await getIfUserRegistered(contestId, userId);
+    const response = await getIfUserRegistered(contestId, user.uuid);
     console.log("Response:", response);
     setIsRegistered(response.isRegistered);
   };
@@ -65,6 +70,18 @@ export default function Contest() {
     } else {
       console.log("user in problem page: ", user);
     }
+
+    socket.on("contestStarted", ({ contestId: startedContestId }) => {
+      console.log("Contest started:", startedContestId);
+      if (contestId === startedContestId) {
+        setContestStatus("Started");
+      }
+    });
+    socket.on("contestEnded", ({ contestId: startedContestId }) => {
+      if (contestId === startedContestId) {
+        setContestStatus("Ended");
+      }
+    });
     fetchContest();
     isUserRegistered();
   }, []);
@@ -77,6 +94,7 @@ export default function Contest() {
     <div>
       <h1>Contest</h1>
       <h2>{contest.name}</h2>
+      <h3>{contestStatus}</h3>
       <p>{contest.description}</p>
       <p>Start Time: {parseDate(contest.startTime)}</p>
       <p>End Time: {parseDate(contest.endTime)}</p>

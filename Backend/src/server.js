@@ -51,7 +51,7 @@ async function scheduleContests() {
     console.log("Start Time:", startTime);
     console.log("End Time:", endTime);
     schedule.scheduleJob(startTime, () => {
-      console.log("Contest started:", contest.title);
+      console.log("Contest started:", contest.name);
       // Update the contest status to "Ongoing"
       const updatedContest = prisma.Contest.update({
         where: {
@@ -61,10 +61,10 @@ async function scheduleContests() {
           status: "Ongoing",
         },
       });
-      io.emit("contestStarted", contest.id);
+      io.emit("contestStarted", { contestId: contest.id });
     });
     schedule.scheduleJob(endTime, () => {
-      console.log("Contest ended:", contest.title);
+      console.log("Contest ended:", contest.name);
       // Update the contest status to "Ended"
       const updatedContest = prisma.Contest.update({
         where: {
@@ -74,7 +74,7 @@ async function scheduleContests() {
           status: "Ended",
         },
       });
-      io.emit("contestEnded", contest.id);
+      io.emit("contestEnded", { contestId: contest.id });
     });
   });
 }
