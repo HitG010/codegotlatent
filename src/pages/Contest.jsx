@@ -2,10 +2,16 @@ import { React } from "react";
 import { useState, useEffect } from "react";
 import { getContest } from "../api/api";
 import { parseDate, calculateDuration } from "../utils/date";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, Navigate } from "react-router-dom";
+import { UserContext } from "../providers/userProvider";
+import { useContext } from "react";
+
 export default function Contest() {
   const [contest, setContest] = useState([]);
   const [loading, setLoading] = useState(true);
+    const user = useContext(UserContext);
+    const [redirectUrl, setRedirectUrl] = useState(false);
+  
 
   const { contestId } = useParams();
 
@@ -21,6 +27,13 @@ export default function Contest() {
     }
   };
   useEffect(() => {
+    if (!user) {
+      
+      window.location.href = "/register";
+      setRedirectUrl("/register");
+    } else {
+      console.log("user in problem page: ", user);
+    }
     fetchContest();
   }, []);
 

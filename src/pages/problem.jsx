@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import "../App.css";
 import { fetchProblem, fetchTestcases } from "../api/api";
 import CodeEditor from "../pages/codeeditor";
 import TestCases from "../components/Testcases";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
+import { useContext } from "react";
+import { UserContext } from "../providers/userProvider";
 
 function Problem() {
   const [data, setData] = useState(null);
@@ -14,6 +16,8 @@ function Problem() {
   const [testCaseError, setTestCaseError] = useState(null);
   const [langId, setLangId] = useState(54);
   const { id } = useParams();
+  const user = useContext(UserContext);
+  const [redirectUrl, setRedirectUrl] = useState(false);
 
   const fetchTestCases = async () => {
     try {
@@ -40,6 +44,12 @@ function Problem() {
   };
 
   useEffect(() => {
+    if (!user) {
+      window.location.href = "/register";
+      setRedirectUrl("/register");
+    } else {
+      console.log("user in problem page: ", user);
+    }
     fetchData();
     fetchTestCases();
   }, []);

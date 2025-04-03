@@ -38,15 +38,15 @@ const handleGoogleSignUp = async () => {
         
         // send the user to backend to create a new user or log in the user
         // and store the returned uuid to local storage
-        const uuid = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth`, {
-            email: user.email,
-            displayName: user.displayName
+        // const uuid = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth`, {
+        //     email: user.email,
+        //     displayName: user.displayName
 
-        });
-        localStorage.setItem('uuid', uuid.data);
-        // set this uuid in the user context
+        // });
+        // localStorage.setItem('uuid', uuid.data);
+        // // set this uuid in the user context
         
-        console.log("UUID: ", uuid);
+        // console.log("UUID: ", uuid);
     }).catch(function(error) {
         console.error("Error during Google sign-in: ", error);
     });

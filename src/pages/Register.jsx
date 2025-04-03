@@ -10,7 +10,7 @@ const Register = () => {
 
     useEffect(() => {
         if (user) {
-          setRedirectUrl('/setusername');
+          setRedirectUrl('/home');
         }
       }, [user])
       if (redirectUrl) {
