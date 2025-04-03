@@ -16,7 +16,7 @@ datasource db {
 model User {
   id         String    @id @default(uuid())  // Unique user ID
   username   String    @unique
-  name       String    // Full name of the user
+  name       String?       
   email      String    @unique
   password   String    // Hashed password
   rating     Int       @default(1500)        // Rating starts at 1500 (ELO system)
