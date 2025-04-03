@@ -383,7 +383,7 @@ app.post("/auth", async (req, res) => {
   }
 });
 
-app.get("/checkExistingUser", async (req, res) => {
+app.post('/checkExistingUser', async (req, res) => {
   const { email } = req.body;
   console.log("Request Body:", req.body);
   // if the user already exists, return the uuid
@@ -396,7 +396,7 @@ app.get("/checkExistingUser", async (req, res) => {
     console.log("User already exists:", user);
     res.status(200).json(user);
   } else {
-    res.status(404).json({ message: "User not found" });
+    res.status(200).json({});
   }
 });
 

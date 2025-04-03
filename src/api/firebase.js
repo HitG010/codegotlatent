@@ -56,7 +56,7 @@ const handleLogOut = () => {
     const auth = getAuth(firebaseApp);
     signOut(auth).then(()=> {
       console.log('logged out')
-      localStorage.removeItem('uuid');
+      localStorage.removeItem('user');
       window.location.href = '/';
     }).catch((error) => {
       console.log(error.message)

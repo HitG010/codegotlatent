@@ -5,9 +5,14 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 export const UserContext = createContext({user: null})
 export default (props) => {
     const auth = getAuth(firebaseApp);
-    const [user, setuser] = useState(null);
+    const [user, setuser] = useState(()=> {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    });
+    
     useEffect(() => {
-        onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+          if(user){
             const { displayName, email, photoURL, accessToken }  = user;
             setuser({
                 displayName,
@@ -17,7 +22,12 @@ export default (props) => {
                 accessToken,
                 username: null
             })
+          }
+          else{
+            setuser(null);
+          }
         })
+        return () => unsubscribe();
     },[]);
 
   return (
