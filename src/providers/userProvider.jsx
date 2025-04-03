@@ -1,4 +1,4 @@
-import { firebaseApp } from "../data/firebase";
+import { firebaseApp } from "../api/firebase";
 import { createContext, useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
@@ -8,10 +8,14 @@ export default (props) => {
     const [user, setuser] = useState(null);
     useEffect(() => {
         onAuthStateChanged(auth, async (user) => {
-            const { displayName, email }  = user;
+            const { displayName, email, photoURL, accessToken }  = user;
             setuser({
                 displayName,
-                email
+                email,
+                photoURL,
+                uuid: null,
+                accessToken,
+                username: null
             })
         })
     },[]);

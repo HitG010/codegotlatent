@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
+const v4 = require("uuid").v4;
+const bcrypt = require("bcrypt");
 
 const { PrismaClient } = require("@prisma/client/edge");
 const { withAccelerate } = require("@prisma/extension-accelerate");
@@ -295,5 +297,31 @@ app.post("/submitTestCases/:probId", async (req, res) => {
   } catch (error) {
     console.error("Error creating problem:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post('/auth', async (req, res) => {
+  const { email, displayName } = req.body;
+  console.log("Request Body:", req.body);
+  // if the user already exists, return the uuid
+  const user = await prisma.User.findUnique({
+    where: {
+      email: email,
+    },
+  });
+  if (user) {
+    console.log("User already exists:", user);
+    res.status(200).json(user.id);
+  } else {
+    // create a new user
+    const newUser = await prisma.User.create({
+      data: {
+        email: email,
+        username: displayName,
+        password: bcrypt.hashSync(v4(), 10)
+      },
+    });
+    console.log("New User:", newUser);
+    res.status(200).json(newUser.id);
   }
 });

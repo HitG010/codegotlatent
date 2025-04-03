@@ -6,6 +6,7 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import UserProvider from './providers/userProvider';
+import Setusername from './pages/Setusername';
 
 const App = () => {
   const location = useLocation();
@@ -33,6 +34,7 @@ const App = () => {
         <Route path='/' element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/setusername" element={<Setusername />} />
         <Route path="/home" element={<Home />}/>
         <Route path="/problemSet" element={<ProblemSet />} />
         <Route path="/problem/:id" element={<Problem/>} />
