@@ -367,18 +367,36 @@ app.post("/auth", async (req, res) => {
   });
   if (user) {
     console.log("User already exists:", user);
-    res.status(200).json(user.id);
+    res.status(200).json(user);
   } else {
     // create a new user
     const newUser = await prisma.User.create({
       data: {
         email: email,
-        username: displayName,
+        name: displayName,
+        username: "User_" + v4().trim().slice(0, 8),
         password: bcrypt.hashSync(v4(), 10),
       },
     });
     console.log("New User:", newUser);
-    res.status(200).json(newUser.id);
+    res.status(200).json(newUser);
+  }
+});
+
+app.get("/checkExistingUser", async (req, res) => {
+  const { email } = req.body;
+  console.log("Request Body:", req.body);
+  // if the user already exists, return the uuid
+  const user = await prisma.User.findUnique({
+    where: {
+      email: email,
+    },
+  });
+  if (user) {
+    console.log("User already exists:", user);
+    res.status(200).json(user);
+  } else {
+    res.status(404).json({ message: "User not found" });
   }
 });
 

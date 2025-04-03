@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { fetchProblems } from "../api/api";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { UserContext } from "../providers/userProvider";
+import { useContext } from "react";
 
 const ProblemSet = () => {
   const [problems, setProblems] = useState([]);
+  const user = useContext(UserContext);
+  const [redirectUrl, setRedirectUrl] = useState(false);
+
 
   async function fetchProblemSet() {
     const response = await fetchProblems();
@@ -12,6 +17,12 @@ const ProblemSet = () => {
   }
 
   useEffect(() => {
+    if (!user) {
+      setRedirectUrl("/register");
+      window.location.href = "/register";
+    } else {
+      console.log("user in problem page: ", user);
+    }
     fetchProblemSet();
   }, []);
 

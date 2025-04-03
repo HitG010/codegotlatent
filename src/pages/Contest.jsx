@@ -7,12 +7,17 @@ import {
   unregisterUser,
 } from "../api/api";
 import { parseDate, calculateDuration } from "../utils/date";
+import { UserContext } from "../providers/userProvider";
+import { useContext } from "react";
+
 import CountdownTimer from "../components/CountdownTimer";
 import { Link, useParams } from "react-router-dom";
 export default function Contest() {
   const [contest, setContest] = useState([]);
   const [loading, setLoading] = useState(true);
-  const userId = "1"; // Replace with actual user ID
+  const userId = useContext(UserContext);
+  const [redirectUrl, setRedirectUrl] = useState(false);
+
   const [isRegistered, setIsRegistered] = useState(false);
   const { contestId } = useParams();
 
@@ -54,6 +59,12 @@ export default function Contest() {
     setIsRegistered(response.isRegistered);
   };
   useEffect(() => {
+    if (!user) {
+      window.location.href = "/register";
+      setRedirectUrl("/register");
+    } else {
+      console.log("user in problem page: ", user);
+    }
     fetchContest();
     isUserRegistered();
   }, []);

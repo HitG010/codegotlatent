@@ -7,6 +7,7 @@ const Setusername = () => {
     const [username, setUsername] = useState('');
     const user = useContext(UserContext);
     const [redirectUrl, setRedirectUrl] = useState(false);
+    console.log("user in setusername page: ", user);
 
     useEffect(() => {
         if (user) {
@@ -14,6 +15,29 @@ const Setusername = () => {
                 setRedirectUrl('/home');
             }
         }
+         else {
+            // check if the user is already present in the database
+            // if yes, then set the user in the context and redirect to home page
+            async function checkUser() {
+                const response = await fetch(`${import.meta.env.VITE_BASE_URL}/checkExistingUser`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: user.email,
+                    })
+                });
+                const data = await response.json();
+                console.log("user in setusername page: ", data);
+                if(data.username !== null) {
+                    user.username = data.username;
+                    user.uuid = data.uuid;
+                    setRedirectUrl('/home');
+                }
+            }
+            checkUser();
+         }
     }
     , [user])
     if (redirectUrl) {
