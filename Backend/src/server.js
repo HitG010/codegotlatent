@@ -4,9 +4,14 @@ const dotenv = require("dotenv");
 dotenv.config();
 const v4 = require("uuid").v4;
 const bcrypt = require("bcrypt");
+const schedule = require("node-schedule");
+const server = require("http").createServer();
+const io = require("socket.io")(server);
 
 const { PrismaClient } = require("@prisma/client/edge");
 const { withAccelerate } = require("@prisma/extension-accelerate");
+const { stat } = require("fs");
+const { data } = require("react-router-dom");
 
 const prisma = new PrismaClient().$extends(withAccelerate());
 
@@ -27,6 +32,54 @@ app.listen(PORT, () => {
 app.get("/hello", (req, res) => {
   res.json({ message: "Hello World" });
 });
+
+// When a user connects, log the connection
+io.on("connection", (socket) => {
+  console.log("A user connected", socket.id);
+});
+
+async function scheduleContests() {
+  const contests = await prisma.Contest.findMany({
+    where: {
+      status: "Upcoming",
+    },
+  });
+  console.log("Contests:", contests);
+  contests.forEach((contest) => {
+    const startTime = new Date(contest.startTime);
+    const endTime = new Date(contest.endTime);
+    console.log("Start Time:", startTime);
+    console.log("End Time:", endTime);
+    schedule.scheduleJob(startTime, () => {
+      console.log("Contest started:", contest.title);
+      // Update the contest status to "Ongoing"
+      const updatedContest = prisma.Contest.update({
+        where: {
+          id: contest.id,
+        },
+        data: {
+          status: "Ongoing",
+        },
+      });
+      io.emit("contestStarted", contest.id);
+    });
+    schedule.scheduleJob(endTime, () => {
+      console.log("Contest ended:", contest.title);
+      // Update the contest status to "Ended"
+      const updatedContest = prisma.Contest.update({
+        where: {
+          id: contest.id,
+        },
+        data: {
+          status: "Ended",
+        },
+      });
+      io.emit("contestEnded", contest.id);
+    });
+  });
+}
+
+scheduleContests();
 
 app.put("/callback", (req, res) => {
   console.log("Callback received:", req.body);
@@ -303,7 +356,7 @@ app.post("/submitTestCases/:probId", async (req, res) => {
   }
 });
 
-app.post('/auth', async (req, res) => {
+app.post("/auth", async (req, res) => {
   const { email, displayName } = req.body;
   console.log("Request Body:", req.body);
   // if the user already exists, return the uuid
@@ -322,7 +375,7 @@ app.post('/auth', async (req, res) => {
         email: email,
         name: displayName,
         username: "User_" + v4().trim().slice(0, 8),
-        password: bcrypt.hashSync(v4(), 10)
+        password: bcrypt.hashSync(v4(), 10),
       },
     });
     console.log("New User:", newUser);
@@ -350,6 +403,9 @@ app.post('/checkExistingUser', async (req, res) => {
 app.get("/contests", async (req, res) => {
   try {
     const contests = await prisma.Contest.findMany({
+      where: {
+        status: "Upcoming",
+      },
       include: {
         participants: false,
       },
@@ -373,6 +429,62 @@ app.get("/contest/:id", async (req, res) => {
     });
     console.log("Contest:", contest);
     res.status(200).json(contest);
+  } catch (error) {
+    console.error("Error fetching contest:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/contest/:contestId/participants/:userId", async (req, res) => {
+  const { contestId, userId } = req.params;
+
+  const result = await prisma.contestUser.findFirst({
+    where: {
+      contestId: contestId,
+      userId: userId,
+    },
+  });
+  console.log("Result:", result);
+  if (result) {
+    res.status(200).json({ isRegistered: true });
+  } else {
+    res.status(200).json({ isRegistered: false });
+  }
+});
+
+app.post("/contest/:contestId/register/:userId", async (req, res) => {
+  const { contestId, userId } = req.params;
+  console.log("Contest ID:", contestId);
+  console.log("User ID:", userId);
+  try {
+    const result = await prisma.contestUser.create({
+      data: {
+        contestId: contestId,
+        userId: userId,
+      },
+    });
+    console.log("Result:", result);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error fetching contest:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.post("/contest/:contestId/unregister/:userId", async (req, res) => {
+  const { contestId, userId } = req.params;
+  console.log("Contest ID:", contestId);
+  console.log("User ID:", userId);
+  try {
+    const result = await prisma.contestUser.delete({
+      where: {
+        userId_contestId: {
+          contestId: contestId,
+          userId: userId,
+        },
+      },
+    });
+    console.log("Result:", result);
+    res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching contest:", error);
     res.status(500).json({ error: "Internal server error" });

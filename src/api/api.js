@@ -212,6 +212,65 @@ const getContest = async (contestId) => {
   }
 };
 
+const getIfUserRegistered = async (contestId, userId) => {
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/contest/${contestId}/participants/${userId}`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contest:", error);
+    throw error;
+  }
+};
+
+const registerUser = async (contestId, userId) => {
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/contest/${contestId}/register/${userId}`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.post(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error registering user:", error);
+    throw error;
+  }
+};
+const unregisterUser = async (contestId, userId) => {
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/contest/${contestId}/unregister/${userId}`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.post(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error unregistering user:", error);
+    throw error;
+  }
+};
+
 export {
   api,
   executeCode,
@@ -222,4 +281,7 @@ export {
   submitCode,
   fetchContests,
   getContest,
+  getIfUserRegistered,
+  registerUser,
+  unregisterUser,
 };
