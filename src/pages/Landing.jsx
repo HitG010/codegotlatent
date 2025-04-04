@@ -1,8 +1,21 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import cgl from '../assets/cgl.png'
+import { useContext } from 'react'
+import { UserContext } from '../providers/userProvider'
+import { useState, useEffect } from 'react'
 
 const Landing = () => {
+  const user = useContext(UserContext);
+  const [redirectUrl, setRedirectUrl] = useState(false);
+  useEffect(() => {
+    if (user) {
+      setRedirectUrl('/home');
+    }
+  }, [user])
+  if (redirectUrl) {
+    return <Navigate to={redirectUrl} />;
+  }
   return (
     <div className='flex flex-col items-center gap-4'>
         <div className='text-2xl font-semibold'>This is the landing page</div>
