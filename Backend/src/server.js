@@ -26,9 +26,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 // app.use("/api", submissionRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
 
 app.get("/hello", (req, res) => {
   res.json({ message: "Hello World" });
@@ -60,10 +60,21 @@ async function scheduleContests() {
     const endTime = new Date(contest.endTime);
     console.log("Start Time:", startTime);
     console.log("End Time:", endTime);
-    schedule.scheduleJob(startTime, () => {
+    // rule.tz = "Asia/Kolkata";
+    const date = startTime.getDate();
+    const month = startTime.getMonth(); // 0-11
+    const year = startTime.getFullYear();
+    const hour = startTime.getHours();
+    const minute = startTime.getMinutes();
+    const second = startTime.getSeconds();
+    console.log("start time:", startTime);
+    // const date = new Date(start);
+    const startDate = new Date(year, month, date, hour, minute, second);
+    console.log("Start Time:", startTime);
+    schedule.scheduleJob(startDate, async () => {
       console.log("Contest started:", contest.name);
       // Update the contest status to "Ongoing"
-      const updatedContest = prisma.Contest.update({
+      const updatedContest = await prisma.Contest.update({
         where: {
           id: contest.id,
         },
@@ -71,12 +82,23 @@ async function scheduleContests() {
           status: "Ongoing",
         },
       });
+      console.log("Contest updated:", updatedContest);
       io.emit("contestStarted", { contestId: contest.id });
     });
-    schedule.scheduleJob(endTime, () => {
+    const endRule = new schedule.RecurrenceRule();
+    // endRule.tz = "Etc/UTC";
+    const enddate = endTime.getDate();
+    const endmonth = endTime.getMonth(); // 0-11
+    const endyear = endTime.getFullYear();
+    const endhour = endTime.getHours();
+    const endminute = endTime.getMinutes();
+    const endsecond = endTime.getSeconds();
+    console.log("End Rule:", endRule);
+    const endDate = new Date(endyear, endmonth, enddate, endhour, endminute, endsecond);
+    schedule.scheduleJob(endDate, async () => {
       console.log("Contest ended:", contest.name);
       // Update the contest status to "Ended"
-      const updatedContest = prisma.Contest.update({
+      const updatedContest = await prisma.Contest.update({
         where: {
           id: contest.id,
         },
@@ -84,6 +106,7 @@ async function scheduleContests() {
           status: "Ended",
         },
       });
+      console.log("Contest updated:", updatedContest);
       io.emit("contestEnded", { contestId: contest.id });
     });
   });
@@ -502,3 +525,8 @@ app.post("/contest/:contestId/unregister/:userId", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+server.listen(PORT, () => {
+  console.log(`Socket server is running on port ${PORT}`);
+});
+
