@@ -13,7 +13,18 @@ import CountdownTimer from "../components/CountdownTimer";
 import { Link, useParams } from "react-router-dom";
 import io from "socket.io-client";
 
-const socket = io(import.meta.env.VITE_BASE_URL);
+const socket = io(import.meta.env.VITE_BASE_URL, {
+  path: "/socket.io",
+  
+});
+
+socket.on("connect", () => {
+  console.log("Connected to socket server");
+});
+socket.on("disconnect", () => {
+  console.log("Disconnected from socket server");
+});
+const userId = '1';
 
 export default function Contest() {
   const [contest, setContest] = useState([]);
@@ -31,7 +42,8 @@ export default function Contest() {
       return;
     }
     console.log("Registering for the contest:", contestId);
-    const response = await registerUser(contestId, user.uuid);
+    // console.log("User UUID:", user.uuid);
+    const response = await registerUser(contestId, userId);
     isUserRegistered();
     console.log("Registering for contest:", contestId);
   };
@@ -40,7 +52,7 @@ export default function Contest() {
       console.log("Not registered for the contest");
       return;
     }
-    const response = await unregisterUser(contestId, user.uuid);
+    const response = await unregisterUser(contestId, userId);
     isUserRegistered();
     console.log("Unregistering from contest:", contestId);
   };
@@ -59,7 +71,7 @@ export default function Contest() {
   };
   const isUserRegistered = async () => {
     // Check if the user is registered for the contest
-    const response = await getIfUserRegistered(contestId, user.uuid);
+    const response = await getIfUserRegistered(contestId, userId);
     console.log("Response:", response);
     setIsRegistered(response.isRegistered);
   };
@@ -68,7 +80,7 @@ export default function Contest() {
       window.location.href = "/register";
       setRedirectUrl("/register");
     } else {
-      console.log("user in problem page: ", user);
+      console.log("user in contest page: ", user);
     }
 
     socket.on("contestStarted", ({ contestId: startedContestId }) => {

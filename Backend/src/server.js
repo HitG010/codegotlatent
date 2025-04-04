@@ -5,8 +5,8 @@ dotenv.config();
 const v4 = require("uuid").v4;
 const bcrypt = require("bcrypt");
 const schedule = require("node-schedule");
-const server = require("http").createServer();
-const io = require("socket.io")(server);
+const {Server} = require("socket.io");
+// const server = require("http").createServer();
 
 const { PrismaClient } = require("@prisma/client/edge");
 const { withAccelerate } = require("@prisma/extension-accelerate");
@@ -18,6 +18,7 @@ const prisma = new PrismaClient().$extends(withAccelerate());
 // const submissionRoutes = require("./routes/index");
 
 const app = express();
+const server = require("http").createServer(app);
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
@@ -32,6 +33,15 @@ app.listen(PORT, () => {
 app.get("/hello", (req, res) => {
   res.json({ message: "Hello World" });
 });
+
+const io = new Server(server, {
+  path: "/socket.io",
+  cors: {
+    origin: "*",
+  },
+});
+
+console.log(io, "io");
 
 // When a user connects, log the connection
 io.on("connection", (socket) => {
@@ -392,6 +402,8 @@ app.post("/checkExistingUser", async (req, res) => {
       email: email,
     },
   });
+  console.log("User:", user);
+  
   if (user) {
     console.log("User already exists:", user);
     res.status(200).json(user);

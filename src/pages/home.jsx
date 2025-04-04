@@ -27,7 +27,7 @@ const Home = () => {
             }
           );
 
-          if (existingUser.data) {
+          if (existingUser) {
             console.log("User already exists:", existingUser.data);
             setUsername(existingUser.data.username);
             user.username = existingUser.data.username;
@@ -40,7 +40,7 @@ const Home = () => {
         const uuidUser = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth`, {
           email: user.email,
           displayName: user.displayName
-        })
+        });
         console.log("uuid: ", uuidUser.data);
         user.username = uuidUser.data.username;
         user.uuid = uuidUser.data.id;
@@ -54,7 +54,7 @@ const Home = () => {
     }
       uploadUser();
   }
-  }, []);
+  }, [user]);
   if (redirectUrl) {
     return <Navigate to={redirectUrl} />;
   }

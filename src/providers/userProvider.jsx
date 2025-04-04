@@ -7,6 +7,7 @@ export default (props) => {
     const auth = getAuth(firebaseApp);
     const [user, setuser] = useState(()=> {
       const storedUser = localStorage.getItem("user");
+      console.log("Stored user:", storedUser);
       return storedUser ? JSON.parse(storedUser) : null;
     });
     
