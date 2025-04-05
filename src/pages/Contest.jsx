@@ -7,11 +7,11 @@ import {
   unregisterUser,
 } from "../api/api";
 import { parseDate, calculateDuration } from "../utils/date";
-import { UserContext } from "../providers/userProvider";
-import { useContext } from "react";
 import CountdownTimer from "../components/CountdownTimer";
 import { Link, useParams } from "react-router-dom";
 import io from "socket.io-client";
+import useUserStore from "../store/userStore";
+
 
 const socket = io(import.meta.env.VITE_BASE_URL, {
   path: "/socket.io",
@@ -24,13 +24,13 @@ socket.on("connect", () => {
 socket.on("disconnect", () => {
   console.log("Disconnected from socket server");
 });
-const userId = '1';
 
 export default function Contest() {
   const [contest, setContest] = useState([]);
   const [loading, setLoading] = useState(true);
-  const user = useContext(UserContext);
-  const [redirectUrl, setRedirectUrl] = useState(false);
+  const user = useUserStore((state) => state.user);
+  const userId = user.id;
+  console.log(userId);
 
   const [isRegistered, setIsRegistered] = useState(false);
   const [contestStatus, setContestStatus] = useState("Upcoming");
@@ -76,12 +76,6 @@ export default function Contest() {
     setIsRegistered(response.isRegistered);
   };
   useEffect(() => {
-    if (!user) {
-      window.location.href = "/register";
-      setRedirectUrl("/register");
-    } else {
-      console.log("user in contest page: ", user);
-    }
 
     socket.on("contestStarted", ({ contestId: startedContestId }) => {
       console.log("Contest started:", startedContestId);

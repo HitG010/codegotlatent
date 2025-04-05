@@ -5,13 +5,16 @@ import Home from './pages/home';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import UserProvider from './providers/userProvider';
+// import UserProvider from './providers/userProvider';
 import Setusername from './pages/Setusername';
 import Contests from "./pages/Contests";
 import Contest from "./pages/Contest";
+import { useUserInit } from './providers/useUserInit';
+import AuthRoute from './providers/authRoute';
 
 const App = () => {
   const location = useLocation();
+  useUserInit(); // Initialize user state and refresh token on app load
   // run testcases flow
   // problemID
   // fetch testcases for problemID
@@ -31,20 +34,20 @@ const App = () => {
   // populate database with submission result
 
   return (
-    <UserProvider>
+    // <UserProvider>
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/setusername" element={<Setusername />} />
-        <Route path="/home" element={<Home />}/>
-        <Route path="/problemSet" element={<ProblemSet />} />
-        <Route path="/problem/:id" element={<Problem />} />
-        <Route path="/contests" element={<Contests />} />
-        <Route path="/contest/:contestId" element={<Contest />} />
+        <Route path="/home" element={<AuthRoute><Home /></AuthRoute>}/>
+        <Route path="/problemSet" element={<AuthRoute><ProblemSet /></AuthRoute>} />
+        <Route path="/problem/:id" element={<AuthRoute><Problem /></AuthRoute>} />
+        <Route path="/contests" element={<AuthRoute><Contests /></AuthRoute>} />
+        <Route path="/contest/:contestId" element={<AuthRoute><Contest /></AuthRoute>} />
         {/* Add more routes as needed */}
       </Routes>
-    </UserProvider>
+    // </UserProvider>
   );
 };
 

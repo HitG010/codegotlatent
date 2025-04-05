@@ -24,6 +24,7 @@ model User {
   submissions Submission[]
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+  refreshToken String  @unique // For JWT refresh token
 }
 
 model Contest {

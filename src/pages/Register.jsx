@@ -1,31 +1,58 @@
-import React, { useState, useContext, useEffect } from 'react'
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
-import { handleGoogleSignUp } from '../api/firebase'
-import { UserContext } from '../providers/userProvider'
-import { Navigate } from 'react-router-dom'
+import { useState } from "react";
+import api from "../api/axios";
+import useUserStore from "../store/userStore";
+import { useNavigate } from "react-router-dom";
 
-const Register = () => {
-    const user = useContext(UserContext);
-    const [redirectUrl, setRedirectUrl] = useState(false);
+export default function Register() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const setUser = useUserStore((state) => state.setUser);
+  const clearUser = useUserStore((state) => state.clearUser);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        if (user) {
-          setRedirectUrl('/home');
-        }
-      }, [user])
-      if (redirectUrl) {
-        return <Navigate to={redirectUrl} />;
-        // window.location.href = redirectUrl;
-      }
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post("/signup", {
+        username,
+        email,
+        password,
+      });
+      const { accessToken, user } = response.data;
+      setUser(user, accessToken);
+      navigate("/");
+    } catch (error) {
+      console.error("Registration error:", error.response.data.message);
+      clearUser();
+    }
+  };
 
   return (
-    <div>
-      <p>Register With Google</p>
-        <button onClick={handleGoogleSignUp} 
-        className='px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600'
-        >Sign Up/ Log In With Google</button>
+    <div className="p-4">
+      <h2>Signup</h2>
+      <input
+        className="block border p-2 my-2"
+        placeholder="username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <input
+        className="block border p-2 my-2"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        className="block border p-2 my-2"
+        placeholder="password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleRegister}>
+        Sign Up
+      </button>
     </div>
-  )
+  );
 }
-
-export default Register
