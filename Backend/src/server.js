@@ -5,7 +5,7 @@ dotenv.config();
 const v4 = require("uuid").v4;
 const bcrypt = require("bcrypt");
 const schedule = require("node-schedule");
-const {Server} = require("socket.io");
+const { Server } = require("socket.io");
 // const server = require("http").createServer();
 
 const { PrismaClient } = require("@prisma/client/edge");
@@ -94,7 +94,14 @@ async function scheduleContests() {
     const endminute = endTime.getMinutes();
     const endsecond = endTime.getSeconds();
     console.log("End Rule:", endRule);
-    const endDate = new Date(endyear, endmonth, enddate, endhour, endminute, endsecond);
+    const endDate = new Date(
+      endyear,
+      endmonth,
+      enddate,
+      endhour,
+      endminute,
+      endsecond
+    );
     schedule.scheduleJob(endDate, async () => {
       console.log("Contest ended:", contest.name);
       // Update the contest status to "Ended"
@@ -426,7 +433,7 @@ app.post("/checkExistingUser", async (req, res) => {
     },
   });
   console.log("User:", user);
-  
+
   if (user) {
     console.log("User already exists:", user);
     res.status(200).json(user);
@@ -529,4 +536,3 @@ app.post("/contest/:contestId/unregister/:userId", async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Socket server is running on port ${PORT}`);
 });
-
