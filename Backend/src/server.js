@@ -10,6 +10,7 @@ const { PrismaClient } = require("@prisma/client/edge");
 const { withAccelerate } = require("@prisma/extension-accelerate");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const axios = require("axios");
 // const authRoutes = require("./routes/auth");
 
 const prisma = new PrismaClient().$extends(withAccelerate());
@@ -90,7 +91,7 @@ async function scheduleContests() {
         },
       });
       console.log("Contest updated:", updatedContest);
-      io.emit("contestStarted", { contestId: contest.id });
+      io.emit("contestStarted", { contestId: contest.id, updatedContest });
     });
     const endRule = new schedule.RecurrenceRule();
     // endRule.tz = "Etc/UTC";
@@ -121,7 +122,7 @@ async function scheduleContests() {
         },
       });
       console.log("Contest updated:", updatedContest);
-      io.emit("contestEnded", { contestId: contest.id });
+      io.emit("contestEnded", { contestId: contest.id, updatedContest });
     });
   });
 }
@@ -539,6 +540,67 @@ app.post("/contest/:contestId/unregister/:userId", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+app.get("/contest/:contestId/problems", async (req, res) => {
+  const { contestId } = req.params;
+  console.log("Contest ID:", contestId);
+  try {
+    const problems = await prisma.Problem.findMany({
+      where: {
+        contestId: contestId,
+      },
+      orderBy: {
+        problemScore: "asc",
+      },
+    });
+    console.log("Problems:", problems);
+    res.status(200).json(problems);
+  } catch (error) {
+    console.error("Error fetching problems:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+const checkIsRegistered = async (contestId, userId) => {
+  const result = await prisma.contestUser.findFirst({
+    where: {
+      contestId: contestId,
+      userId: userId,
+    },
+  });
+  console.log("Result:", result);
+  if (result) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+app.get(
+  "/contest/:contestId/problem/:problemId/user/:userId",
+  async (req, res) => {
+    const { contestId, problemId, userId } = req.params;
+    console.log("Contest ID:", contestId);
+    console.log("Problem ID:", problemId);
+    try {
+      const isRegistered = await checkIsRegistered(contestId, userId);
+      if (isRegistered) {
+        const problem = await prisma.Problem.findUnique({
+          where: {
+            id: problemId,
+            contestId: contestId,
+          },
+        });
+        res.status(200).json(problem);
+      } else {
+        res.status(403).json({ error: "Contest is not started yet" });
+      }
+    } catch (error) {
+      console.error("Error fetching problems:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
 
 server.listen(PORT, () => {
   console.log(`Socket server is running on port ${PORT}`);

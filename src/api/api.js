@@ -271,6 +271,44 @@ const unregisterUser = async (contestId, userId) => {
   }
 };
 
+const getAllContestProblems = async (contestId) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/problems`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contest problems:", error);
+    throw error;
+  }
+};
+
+const fetchContestProblem = async (problemId, contestId, userId) => {
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/contest/${contestId}/problem/${problemId}/user/${userId}`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contest problem:", error);
+    throw error;
+  }
+};
+
 export {
   api,
   executeCode,
@@ -284,4 +322,6 @@ export {
   getIfUserRegistered,
   registerUser,
   unregisterUser,
+  getAllContestProblems,
+  fetchContestProblem,
 };

@@ -1,16 +1,22 @@
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import ProblemSet from './pages/ProblemSet';
-import Problem from './pages/problem';
-import Home from './pages/home';
-import Landing from './pages/Landing';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
+import ProblemSet from "./pages/ProblemSet";
+import Problem from "./pages/problem";
+import Home from "./pages/home";
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 // import UserProvider from './providers/userProvider';
-import Setusername from './pages/Setusername';
+import Setusername from "./pages/Setusername";
 import Contests from "./pages/Contests";
 import Contest from "./pages/Contest";
-import { useUserInit } from './providers/useUserInit';
-import AuthRoute from './providers/authRoute';
+import ContestProblem from "./pages/ContestProblem";
+import { useUserInit } from "./providers/useUserInit";
+import AuthRoute from "./providers/authRoute";
 
 const App = () => {
   const location = useLocation();
@@ -35,18 +41,61 @@ const App = () => {
 
   return (
     // <UserProvider>
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/setusername" element={<Setusername />} />
-        <Route path="/home" element={<AuthRoute><Home /></AuthRoute>}/>
-        <Route path="/problemSet" element={<AuthRoute><ProblemSet /></AuthRoute>} />
-        <Route path="/problem/:id" element={<AuthRoute><Problem /></AuthRoute>} />
-        <Route path="/contests" element={<AuthRoute><Contests /></AuthRoute>} />
-        <Route path="/contest/:contestId" element={<AuthRoute><Contest /></AuthRoute>} />
-        {/* Add more routes as needed */}
-      </Routes>
+    <Routes location={location} key={location.pathname}>
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/setusername" element={<Setusername />} />
+      <Route
+        path="/home"
+        element={
+          <AuthRoute>
+            <Home />
+          </AuthRoute>
+        }
+      />
+      <Route
+        path="/problemSet"
+        element={
+          <AuthRoute>
+            <ProblemSet />
+          </AuthRoute>
+        }
+      />
+      <Route
+        path="/problem/:id"
+        element={
+          <AuthRoute>
+            <Problem />
+          </AuthRoute>
+        }
+      />
+      <Route
+        path="/contests"
+        element={
+          <AuthRoute>
+            <Contests />
+          </AuthRoute>
+        }
+      />
+      <Route
+        path="/contest/:contestId"
+        element={
+          <AuthRoute>
+            <Contest />
+          </AuthRoute>
+        }
+      />
+      <Route
+        path="/contest/:contestId/problem/:problemId"
+        element={
+          <AuthRoute>
+            <ContestProblem />
+          </AuthRoute>
+        }
+      />
+      {/* Add more routes as needed */}
+    </Routes>
     // </UserProvider>
   );
 };

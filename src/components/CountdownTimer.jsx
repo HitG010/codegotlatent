@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const CountdownTimer = ({ startTime }) => {
+const CountdownTimer = ({ startTime, isOngoing }) => {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(startTime));
 
   function calculateTimeLeft(startTime) {
@@ -27,8 +27,8 @@ const CountdownTimer = ({ startTime }) => {
 
   return (
     <div className="text-lg font-bold text-blue-600">
-      Contest starts in: {timeLeft.hours}h {timeLeft.minutes}m{" "}
-      {timeLeft.seconds}s
+      Contest {isOngoing ? "starts" : "ends"} in: {timeLeft.hours}h{" "}
+      {timeLeft.minutes}m {timeLeft.seconds}s
     </div>
   );
 };

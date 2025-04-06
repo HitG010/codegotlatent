@@ -5,6 +5,7 @@ import {
   getIfUserRegistered,
   registerUser,
   unregisterUser,
+  getAllContestProblems,
 } from "../api/api";
 import { parseDate, calculateDuration } from "../utils/date";
 import CountdownTimer from "../components/CountdownTimer";
@@ -12,10 +13,8 @@ import { Link, useParams } from "react-router-dom";
 import io from "socket.io-client";
 import useUserStore from "../store/userStore";
 
-
 const socket = io(import.meta.env.VITE_BASE_URL, {
   path: "/socket.io",
-  
 });
 
 socket.on("connect", () => {
@@ -35,6 +34,21 @@ export default function Contest() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [contestStatus, setContestStatus] = useState("Upcoming");
   const { contestId } = useParams();
+
+  const [allProblems, setAllProblems] = useState([]);
+
+  const fetchAllProblems = async () => {
+    console.log("Fetching all problems for contest:", contestId);
+    if (isRegistered && contest.status === "Ongoing") {
+      try {
+        const response = await getAllContestProblems(contestId);
+        console.log("Contest Problems:", response);
+        setAllProblems(response);
+      } catch (error) {
+        console.error("Error fetching contest problems:", error);
+      }
+    }
+  };
 
   const handleClickRegister = async () => {
     if (isRegistered) {
@@ -69,28 +83,39 @@ export default function Contest() {
       setLoading(false);
     }
   };
+
   const isUserRegistered = async () => {
     // Check if the user is registered for the contest
     const response = await getIfUserRegistered(contestId, userId);
     console.log("Response:", response);
     setIsRegistered(response.isRegistered);
   };
-  useEffect(() => {
-
-    socket.on("contestStarted", ({ contestId: startedContestId }) => {
+  socket.on(
+    "contestStarted",
+    ({ contestId: startedContestId, updatedContest }) => {
       console.log("Contest started:", startedContestId);
       if (contestId === startedContestId) {
-        setContestStatus("Started");
+        setContestStatus("Ongoing");
+        setContest(updatedContest);
+        fetchAllProblems();
       }
-    });
-    socket.on("contestEnded", ({ contestId: startedContestId }) => {
+    }
+  );
+  socket.on(
+    "contestEnded",
+    ({ contestId: startedContestId, updatedContest }) => {
       if (contestId === startedContestId) {
         setContestStatus("Ended");
+        setContest(updatedContest);
       }
-    });
+    }
+  );
+  useEffect(() => {
+    console.log("Contest ID:", contestId);
     fetchContest();
+    fetchAllProblems();
     isUserRegistered();
-  }, []);
+  }, [contestStatus]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -113,6 +138,29 @@ export default function Contest() {
           <button onClick={handleClickUnregister}>Unregister</button>
           <p>You are registered for this contest</p>
           <CountdownTimer startTime={contest.startTime}></CountdownTimer>
+        </div>
+      )}
+      {contest.status === "Ongoing" && isRegistered && (
+        <div>
+          <p>You are registered for this contest</p>
+          <CountdownTimer startTime={contest.endTime}></CountdownTimer>
+        </div>
+      )}
+      {contest.status === "Ended" && (
+        <div>
+          <p>The contest has ended</p>
+        </div>
+      )}
+      {contest.status === "Ongoing" && isRegistered && (
+        <div>
+          <h2>Problems</h2>
+          {allProblems.map((problem) => (
+            <div key={problem.id}>
+              <Link to={`/contest/${contestId}/problem/${problem.id}`}>
+                <h3>{problem.title}</h3>
+              </Link>
+            </div>
+          ))}
         </div>
       )}
     </div>

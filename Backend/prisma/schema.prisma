@@ -45,6 +45,7 @@ model Contest {
 model Problem {
   id          String    @id @default(uuid())
   contestId   String?   // Nullable for problems not in contests
+  problemScore Int? // Score for the problem (used in contests)
   title       String
   description String
   difficulty  String    // "Easy", "Medium", "Hard"
@@ -54,10 +55,21 @@ model Problem {
   submissions Submission[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  isPublic    Boolean  @default(false) // Public vs. private problems
 }
 
+// model ContestProblemUser{
+//   id        String  @id @default(uuid())
+//   userId    String
+//   problemId String
+//   contestId String
+//   penalty    Int? 
+//   isCorrect Boolean? // Whether the problem was solved correctly
+//   finishedAt DateTime? // When the user finished the problem
 
+//   user      User    @relation(fields: [userId], references: [id])
+//   problem   Problem @relation(fields: [problemId], references: [id])
+//   contest   Contest @relation(fields: [contestId], references: [id])
+// }
 
 model ContestUser {
   id        String  @id @default(uuid())
@@ -67,16 +79,20 @@ model ContestUser {
   actualRank Int?   // Actual rank (calculated post-contest)
   ratingChange Int? // How much rating changed after the contest
 
+
   user      User    @relation(fields: [userId], references: [id])
   contest   Contest @relation(fields: [contestId], references: [id])
 
+
   @@unique([userId, contestId]) // Ensure no duplicate participation
 }
+
 
 model Submission {
   id         String   @id @default(uuid())
   userId     String
   problemId  String
+  contestId   String? // Nullable for submissions not in contests
   language   Int   // "Python", "JavaScript", "C++", etc.
   code       String
   verdict    String   // "Accepted", "Wrong Answer", "Time Limit Exceeded", etc.
