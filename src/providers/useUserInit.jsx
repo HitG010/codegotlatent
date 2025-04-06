@@ -1,0 +1,29 @@
+import { useEffect } from "react";
+import api from "../api/axios";
+import useUserStore from "../store/userStore";
+
+export const useUserInit = () => {
+    const setUser = useUserStore((state) => state.setUser);
+    const clearUser = useUserStore((state) => state.clearUser);
+    const user = useUserStore((state) => state.user);
+    const accessToken = useUserStore((state) => state.accessToken);
+
+    console.log("User data:", user);
+    console.log("Access Token:", accessToken);
+
+    useEffect(() => {
+        api.post("/refresh-token", {
+         }) // Replace { key: "value" } with your actual request body
+            .then((response) => {
+                const { accessToken, user } = response.data;
+                console.log("User data:", user);
+                console.log("Access Token:", accessToken);
+                setUser(user, accessToken);
+                console.log(useUserStore.getState().isAuthenticated, "isAuthenticated in useUserInit");
+            })
+            .catch((error) => {
+                console.error("Error refreshing token:", error);
+                clearUser();
+            });
+    }, []);
+};
