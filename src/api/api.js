@@ -59,6 +59,31 @@ async function executeCode(code, testCases, langId) {
   return tokensString;
 }
 
+async function submitProblem(code, probId, langId, contestId = null, userId) {
+  console.log("Code:", code);
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+  const body = {
+    source_code: code,
+    language_id: langId,
+    problem_id: probId,
+    contest_id: contestId,
+    callback_url: "http://localhost:5000/callback",
+    userId: userId,
+  };
+  const url = `${import.meta.env.VITE_BASE_URL}/submitContestCode`;
+  console.log("URL:", url);
+  console.log("Body:", body);
+  const response = await axios.post(url, body, options);
+  console.log("Response:", response.data);
+  return response.data;
+}
+
 async function submitCode(code, probId, langId) {
   console.log("Code:", typeof code);
   const options = {
@@ -77,7 +102,7 @@ async function submitCode(code, probId, langId) {
   const url = `${import.meta.env.VITE_BASE_URL}/batchSubmitProblem`;
   console.log("URL:", url);
   console.log("Body:", body);
-  const response = await axios.post(url, body, options3);
+  const response = await axios.post(url, body, options);
   console.log("Response:", response.data);
   // await pollSubmissionStatus(response.data.token).then((data) => {
   //   console.log("Polling Response:", data);
@@ -324,4 +349,5 @@ export {
   unregisterUser,
   getAllContestProblems,
   fetchContestProblem,
+  submitProblem,
 };

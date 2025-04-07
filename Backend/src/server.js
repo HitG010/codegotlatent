@@ -134,6 +134,79 @@ app.put("/callback", (req, res) => {
   res.status(200).send("OK");
 });
 
+app.post("/submitContestCode", async (req, res) => {
+  const body = await req.body;
+  const { problem_id, language_id, source_code, contest_id, userId } = body;
+
+  const testcases = await prisma.TestCase.findMany({
+    where: {
+      problemId: problem_id,
+    },
+  });
+
+  const submissions = [];
+  console.log("Submissions:", submissions);
+  testcases.forEach((testCase) => {
+    const submission = {
+      source_code: source_code,
+      language_id: language_id,
+      stdin: testCase.stdin,
+      expected_output: testCase.stdout,
+    };
+    submissions.push(submission);
+  });
+  console.log("Submissions:", submissions);
+
+  // long poll the server for submission status
+  const url = `${process.env.JUDGE0_API}/submissions/batch`;
+  const result = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify({ submissions: submissions }),
+  });
+
+  const resultJson = await result.json();
+  console.log("Batch submission string: ", result);
+  const tokensString = resultJson.map((item) => item.token).join(",");
+
+  const response = await getSubmissionStatus(tokensString);
+
+  let finalVerdict = "Accepted";
+  let passedTestcasesCnt = 0;
+  let executionTime = 0;
+  let memory = 0;
+  // let errorToken = null;
+  for (let i = 0; i < response.length; i++) {
+    if (response[i].status.id > 3) {
+      finalVerdict = response[i].status.description;
+    } else if (response[i].status.id == 3) {
+      passedTestcasesCnt++;
+    }
+    executionTime += parseFloat(response[i].time);
+    memory += response[i].memory;
+  }
+
+  const submission = await prisma.Submission.create({
+    data: {
+      problemId: problem_id,
+      userId: userId,
+      language: language_id,
+      code: source_code,
+      verdict: finalVerdict,
+      score: passedTestcasesCnt,
+      executionTime: executionTime,
+      memoryUsage: memory,
+      contestId: contest_id,
+    },
+  });
+  console.log("Submission:", submission);
+  console.log("submission created successfully. Verdict:", finalVerdict);
+  return res.send(submission);
+});
+
 app.post("/batchSubmission", async (req, res) => {
   const body = await req.body;
   const { testcases, language_id, source_code } = body;
@@ -350,9 +423,7 @@ app.post("/submitProblem", async (req, res) => {
 
 app.get("/allProblems", async (req, res) => {
   const problems = await prisma.Problem.findMany({
-    where: {
-      isPublic: true,
-    },
+    where: {},
   });
   console.log(problems);
   res.status(200).json(problems);

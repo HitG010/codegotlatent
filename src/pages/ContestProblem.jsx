@@ -2,7 +2,7 @@ import { React } from "react";
 import { useState, useEffect } from "react";
 import "../App.css";
 import { fetchContestProblem, fetchTestcases } from "../api/api";
-import CodeEditor from "../pages/codeeditor";
+import ContestCodeEditor from "../components/ContestCodeEditor";
 import { useParams, Navigate } from "react-router-dom";
 import useUserStore from "../store/userStore";
 
@@ -10,12 +10,11 @@ export default function ContestProblem() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [testCases, setTestCases] = useState([]);
-  const [testCaseLoading, setTestCaseLoading] = useState(true);
-  const [testCaseError, setTestCaseError] = useState(null);
   const [langId, setLangId] = useState(54);
   const { contestId, problemId } = useParams();
   const user = useUserStore((state) => state.user);
+  const userId = user.id;
+  console.log(userId);
   const token = useUserStore((state) => state.accessToken);
 
   const fetchTestCases = async () => {
@@ -83,16 +82,12 @@ export default function ContestProblem() {
       <p>{data.max_time_limit}</p>
       <p>{data.max_memory_limit / 1024}</p>
       <h2>Code Editor</h2>
-      {testCaseLoading ? (
-        <div>Loading Test Cases...</div>
-      ) : testCaseError ? (
-        <div>Error: {testCaseError.message}</div>
-      ) : (
-        <>
-          <CodeEditor problemId={problemId} langId={langId} />
-          {/* <TestCases testCases={testCases} /> */}
-        </>
-      )}
+      <ContestCodeEditor
+        problemId={problemId}
+        langId={langId}
+        contestId={contestId}
+        userId={userId}
+      />
     </>
   );
 }

@@ -1,17 +1,22 @@
 // filepath: /Users/hiteshgupta/Documents/codegotlatent/src/pages/codeeditor.jsx
-import React, { useState, useEffect } from "react";
-import { executeCode, pollSubmissionStatus, submitProblem } from "../api/api";
+import React, { useState, useEffect, use } from "react";
+import {
+  executeCode,
+  pollSubmissionStatus,
+  submitCode,
+  submitProblem,
+} from "../api/api";
 import Testcases from "../components/Testcases";
 import { fetchTestcases } from "../api/api";
 
-const CodeEditor = ({ problemId, langId, userId }) => {
+const ContestCodeEditor = ({ problemId, langId, contestId, userId }) => {
   const [code, setCode] = useState("// Write your code here...");
   const [result, setResult] = useState([]);
   const [error, setError] = useState(null);
   const [testCases, setTestCases] = useState([]);
   const [testCaseLoading, setTestCaseLoading] = useState(true);
   const [testCaseError, setTestCaseError] = useState(null);
-  const [submissionResult, setSubmissionResult] = useState([]);
+  const [submissionResult, setSubmissionResult] = useState(null);
 
   const fetchTestCases = async () => {
     try {
@@ -53,7 +58,13 @@ const CodeEditor = ({ problemId, langId, userId }) => {
   const handleSubmit = async () => {
     console.log("Submitted Code:", code);
     try {
-      const result = await submitProblem(code, problemId, langId, null, userId);
+      const result = await submitProblem(
+        code,
+        problemId,
+        langId,
+        contestId,
+        userId
+      );
       console.log("Result:", result);
       setSubmissionResult(result);
     } catch (error) {
@@ -124,7 +135,7 @@ const CodeEditor = ({ problemId, langId, userId }) => {
           <pre>{JSON.stringify(result)}</pre>
         </div>
       )}
-      {submissionResult.length > 0 && (
+      {submissionResult && (
         <div
           style={{
             marginTop: "20px",
@@ -143,7 +154,7 @@ const CodeEditor = ({ problemId, langId, userId }) => {
         <div>Error: {testCaseError.message}</div>
       ) : (
         <>
-          {/* <CodeEditor problemId={id} testCases={testCases} langId={langId} /> */}
+          {/* <ContestCodeEditor problemId={id} testCases={testCases} langId={langId} /> */}
           <Testcases testCases={testCases} testcasesStatus={result} />
         </>
       )}
@@ -151,4 +162,4 @@ const CodeEditor = ({ problemId, langId, userId }) => {
   );
 };
 
-export default CodeEditor;
+export default ContestCodeEditor;
