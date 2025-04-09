@@ -719,8 +719,8 @@ app.post("/auth/login", async (req, res) => {
 
     console.log("Refresh Token:", refreshToken);
 
-    const updatedUser = await prisma.User.update({
-      where: { id: user.id },
+    const updatedUser = await prisma.UserRefreshToken.update({
+      where: { userId: user.id },
       data: { refreshToken },
     });
     console.log("User updated with refresh token:", updatedUser);
@@ -788,9 +788,11 @@ app.post("/auth/signup", async (req, res) => {
 
     console.log("Refresh Token:", refreshToken);
 
-    const updatedUser = await prisma.User.update({
-      where: { id: newUser.id },
-      data: { refreshToken },
+    const updatedUser = await prisma.userRefreshToken.create({
+      data: {
+        userId: newUser.id,
+        refreshToken,
+      },
     });
     if (!updatedUser) {
       return res
@@ -819,7 +821,7 @@ app.post("/auth/refresh-token", async (req, res) => {
     return res.status(401).json({ message: "Refresh token not found." });
   }
   try {
-    const user = await prisma.User.findUnique({
+    const user = await prisma.userRefreshToken.findUnique({
       where: { refreshToken },
     });
     if (!user) {

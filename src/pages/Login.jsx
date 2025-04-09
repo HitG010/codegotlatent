@@ -9,6 +9,12 @@ const Login = () => {
   const setUser = useUserStore((state) => state.setUser);
   const clearUser = useUserStore((state) => state.clearUser);
 
+  // if user already exists in store, redirect to home
+  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+  if (isAuthenticated) {
+    return <Navigate to="/home" />;
+  }
+
   const handleLogin = async () => {
     try {
       const response = await api.post('/login', { email, password });

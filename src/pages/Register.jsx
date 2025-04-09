@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../api/axios";
 import useUserStore from "../store/userStore";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -10,6 +10,13 @@ export default function Register() {
   const setUser = useUserStore((state) => state.setUser);
   const clearUser = useUserStore((state) => state.clearUser);
   const navigate = useNavigate();
+
+  // if user is already present in the store, redirect to home
+  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+  if (isAuthenticated) {
+    return <Navigate to="/home" />;
+  }
+
 
   const handleRegister = async (e) => {
     e.preventDefault();

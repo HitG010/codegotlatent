@@ -14,47 +14,54 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(uuid())  // Unique user ID
-  username   String    @unique
-  name       String?       
-  email      String    @unique
-  password   String    // Hashed password
-  rating     Int       @default(1500)        // Rating starts at 1500 (ELO system)
-  contests   ContestUser[]
-  submissions Submission[]
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  refreshToken String  @unique // For JWT refresh token
+  id               String             @id @default(uuid()) // Unique user ID
+  username         String             @unique
+  name             String?
+  email            String             @unique
+  password         String // Hashed password
+  rating           Int                @default(1500) // Rating starts at 1500 (ELO system)
+  contests         ContestUser[]
+  submissions      Submission[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  UserRefreshToken UserRefreshToken[]
+}
+
+model UserRefreshToken {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  refreshToken String   @unique
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Contest {
-  id          String       @id @default(uuid())
-  name        String
-  description String?
-  startTime   DateTime
-  endTime     DateTime
-  participants ContestUser[]
-  numberOfParticipants Int? @default(0) // Number of participants
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  status      String       @default("Upcoming") // "Upcoming", "Ongoing", "Ended"
+  id                   String        @id @default(uuid())
+  name                 String
+  description          String?
+  startTime            DateTime
+  endTime              DateTime
+  participants         ContestUser[]
+  numberOfParticipants Int?          @default(0) // Number of participants
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  status               String        @default("Upcoming") // "Upcoming", "Ongoing", "Ended"
 }
 
-
-
 model Problem {
-  id          String    @id @default(uuid())
-  contestId   String?   // Nullable for problems not in contests
-  problemScore Int? // Score for the problem (used in contests)
-  title       String
-  description String
-  difficulty  String    // "Easy", "Medium", "Hard"
-  max_time_limit Int    @default(2)
-  max_memory_limit Int  @default(262144) // 256MB in kBs
-  testCases   TestCase[]
-  submissions Submission[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id               String       @id @default(uuid())
+  contestId        String? // Nullable for problems not in contests
+  problemScore     Int? // Score for the problem (used in contests)
+  title            String
+  description      String
+  difficulty       String // "Easy", "Medium", "Hard"
+  max_time_limit   Int          @default(2)
+  max_memory_limit Int          @default(262144) // 256MB in kBs
+  testCases        TestCase[]
+  submissions      Submission[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 }
 
 // model ContestProblemUser{
@@ -72,47 +79,44 @@ model Problem {
 // }
 
 model ContestUser {
-  id        String  @id @default(uuid())
-  userId    String
-  contestId String
-  rankGuess Int?    // User's guessed rank
-  actualRank Int?   // Actual rank (calculated post-contest)
+  id           String @id @default(uuid())
+  userId       String
+  contestId    String
+  rankGuess    Int? // User's guessed rank
+  actualRank   Int? // Actual rank (calculated post-contest)
   ratingChange Int? // How much rating changed after the contest
 
-
-  user      User    @relation(fields: [userId], references: [id])
-  contest   Contest @relation(fields: [contestId], references: [id])
-
+  user    User    @relation(fields: [userId], references: [id])
+  contest Contest @relation(fields: [contestId], references: [id])
 
   @@unique([userId, contestId]) // Ensure no duplicate participation
 }
 
-
 model Submission {
-  id         String   @id @default(uuid())
-  userId     String
-  problemId  String
-  contestId   String? // Nullable for submissions not in contests
-  language   Int   // "Python", "JavaScript", "C++", etc.
-  code       String
-  verdict    String   // "Accepted", "Wrong Answer", "Time Limit Exceeded", etc.
-  score      Int      @default(0) // Score awarded based on correctness
+  id            String   @id @default(uuid())
+  userId        String
+  problemId     String
+  contestId     String? // Nullable for submissions not in contests
+  language      Int // "Python", "JavaScript", "C++", etc.
+  code          String
+  verdict       String // "Accepted", "Wrong Answer", "Time Limit Exceeded", etc.
+  score         Int      @default(0) // Score awarded based on correctness
   executionTime Float? // Execution time in ms
   memoryUsage   Float? // Memory usage
-  createdAt  DateTime @default(now())
+  createdAt     DateTime @default(now())
 
-  user       User     @relation(fields: [userId], references: [id])
-  problem    Problem  @relation(fields: [problemId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  problem Problem @relation(fields: [problemId], references: [id])
 }
 
 model TestCase {
   id        String  @id @default(uuid())
   problemId String
   input     String
-  stdin    String   @default("")
-  stdout    String   @default("")
+  stdin     String  @default("")
+  stdout    String  @default("")
   output    String
   isPublic  Boolean @default(false) // Public test cases vs. hidden ones
 
-  problem   Problem @relation(fields: [problemId], references: [id])
+  problem Problem @relation(fields: [problemId], references: [id])
 }
