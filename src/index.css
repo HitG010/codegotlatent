@@ -1,1 +1,15 @@
 @import "tailwindcss";
+@font-face {
+    font-family: "Overused Grotesk";
+    src: url('https://raw.githubusercontent.com/RandomMaerks/Overused-Grotesk/master/fonts/variable/OverusedGroteskRoman-VF.ttf') format('truetype');
+    font-weight: 300 900;
+}
+
+body {
+    font-family: 'Overused Grotesk', sans-serif;
+    background-color: #1a1a1a;
+    color: #f1f3f5;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}

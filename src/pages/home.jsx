@@ -15,22 +15,25 @@ const Home = () => {
   // alert("Home Page");
   return (
     <div>
-      Welcome to Code got Latent!
+      <h1>Welcome to Code got Latent!</h1>
       <Link to="/problemSet" style={{ textDecoration: 'none', color: 'blue' }}>
         <h2>Problem Set</h2>
-        </Link>
+      </Link>
       <Link to="/contests" style={{ textDecoration: 'none', color: 'blue' }}>
         <h2>Contests</h2>
-        </Link>
-        <h1>Welcome {user?.email}</h1>
-        <h1>Welcome {user?.id}</h1>
-        <button onClick={()=>{
+      </Link>
+      <h1>Welcome {user?.email}</h1>
+      <h1>Welcome {user?.id}</h1>
+      <button
+        onClick={() => {
           logout();
         }}
-        className='px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600'
-        >Log Out</button>
+        className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
+        Log Out
+      </button>
     </div>
-  )
+  );
 }
 
 export default Home;
