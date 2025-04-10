@@ -673,6 +673,42 @@ app.get(
   }
 );
 
+app.get("/submission/:submissionId/user/:userId", async (req, res) => {
+  const { submissionId, userId } = req.params;
+  console.log("Submission ID:", submissionId);
+  console.log("User ID:", userId);
+  try {
+    const submission = await prisma.Submission.findUnique({
+      where: {
+        id: submissionId,
+      },
+    });
+    if (!submission) {
+      return res.status(404).json({ error: "Submission not found" });
+    }
+    if (submission.userId === userId) {
+      return res.status(200).json(submission);
+    }
+    if (submission.contestId === null) {
+      return res.status(200).json(submission);
+    }
+    // Check if submission is of a contest
+    const contest = await prisma.Contest.findUnique({
+      where: {
+        id: submission.contestId,
+      },
+    });
+    if (contest.status === "Ended") {
+      return res.status(200).json(submission);
+    } else {
+      return res.status(403).json({ error: "Contest has not ended yet" });
+    }
+  } catch (error) {
+    console.error("Error fetching problems:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 server.listen(PORT, () => {
   console.log(`Socket server is running on port ${PORT}`);
 });

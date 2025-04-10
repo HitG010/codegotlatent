@@ -15,6 +15,7 @@ import Setusername from "./pages/Setusername";
 import Contests from "./pages/Contests";
 import Contest from "./pages/Contest";
 import ContestProblem from "./pages/ContestProblem";
+import Submission from "./pages/Submission";
 import { useUserInit } from "./providers/useUserInit";
 import AuthRoute from "./providers/authRoute";
 
@@ -91,6 +92,14 @@ const App = () => {
         element={
           <AuthRoute>
             <ContestProblem />
+          </AuthRoute>
+        }
+      />
+      <Route
+        path="/submission/:submissionId"
+        element={
+          <AuthRoute>
+            <Submission />
           </AuthRoute>
         }
       />
