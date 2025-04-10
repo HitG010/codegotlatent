@@ -25,6 +25,7 @@ model User {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   UserRefreshToken UserRefreshToken[]
+  Problems  ProblemUser[]
 }
 
 model UserRefreshToken {
@@ -47,6 +48,9 @@ model Contest {
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
   status               String        @default("Upcoming") // "Upcoming", "Ongoing", "Ended"
+  problems            Problem[]
+  submissions         Submission[]
+  // Problems            ProblemUser[]
 }
 
 model Problem {
@@ -62,21 +66,26 @@ model Problem {
   submissions      Submission[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
+  contest         Contest?     @relation(fields: [contestId], references: [id])
+  Problems        ProblemUser[]
+  // @@index([contestId]) // Index for faster lookups
+
 }
 
-// model ContestProblemUser{
-//   id        String  @id @default(uuid())
-//   userId    String
-//   problemId String
-//   contestId String
-//   penalty    Int? 
-//   isCorrect Boolean? // Whether the problem was solved correctly
-//   finishedAt DateTime? // When the user finished the problem
+// stores all problems data for a particular user
+model ProblemUser{
+  id        String  @id @default(uuid())
+  userId    String
+  problemId String
+  contestId String?
+  penalty    Int? 
+  isCorrect Boolean? // Whether the problem was solved correctly
+  finishedAt DateTime? // When the user finished the problem
 
-//   user      User    @relation(fields: [userId], references: [id])
-//   problem   Problem @relation(fields: [problemId], references: [id])
-//   contest   Contest @relation(fields: [contestId], references: [id])
-// }
+  user      User    @relation(fields: [userId], references: [id])
+  problem   Problem @relation(fields: [problemId], references: [id])
+  // contest   Contest @relation(fields: [contestId], references: [id])
+}
 
 model ContestUser {
   id           String @id @default(uuid())
@@ -85,6 +94,9 @@ model ContestUser {
   rankGuess    Int? // User's guessed rank
   actualRank   Int? // Actual rank (calculated post-contest)
   ratingChange Int? // How much rating changed after the contest
+  finishTime   DateTime? // When the user finished the contest
+  score        Int? // Total score in the contest
+  penalty      Int? // Total penalty time (in seconds)
 
   user    User    @relation(fields: [userId], references: [id])
   contest Contest @relation(fields: [contestId], references: [id])
@@ -107,6 +119,7 @@ model Submission {
 
   user    User    @relation(fields: [userId], references: [id])
   problem Problem @relation(fields: [problemId], references: [id])
+  contest Contest? @relation(fields: [contestId], references: [id])
 }
 
 model TestCase {
