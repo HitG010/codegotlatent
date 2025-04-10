@@ -204,8 +204,92 @@ app.post("/submitContestCode", async (req, res) => {
   });
   console.log("Submission:", submission);
   console.log("submission created successfully. Verdict:", finalVerdict);
+  if (contest_id !== null) {
+    const isCorrect = finalVerdict === "Accepted";
+    const finishTime = await prisma.problemUser.findFirst({
+      where: {
+        userId: userId,
+        problemId: problem_id,
+        contestId: contest_id,
+      },
+      select: {
+        finishedAt: true,
+      },
+    });
+    console.log("Finish Time:", finishTime);
+    const updatedContestProblem = await prisma.problemUser.upsert({
+      where: {
+        userId_problemId: {
+          userId: userId,
+          problemId: problem_id,
+        },
+        contestId: contest_id,
+      },
+      update: {
+        isCorrect: isCorrect,
+        penalty: {
+          increment: isCorrect ? 0 : 1,
+        },
+        finishedAt:
+          finishTime && finishTime.finishedAt
+            ? finishTime.finishedAt
+            : isCorrect
+            ? submission.createdAt
+            : null,
+      },
+      create: {
+        problemId: problem_id,
+        userId: userId,
+        contestId: contest_id,
+        isCorrect: isCorrect,
+        score: await prisma.problem.findUnique({ where: { id: problem_id } })
+          .problemScore,
+        penalty: isCorrect ? 0 : 1,
+        // Take the first submission time as the finished time
+        finishedAt: isCorrect ? submission.createdAt : null,
+      },
+    });
+    console.log(updatedContestProblem);
+    const updatedContestUser = await updateContestUser(contest_id, userId);
+  }
   return res.send(submission);
 });
+
+const updateContestUser = async (contestId, userId) => {
+  const contestProblems = await prisma.problemUser.findMany({
+    where: {
+      contestId: contestId,
+      userId: userId,
+    },
+  });
+  let totalScore = 0;
+  let totalPenalty = 0;
+  let totalFinishTime = 0;
+  contestProblems.forEach((contestProblem) => {
+    totalScore += contestProblem.score;
+    totalFinishTime = Math.max(
+      contestProblem.finishedAt ? contestProblem.finishedAt : 0,
+      totalFinishTime
+    );
+    totalPenalty += contestProblem.penalty;
+  });
+  // add 5 mins for each penalty
+  if (totalFinishTime != 0) totalFinishTime += totalPenalty * 5 * 60 * 1000;
+  const updatedContestUser = await prisma.contestUser.update({
+    where: {
+      userId_contestId: {
+        userId: userId,
+        contestId: contestId,
+      },
+    },
+    data: {
+      score: totalScore,
+      penalty: totalPenalty,
+      finishTime: totalFinishTime,
+    },
+  });
+  return updatedContestUser;
+};
 
 app.post("/batchSubmission", async (req, res) => {
   const body = await req.body;
@@ -423,7 +507,21 @@ app.post("/submitProblem", async (req, res) => {
 
 app.get("/allProblems", async (req, res) => {
   const problems = await prisma.Problem.findMany({
-    where: {},
+    include: {
+      contest: true,
+    },
+    where: {
+      OR: [
+        {
+          contest: {
+            status: "Ended",
+          },
+        },
+        {
+          contest: null,
+        },
+      ],
+    },
   });
   console.log(problems);
   res.status(200).json(problems);

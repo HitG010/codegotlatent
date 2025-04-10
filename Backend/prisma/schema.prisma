@@ -56,8 +56,8 @@ model Contest {
 model Problem {
   id               String       @id @default(uuid())
   contestId        String? // Nullable for problems not in contests
-  problemScore     Int? // Score for the problem (used in contests)
   title            String
+  problemScore    Int?       @default(0) // Score for the problem
   description      String
   difficulty       String // "Easy", "Medium", "Hard"
   max_time_limit   Int          @default(2)
@@ -78,13 +78,14 @@ model ProblemUser{
   userId    String
   problemId String
   contestId String?
+  score     Int? // Score awarded based on correctness
   penalty    Int? 
   isCorrect Boolean? // Whether the problem was solved correctly
   finishedAt DateTime? // When the user finished the problem
 
   user      User    @relation(fields: [userId], references: [id])
   problem   Problem @relation(fields: [problemId], references: [id])
-  // contest   Contest @relation(fields: [contestId], references: [id])
+  @@unique([userId, problemId])
 }
 
 model ContestUser {
