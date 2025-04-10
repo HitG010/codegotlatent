@@ -227,6 +227,7 @@ app.post("/submitContestCode", async (req, res) => {
       },
       update: {
         isCorrect: isCorrect,
+        score: isCorrect ? ((await prisma.problem.findUnique({ where: { id: problem_id } }))?.problemScore || 0) : 0,
         penalty: {
           increment: isCorrect ? 0 : 1,
         },
@@ -242,29 +243,39 @@ app.post("/submitContestCode", async (req, res) => {
         userId: userId,
         contestId: contest_id,
         isCorrect: isCorrect,
-        score: await prisma.problem.findUnique({ where: { id: problem_id } })
-          .problemScore,
+        score: isCorrect ? ((await prisma.problem.findUnique({ where: { id: problem_id } }))?.problemScore || 0) : 0,
         penalty: isCorrect ? 0 : 1,
         // Take the first submission time as the finished time
         finishedAt: isCorrect ? submission.createdAt : null,
       },
     });
     console.log(updatedContestProblem);
-    const updatedContestUser = await updateContestUser(contest_id, userId);
+    // fetch contest start time
+    const contestStartTime = await prisma.Contest.findUnique({
+      where: {
+        id: contest_id,
+      },
+      select: {
+        startTime: true,
+      },
+    });
+    console.log("Contest Start Time:", contestStartTime);
+    const updatedContestUser = await updateContestUser(contest_id, userId, contestStartTime.startTime);
   }
   return res.send(submission);
 });
 
-const updateContestUser = async (contestId, userId) => {
+const updateContestUser = async (contestId, userId, contestStartTime) => {
   const contestProblems = await prisma.problemUser.findMany({
     where: {
       contestId: contestId,
       userId: userId,
     },
   });
+  console.log("Contest Problems:", contestProblems);
   let totalScore = 0;
   let totalPenalty = 0;
-  let totalFinishTime = 0;
+  let totalFinishTime = contestStartTime;
   contestProblems.forEach((contestProblem) => {
     totalScore += contestProblem.score;
     totalFinishTime = Math.max(
@@ -285,7 +296,7 @@ const updateContestUser = async (contestId, userId) => {
     data: {
       score: totalScore,
       penalty: totalPenalty,
-      finishTime: totalFinishTime,
+      finishTime: new Date(totalFinishTime),
     },
   });
   return updatedContestUser;
