@@ -5,6 +5,7 @@ dotenv.config();
 const v4 = require("uuid").v4;
 const bcrypt = require("bcrypt");
 const schedule = require("node-schedule");
+const cron = require("node-cron");
 const { Server } = require("socket.io");
 const { PrismaClient } = require("@prisma/client/edge");
 const { withAccelerate } = require("@prisma/extension-accelerate");
@@ -49,7 +50,7 @@ const io = new Server(server, {
   },
 });
 
-console.log(io, "io");
+// console.log(io, "io");
 
 // When a user connects, log the connection
 io.on("connection", (socket) => {
@@ -127,7 +128,18 @@ async function scheduleContests() {
   });
 }
 
-scheduleContests();
+// scheduleContests();
+// CALL THE FUNCTION TO SCHEDULE CONTESTS AFTER 1 DAY FOR AUTOMATICALLY SCHEDULING NEWLY CREATED CONTESTS IN THE DATABASE IN FUTURE
+// cron.schedule("0 0 * * *", async () => {
+//   console.log("Scheduling contests");
+//   await scheduleContests();
+// });
+
+// create a similiar cron job for every 1 min
+cron.schedule("*/1 * * * *", async () => {
+  console.log("Scheduling contests");
+  await scheduleContests();
+});
 
 app.put("/callback", (req, res) => {
   console.log("Callback received:", req.body);
@@ -1016,3 +1028,73 @@ app.post("/auth/logout", async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 });
+
+app.get("/contest/:contestId/users", async (req, res) => {
+  const { contestId } = req.params;
+  console.log("Contest ID:", contestId);
+  try{
+    // check if the cnontest has ended
+    const contest = await prisma.Contest.findUnique({
+      where: {
+        id: contestId,
+      },
+    });
+    if (contest.status !== "Ended") {
+      return res.status(403).json({ error: "Contest has not ended yet" });
+    }
+  } catch (error) {
+    console.error("Error fetching contest:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+  try {
+    const contestUsers = await prisma.contestUser.findMany({
+      where: {
+        contestId: contestId,
+      },
+      include: {
+        user: true,
+      },
+      orderBy: [
+        {score: "desc"},
+        {finishTime: "asc"},
+        {penalty: "asc"},
+      ],
+    });
+    console.log("Contest Users:", contestUsers);
+    // convert this contestUsers to a list 
+    const contestUsersList = contestUsers.map((contestUser) => {
+      return {
+        userId: contestUser.userId,
+        username: contestUser.user.username,
+        score: contestUser.score,
+        finishTime: contestUser.finishTime,
+        penalty: contestUser.penalty,
+      };
+    });
+    res.status(200).send(contestUsersList);
+  } catch (error) {
+    console.error("Error fetching contest ranking:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/contest/:contestId/startTime", async (req, res) => {
+  const { contestId } = req.params;
+  console.log("Contest ID:", contestId);
+  try {
+    const contest = await prisma.Contest.findUnique({
+      where: {
+        id: contestId,
+      },
+      select: {
+        startTime: true,
+      },
+    });
+    console.log("Contest Start Time:", contest.startTime);
+    res.status(200).json(contest.startTime);
+  } catch (error) {
+    console.error("Error fetching contest start time:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+);

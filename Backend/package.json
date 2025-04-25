@@ -19,6 +19,7 @@
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.3",
     "node-schedule": "^2.1.1",
     "nodemon": "^3.1.9",
     "uuid": "^11.1.0"

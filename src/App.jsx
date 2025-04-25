@@ -18,6 +18,7 @@ import ContestProblem from "./pages/ContestProblem";
 import Submission from "./pages/Submission";
 import { useUserInit } from "./providers/useUserInit";
 import AuthRoute from "./providers/authRoute";
+import ContestRanking from "./pages/ContestRanking";
 
 const App = () => {
   const location = useLocation();
@@ -103,6 +104,7 @@ const App = () => {
           </AuthRoute>
         }
       />
+      <Route path="/contest/:contestId/ranking" element={<ContestRanking />} />
       {/* Add more routes as needed */}
     </Routes>
     // </UserProvider>

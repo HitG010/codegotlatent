@@ -32,7 +32,7 @@ const Landing = () => {
           <div className='text-lg font-regular text-[#f1f3f585]'>If you feel like you have a Coding “Latent”, Get Started Now!</div>
         </div>
         <div className='px-4 py-2 bg-[#f1f3f5] text-[#1a1a1a] font-semibold rounded-lg hover:bg-[#fafafa]' > 
-          <Link to={"/register"} className='flex gap-2 items-center'>Get Started <FaArrowRightLong /></Link>
+          <Link to={"/login"} className='flex gap-2 items-center'>Get Started <FaArrowRightLong /></Link>
         </div>
     </div>
   )

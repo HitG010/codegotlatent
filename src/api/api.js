@@ -354,6 +354,42 @@ const getSubmission = async (submissionId, userId) => {
   }
 };
 
+const getContestUsers = async (contestId) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/users`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contest users:", error);
+    throw error;
+  }
+}
+
+const fetchContestStartTime = async (contestId) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/startTime`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contest start time:", error);
+    throw error;
+  }
+}
+
 export {
   api,
   executeCode,
@@ -371,4 +407,6 @@ export {
   fetchContestProblem,
   submitProblem,
   getSubmission,
+  getContestUsers,
+  fetchContestStartTime
 };

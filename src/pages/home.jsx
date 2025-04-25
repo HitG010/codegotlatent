@@ -6,6 +6,7 @@ import axios from 'axios'
 import useUserStore from '../store/userStore'
 import api from '../api/axios'
 import {logout} from '../utils/logout'
+import Navbar from '../components/Navbar'
 
 const Home = () => {
   const user = useUserStore((state) => state.user);
@@ -15,6 +16,7 @@ const Home = () => {
   // alert("Home Page");
   return (
     <div>
+      <Navbar />
       <h1>Welcome to Code got Latent!</h1>
       <Link to="/problemSet" style={{ textDecoration: 'none', color: 'blue' }}>
         <h2>Problem Set</h2>
