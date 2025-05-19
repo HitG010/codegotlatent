@@ -6,6 +6,7 @@ import {
   registerUser,
   unregisterUser,
   getAllContestProblems,
+  submitRank,
 } from "../api/api";
 import { parseDate, calculateDuration } from "../utils/date";
 import CountdownTimer from "../components/CountdownTimer";
@@ -30,6 +31,9 @@ export default function Contest() {
   const user = useUserStore((state) => state.user);
   const userId = user.id;
   console.log(userId);
+  const [predictedRank, setPredictedRank] = useState(0);
+  // let isStarting2min = false;
+  const [isStarting2min, setIsStarting2min] = useState(false);
 
   const [isRegistered, setIsRegistered] = useState(false);
   const [contestStatus, setContestStatus] = useState("Upcoming");
@@ -97,7 +101,9 @@ export default function Contest() {
       if (contestId === startedContestId) {
         setContestStatus("Ongoing");
         setContest(updatedContest);
-        fetchAllProblems();
+        // fetchAllProblems();
+        // ask for their predicted rank for the contest for the starting 2 minutes
+        setIsStarting2min(true);
       }
     }
   );
@@ -107,6 +113,18 @@ export default function Contest() {
       if (contestId === startedContestId) {
         setContestStatus("Ended");
         setContest(updatedContest);
+      }
+    }
+  );
+  socket.on(
+    "2minEloped", 
+    ({ contestId: startedContestId }) => {
+      if (contestId === startedContestId) {
+        // setContestStatus("Ongoing");
+        // setContest(updatedContest);
+        fetchAllProblems();
+        // isStarting2min = false;
+        setIsStarting2min(false);
       }
     }
   );
@@ -161,6 +179,71 @@ export default function Contest() {
               </Link>
             </div>
           ))}
+        </div>
+      )}
+      {/*card displaying number of current participants in the contest */}
+      <div>
+        <h2>Current Participants</h2>
+        <p>{contest.currentParticipants}</p>
+      </div>
+      {/* {isRegistered && contest.status === "Ongoing" && (
+        // dialog box to accept user's predicted ranking
+        <div>
+          <h2>Submit your predicted ranking</h2>
+          <form>
+            <label>
+              Predicted Rank:
+              <input type="number" name="predictedRank" value={predictedRank} onChange={
+                (e) => setPredictedRank(e.target.value)
+              }/>
+            </label>
+            <button type="submit" onClick={
+              async (e) => {
+                e.preventDefault();
+                console.log("Submitting predicted rank:", predictedRank);
+                const response = await submitRank(
+                  contestId,
+                  userId,
+                  predictedRank
+                );
+                console.log("Response:", response);
+                // setPredictedRank(null);
+              }
+            }>Submit</button>
+          </form>
+        </div>
+      )} */}
+      {isRegistered && isStarting2min && (
+        <div>
+          <h2>Contest is starting in 2 minutes</h2>
+          <p>Please submit your predicted rank for the contest</p>
+          <form>
+            <label>
+              Predicted Rank:
+              <input
+                type="number"
+                name="predictedRank"
+                value={predictedRank}
+                onChange={(e) => setPredictedRank(e.target.value)}
+              />
+            </label>
+            <button
+              type="submit"
+              onClick={async (e) => {
+                e.preventDefault();
+                console.log("Submitting predicted rank:", predictedRank);
+                const response = await submitRank(
+                  contestId,
+                  userId,
+                  predictedRank
+                );
+                console.log("Response:", response);
+                // setPredictedRank(null);
+              }}
+            >
+              Submit
+            </button>
+          </form>
         </div>
       )}
     </div>

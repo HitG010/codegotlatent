@@ -20,6 +20,7 @@ model User {
   email            String             @unique
   password         String // Hashed password
   rating           Int                @default(1500) // Rating starts at 1500 (ELO system)
+  pastRatings     Int[]              @default([]) // Store past ratings for history
   contests         ContestUser[]
   submissions      Submission[]
   createdAt        DateTime           @default(now())
