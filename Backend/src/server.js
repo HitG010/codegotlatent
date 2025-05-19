@@ -239,7 +239,11 @@ app.post("/submitContestCode", async (req, res) => {
       },
       update: {
         isCorrect: isCorrect,
-        score: isCorrect ? ((await prisma.problem.findUnique({ where: { id: problem_id } }))?.problemScore || 0) : 0,
+        score: isCorrect
+          ? (
+              await prisma.problem.findUnique({ where: { id: problem_id } })
+            )?.problemScore || 0
+          : 0,
         penalty: {
           increment: isCorrect ? 0 : 1,
         },
@@ -255,7 +259,11 @@ app.post("/submitContestCode", async (req, res) => {
         userId: userId,
         contestId: contest_id,
         isCorrect: isCorrect,
-        score: isCorrect ? ((await prisma.problem.findUnique({ where: { id: problem_id } }))?.problemScore || 0) : 0,
+        score: isCorrect
+          ? (
+              await prisma.problem.findUnique({ where: { id: problem_id } })
+            )?.problemScore || 0
+          : 0,
         penalty: isCorrect ? 0 : 1,
         // Take the first submission time as the finished time
         finishedAt: isCorrect ? submission.createdAt : null,
@@ -272,7 +280,11 @@ app.post("/submitContestCode", async (req, res) => {
       },
     });
     console.log("Contest Start Time:", contestStartTime);
-    const updatedContestUser = await updateContestUser(contest_id, userId, contestStartTime.startTime);
+    const updatedContestUser = await updateContestUser(
+      contest_id,
+      userId,
+      contestStartTime.startTime
+    );
   }
   return res.send(submission);
 });
@@ -1032,7 +1044,7 @@ app.post("/auth/logout", async (req, res) => {
 app.get("/contest/:contestId/users", async (req, res) => {
   const { contestId } = req.params;
   console.log("Contest ID:", contestId);
-  try{
+  try {
     // check if the cnontest has ended
     const contest = await prisma.Contest.findUnique({
       where: {
@@ -1054,14 +1066,10 @@ app.get("/contest/:contestId/users", async (req, res) => {
       include: {
         user: true,
       },
-      orderBy: [
-        {score: "desc"},
-        {finishTime: "asc"},
-        {penalty: "asc"},
-      ],
+      orderBy: [{ score: "desc" }, { finishTime: "asc" }, { penalty: "asc" }],
     });
     console.log("Contest Users:", contestUsers);
-    // convert this contestUsers to a list 
+    // convert this contestUsers to a list
     const contestUsersList = contestUsers.map((contestUser) => {
       return {
         userId: contestUser.userId,
@@ -1096,5 +1104,91 @@ app.get("/contest/:contestId/startTime", async (req, res) => {
     console.error("Error fetching contest start time:", error);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+function assignRanks(users) {
+  // Sort users by their score in descending order and then by finish time in ascending order
+  users.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score; // Sort by score in descending order
+    }
+    return a.finishTime - b.finishTime; // Sort by finish time in ascending order
+  });
+
+  users[0].actualRank = 1; // Assign rank to the first user
+  let rank = 2;
+  for (let i = 1; i < users.length; i++) {
+    if (
+      users[i].score === users[i - 1].score &&
+      users[i].finishTime === users[i - 1].finishTime
+    ) {
+      // If the score and finish time are the same, assign the same rank
+      users[i].actualRank = users[i - 1].actualRank;
+    } else {
+      users[i].actualRank = rank; // Assign the current rank
+    }
+    rank++;
+  }
+
+  // update the contestUser table with the actual rank
+  users.forEach(async (user) => {
+    await prisma.contestUser.update({
+      where: {
+        userId_contestId: {
+          userId: user.userId,
+          contestId: user.contestId,
+        },
+      },
+      data: {
+        actualRank: user.actualRank,
+      },
+    });
+  });
+
+  return users;
 }
-);
+
+function calculateRatingChanges(users) {
+  const K = 80; // Max influence per contest
+  const BETA = 3; // Bonus for accurate prediction
+  const SIGMA = 300; // Scale sensitivity constant
+  const N = users.length;
+
+  // Compute average rating (mu)
+  const avgRating =
+    users.reduce((sum, user) => sum + user.currentRating, 0) / N;
+
+  // Step 1: Compute raw delta + bonus
+  let deltas = users.map((user) => {
+    const { predictedRank, actualRank, currentRating } = user;
+
+    const diff = predictedRank - actualRank;
+    const scale = 1 / (1 + Math.pow((currentRating - avgRating) / SIGMA, 2));
+    const baseDelta = K * (diff / (N - 1)) * scale;
+
+    // Optional bonus for matching prediction
+    const bonus = predictedRank === actualRank ? BETA : 0;
+
+    return baseDelta + bonus;
+  });
+
+  // Step 2: Normalize to be zero-sum
+  const totalChange = deltas.reduce((sum, d) => sum + d, 0);
+  const adjustment = -totalChange / N;
+
+  users.forEach(async (user, index) => {
+    const finalDelta = deltas[index] + adjustment;
+    await prisma.contestUser.update({
+      where: {
+        userId_contestId: {
+          userId: user.userId,
+          contestId: user.contestId,
+        },
+      },
+      data: {
+        ratingChange: Math.round(finalDelta),
+      },
+    });
+  });
+  return users;
+}
