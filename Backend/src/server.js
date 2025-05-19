@@ -94,6 +94,29 @@ async function scheduleContests() {
       console.log("Contest updated:", updatedContest);
       io.emit("contestStarted", { contestId: contest.id, updatedContest });
     });
+    // schedule the 2 min eloped event
+    const elopedTime = new Date(startTime.getTime() + 2 * 60 * 1000);
+    const elopedRule = new schedule.RecurrenceRule();
+    // elopedRule.tz = "Etc/UTC";
+    const elopeddate = elopedTime.getDate();
+    const elopedmonth = elopedTime.getMonth(); // 0-11
+    const elopedyear = elopedTime.getFullYear();
+    const elopedhour = elopedTime.getHours();
+    const elopedminute = elopedTime.getMinutes();
+    const elopedsecond = elopedTime.getSeconds();
+    console.log("Eloped Rule:", elopedRule);
+    const elopedDate = new Date(
+      elopedyear,
+      elopedmonth,
+      elopeddate,
+      elopedhour,
+      elopedminute,
+      elopedsecond
+    );
+    schedule.scheduleJob(elopedDate, async () => {
+      console.log("Contest 2 min eloped:", contest.name);
+      io.emit("2minEloped", { contestId: contest.id });
+    });
     const endRule = new schedule.RecurrenceRule();
     // endRule.tz = "Etc/UTC";
     const enddate = endTime.getDate();
@@ -736,21 +759,41 @@ app.post("/contest/:contestId/unregister/:userId", async (req, res) => {
 app.get("/contest/:contestId/problems", async (req, res) => {
   const { contestId } = req.params;
   console.log("Contest ID:", contestId);
-  try {
-    const problems = await prisma.Problem.findMany({
+  try{
+    const contest = await prisma.Contest.findUnique({
       where: {
-        contestId: contestId,
-      },
-      orderBy: {
-        problemScore: "asc",
+        id: contestId,
+        
+          // check if the time of req is greater than the start time of the contest + 2mins
+        startTime: {
+            lte: new Date(Date.now() - 2 * 60 * 1000),
+          }
       },
     });
-    console.log("Problems:", problems);
-    res.status(200).json(problems);
-  } catch (error) {
-    console.error("Error fetching problems:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+    console.log("Contest:", contest);
+    if (contest.status === "Ongoing") {
+  try {
+      const problems = await prisma.Problem.findMany({
+        where: {
+          contestId: contestId,
+          
+        },
+        orderBy: {
+          problemScore: "asc",
+        },
+      });
+      console.log("Problems:", problems);
+      res.status(200).json(problems);
+    } catch (error) {
+      console.error("Error fetching problems:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+    }}
+    catch (error) {
+      console.error("Error fetching problems:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  
 });
 
 const checkIsRegistered = async (contestId, userId) => {
@@ -1098,3 +1141,52 @@ app.get("/contest/:contestId/startTime", async (req, res) => {
   }
 }
 );
+
+// accept predicted ranking from user and save it to the database
+app.post("/contest/:contestId/user/:userId/rank/:predictedrank", async (req, res) => {
+  let { contestId, userId, predictedrank } = req.params;
+  // const { predictedRanking } = req.body;
+  console.log("Contest ID:", contestId);
+  console.log("User ID:", userId);
+  console.log("Predicted Ranking:", predictedrank);
+  let randomrank = 0;
+  // fetch the number of users in the contest
+  try {
+    const contest = await prisma.Contest.findUnique({
+      where: {
+        id: contestId,
+      },
+      select: {
+        participants: true,
+      },
+    });
+    console.log("Contest Participants:", contest.participants);
+    if(predictedrank == 0) {
+      randomrank = Math.floor(Math.random() * contest.participants.length) + 1;
+      console.log("Random Rank:", randomrank);
+      predictedrank = randomrank;
+    }
+  }
+  catch (error) {
+    console.error("Error fetching contest participants:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+  try {
+    const result = await prisma.contestUser.update({
+      where: {
+        userId_contestId: {
+          userId: userId,
+          contestId: contestId,
+        },
+      },
+      data: {
+        rankGuess: parseInt(predictedrank),
+      },
+    });
+    console.log("Result:", result);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error fetching contest ranking:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});

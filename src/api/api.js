@@ -390,6 +390,25 @@ const fetchContestStartTime = async (contestId) => {
   }
 }
 
+// submit user's submitted predicted rank to the backend
+const submitRank = async (contestId, userId, rank) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/user/${userId}/rank/${rank}`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.post(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting rank:", error);
+    throw error;
+  }
+};
+
 export {
   api,
   executeCode,
@@ -408,5 +427,6 @@ export {
   submitProblem,
   getSubmission,
   getContestUsers,
-  fetchContestStartTime
+  fetchContestStartTime,
+  submitRank,
 };
