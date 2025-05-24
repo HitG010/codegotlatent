@@ -1295,9 +1295,9 @@ function calculateRatingChanges(users) {
         id: user.userId,
       },
       data: {
-        currentRating: user.currentRating,
+        currentRating: user.rating,
         pastRating: {
-          push: user.currentRating, // Append the new rating to past ratings
+          push: user.rating, // Append the new rating to past ratings
         },
       },
     });
