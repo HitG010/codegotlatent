@@ -148,6 +148,12 @@ async function scheduleContests() {
       console.log("Contest updated:", updatedContest);
       io.emit("contestEnded", { contestId: contest.id, updatedContest });
     });
+
+    // update the rankings after 30 seconds after the contest ends
+    schedule.scheduleJob(new Date(endDate.getTime() + 30 * 1000), async () => {
+      console.log("Updating contest rankings:", contest.name);
+      submitContest(contest.id);
+    });
   });
 }
 
