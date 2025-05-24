@@ -1282,6 +1282,50 @@ function calculateRatingChanges(users) {
         ratingChange: Math.round(finalDelta),
       },
     });
+    // Change the user's current rating
+    user.currentRating += Math.round(finalDelta);
+    await prisma.User.update({
+      where: {
+        id: user.userId,
+      },
+      data: {
+        currentRating: user.currentRating,
+        pastRating: {
+          push: user.currentRating, // Append the new rating to past ratings
+        },
+      },
+    });
   });
   return users;
+}
+async function submitContest(contestId) {
+  console.log("Contest ID:", contestId);
+  try {
+    // fetch all the users who participated in the contest
+    const contestUsers = await prisma.contestUser.findMany({
+      where: {
+        contestId: contestId,
+      },
+      include: {
+        user: true,
+      },
+    });
+    console.log("Contest Users:", contestUsers);
+    if (contestUsers.length === 0) {
+      throw new Error("No participants found.");
+    }
+
+    // assign ranks to the users
+    const rankedUsers = assignRanks(contestUsers);
+    console.log("Ranked Users:", rankedUsers);
+
+    // calculate rating changes
+    const usersWithRatingChanges = calculateRatingChanges(rankedUsers);
+    console.log("Users with Rating Changes:", usersWithRatingChanges);
+
+    return usersWithRatingChanges;
+  } catch (error) {
+    console.error("Error ending contest:", error);
+    throw error;
+  }
 }
