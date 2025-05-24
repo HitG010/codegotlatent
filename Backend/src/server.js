@@ -1248,35 +1248,51 @@ function assignRanks(users) {
 }
 
 function calculateRatingChanges(users) {
-  const K = 80; // Max influence per contest
-  const BETA = 3; // Bonus for accurate prediction
-  const SIGMA = 300; // Scale sensitivity constant
+  const K = 60;
+  const T = 2; // tolerance in rank difference
+  const SIGMA = 400;
+
   const N = users.length;
 
-  // Compute average rating (mu)
-  const avgRating =
-    users.reduce((sum, user) => sum + user.currentRating, 0) / N;
+  // Step 1: extract ratings
+  for (let i = 0; i < N; i++) {
+    users[i].rating = users[i].user.rating;
+  }
 
-  // Step 1: Compute raw delta + bonus
+  // Step 2: compute average rating (μ)
+  const avgRating = users.reduce((sum, user) => sum + user.rating, 0) / N;
+
+  // Step 3: calculate deltas
   let deltas = users.map((user) => {
-    const { predictedRank, actualRank, currentRating } = user;
+    const { rankGuess, actualRank, rating } = user;
+    const D = Math.abs(rankGuess - actualRank);
 
-    const diff = predictedRank - actualRank;
-    const scale = 1 / (1 + Math.pow((currentRating - avgRating) / SIGMA, 2));
-    const baseDelta = K * (diff / (N - 1)) * scale;
+    // Rating volatility scaler
+    const volatility = 1 / (1 + Math.pow((rating - avgRating) / SIGMA, 2));
 
-    // Optional bonus for matching prediction
-    const bonus = predictedRank === actualRank ? BETA : 0;
-
-    return baseDelta + bonus;
+    let delta;
+    if (D <= T) {
+      if (D === T) {
+        delta = -K * 0.1 * volatility; // small penalty at edge
+      } else {
+        delta = K * (1 - D / T) * volatility;
+      }
+    } else {
+      delta = -K * ((D - T) / (N - T)) * volatility;
+    }
+    return delta;
   });
 
-  // Step 2: Normalize to be zero-sum
+  // Step 4: normalize to zero-sum
   const totalChange = deltas.reduce((sum, d) => sum + d, 0);
   const adjustment = -totalChange / N;
 
+  // Step 5: apply rating changes
   users.forEach(async (user, index) => {
     const finalDelta = deltas[index] + adjustment;
+    const roundedDelta = Math.round(finalDelta);
+    const newRating = user.rating + roundedDelta;
+
     await prisma.contestUser.update({
       where: {
         userId_contestId: {
@@ -1285,30 +1301,36 @@ function calculateRatingChanges(users) {
         },
       },
       data: {
-        ratingChange: Math.round(finalDelta),
+        ratingChange: roundedDelta,
       },
     });
-    // Change the user's current rating
-    user.currentRating += Math.round(finalDelta);
-    await prisma.User.update({
+
+    await prisma.user.update({
       where: {
         id: user.userId,
       },
       data: {
-        currentRating: user.currentRating,
-        pastRating: {
-          push: user.currentRating, // Append the new rating to past ratings
+        rating: newRating,
+        pastRatings: {
+          push: newRating,
         },
       },
     });
+
+    console.log(
+      `User ${user.username} | Δ: ${roundedDelta}, New Rating: ${newRating}`
+    );
   });
+
   return users;
 }
+
 async function submitContest(contestId) {
   console.log("Contest ID:", contestId);
   try {
     // fetch all the users who participated in the contest
     const contestUsers = await prisma.contestUser.findMany({
+      relationLoadStrategy: "join",
       where: {
         contestId: contestId,
       },
