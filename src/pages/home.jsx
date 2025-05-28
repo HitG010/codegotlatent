@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
@@ -16,10 +16,11 @@ const Home = () => {
   const token = useUserStore((state) => state.accessToken);
   console.log(user, "User in Home");
   console.log(token, "Access Token in Home");
+  const pathname = window.location.pathname;
   // alert("Home Page");
   return (
     <div className="h-screen w-100vh flex flex-row justify-between bg-[#0F0F0F]">
-      <Navbar />
+      <Navbar path={pathname}/>
       <div className="home flex flex-col h-full w-[80%] p-10 pt-16 bg-[#0F0F0F]">
         <div className="flex flex-col gap-1 justify-self-start">
           <h1 className="text-white text-4xl font-bold">
