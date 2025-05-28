@@ -4,11 +4,10 @@ import { GoHomeFill } from "react-icons/go";
 import { SlPuzzle } from "react-icons/sl";
 import { HiMiniTrophy } from "react-icons/hi2";
 import { IoSettingsOutline } from "react-icons/io5";
+import { Link } from "react-router-dom";
 
 export default function Navbar({
-  isHome = false,
-  isProblemSet = false,
-  isContests = false,
+  path
 }) {
   // This component renders a sidebar navigation bar with links to Home, Problems, and Contests.
   return (
@@ -18,18 +17,18 @@ export default function Navbar({
           <img src={latentNavLogo} alt="Latent Logo" className="h-14 w-14" />
         </div>
         <div className="section-buttons flex flex-col gap-2">
-          <div className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2">
+          <Link to={'/home'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/home' ? 'bg-[#2A2A2A]' : ''}`}>
             <GoHomeFill className="text-white text-2xl mr-2 ml-2" />
             <p className="text-lg">Home</p>
-          </div>
-          <div className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2">
-            <SlPuzzle className="text-white text-2xl mr-2 ml-2" />
+          </Link>
+          <Link to={'/problemset'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/problemset' ? 'bg-[#2A2A2A]' : ''}`}>
+            <SlPuzzle className="text-white text-2xl mr-2 ml-2 " />
             <p className="text-lg">Problems</p>
-          </div>
-          <div className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2">
+          </Link>
+          <Link to={'/contests'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/contests' ? 'bg-[#2A2A2A]' : ''}`}>
             <HiMiniTrophy className="text-white text-2xl mr-2 ml-2" />
             <p className="text-lg">Contests</p>
-          </div>
+          </Link>
         </div>
       </div>
       <div className="end-section flex flex-col gap-2">
