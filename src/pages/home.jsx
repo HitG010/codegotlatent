@@ -1,12 +1,12 @@
-import React, {useEffect} from 'react'
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
-import axios from 'axios'
-import useUserStore from '../store/userStore'
-import api from '../api/axios'
-import {logout} from '../utils/logout'
-import Navbar from '../components/Navbar'
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Navigate } from "react-router-dom";
+import axios from "axios";
+import useUserStore from "../store/userStore";
+import api from "../api/axios";
+import { logout } from "../utils/logout";
+import Navbar from "../components/Navbar";
 
 const Home = () => {
   const user = useUserStore((state) => state.user);
@@ -15,27 +15,36 @@ const Home = () => {
   console.log(token, "Access Token in Home");
   // alert("Home Page");
   return (
-    <div>
+    <div className="h-screen w-100vh flex flex-row justify-between bg-[#0F0F0F]">
       <Navbar />
-      <h1>Welcome to Code got Latent!</h1>
-      <Link to="/problemSet" style={{ textDecoration: 'none', color: 'blue' }}>
-        <h2>Problem Set</h2>
-      </Link>
-      <Link to="/contests" style={{ textDecoration: 'none', color: 'blue' }}>
-        <h2>Contests</h2>
-      </Link>
-      <h1>Welcome {user?.email}</h1>
-      <h1>Welcome {user?.id}</h1>
-      <button
-        onClick={() => {
-          logout();
-        }}
-        className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-      >
-        Log Out
-      </button>
+      <div className="home flex flex-col h-full w-[80%] p-10 pt-16 bg-[#0F0F0F]">
+        <div className="flex flex-col gap-1 justify-self-start">
+          <h1 className="text-white text-4xl font-bold">
+            Welcome, {user.name} 👋
+          </h1>
+          <p className="text-gray-400 text-xl">
+            Start showing your "Latent" today!
+          </p>
+        </div>
+        <div className="explore flex flex-row gap-2 p-3">
+          <div className="problem-button flex-1 p-5 flex flex-col">
+            <h1 className="text-2xl">Problems</h1>
+            <p>
+              Tackle a curated set of questions and strengthen your Data
+              Structures & Algorithms Skills
+            </p>
+          </div>
+          <div className="problem-button flex-1 p-5 flex flex-col">
+            <h1 className="text-2xl">Problems</h1>
+            <p>
+              Tackle a curated set of questions and strengthen your Data
+              Structures & Algorithms Skills
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default Home;
