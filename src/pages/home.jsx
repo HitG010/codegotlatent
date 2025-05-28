@@ -7,6 +7,9 @@ import useUserStore from "../store/userStore";
 import api from "../api/axios";
 import { logout } from "../utils/logout";
 import Navbar from "../components/Navbar";
+import contestTrophy from "../assets/trophy.svg";
+import language from "../assets/language.svg";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 const Home = () => {
   const user = useUserStore((state) => state.user);
@@ -27,20 +30,36 @@ const Home = () => {
             Start showing your "Latent" today!
           </p>
         </div>
-        <div className="explore flex flex-row gap-2 p-3">
-          <div className="problem-button flex-1 p-5 flex flex-col">
-            <h1 className="text-2xl">Problems</h1>
-            <p>
-              Tackle a curated set of questions and strengthen your Data
-              Structures & Algorithms Skills
-            </p>
+        <div className="explore flex flex-row gap-10 p-5">
+          <div className="problem-button flex-1 pt-5 pl-5 pb-5 flex flex-row items-center border-2">
+            <div className="flex flex-col p-2">
+              <div className="flex flex-row gap-3 items-center justify-items-start mb-3">
+                <h1 className="text-3xl">Problems</h1>
+                <FaArrowRightLong className="h-6 w-6" />
+              </div>
+              <p className="opacity-75">
+                Tackle a curated set of questions and strenghten your Data
+                Structures and Algorithms skills!
+              </p>
+            </div>
+            <img src={language} alt="Contest Trophy" className="h-35 w-35" />
           </div>
-          <div className="problem-button flex-1 p-5 flex flex-col">
-            <h1 className="text-2xl">Problems</h1>
-            <p>
-              Tackle a curated set of questions and strengthen your Data
-              Structures & Algorithms Skills
-            </p>
+          <div className="problem-button flex-1 pt-5 pl-5 pb-5 flex flex-row items-center border-2">
+            <div className="flex flex-col p-2">
+              <div className="flex flex-row gap-3 items-center justify-items-start mb-3">
+                <h1 className="text-3xl">Contests</h1>
+                <FaArrowRightLong className="h-6 w-6" />
+              </div>
+              <p className="opacity-75">
+                Show your coding skills in Rated Contests with a Twist in
+                Ratings. Attempt a Contest Now!
+              </p>
+            </div>
+            <img
+              src={contestTrophy}
+              alt="Contest Trophy"
+              className="h-30 w-30"
+            />
           </div>
         </div>
       </div>
