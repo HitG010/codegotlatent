@@ -11,33 +11,33 @@ export default function Navbar({
 }) {
   // This component renders a sidebar navigation bar with links to Home, Problems, and Contests.
   return (
-    <div className="navbar h-full w-[20%] bg-[#1A1A1A] flex flex-col p-6 justify-between">
+    <div className="navbar h-full w-[20%] bg-[#1A1A1A] flex flex-col p-6 justify-between transion-all duration-300">
       <div className="flex flex-col">
         <div className="logo mb-5">
           <img src={latentNavLogo} alt="Latent Logo" className="h-14 w-14" />
         </div>
         <div className="section-buttons flex flex-col gap-2">
-          <Link to={'/home'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/home' ? 'bg-[#2A2A2A]' : ''}`}>
+          <Link to={'/home'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/home' ? 'bg-[#2A2A2A]' : ''} transion-all duration-300`}>
             <GoHomeFill className="text-white text-2xl mr-2 ml-2" />
             <p className="text-lg">Home</p>
           </Link>
-          <Link to={'/problemset'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/problemset' ? 'bg-[#2A2A2A]' : ''}`}>
+          <Link to={'/problemset'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/problemset' ? 'bg-[#2A2A2A]' : ''} transion-all duration-300`}>
             <SlPuzzle className="text-white text-2xl mr-2 ml-2 " />
             <p className="text-lg">Problems</p>
           </Link>
-          <Link to={'/contests'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/contests' ? 'bg-[#2A2A2A]' : ''}`}>
+          <Link to={'/contests'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/contests' ? 'bg-[#2A2A2A]' : ''} transion-all duration-300`}>
             <HiMiniTrophy className="text-white text-2xl mr-2 ml-2" />
             <p className="text-lg">Contests</p>
           </Link>
         </div>
       </div>
       <div className="end-section flex flex-col gap-2">
-        <div className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2">
+        <div className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300">
           <IoSettingsOutline className="text-white opacity-50 text-2xl mr-2" />
           <p className="text-lg opacity-50">Settings</p>
         </div>
         <div className="h-[1px] bg-white opacity-10"></div>
-        <div className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2">
+        <div className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300">
           <IoSettingsOutline className="text-white opacity-50 text-2xl mr-2" />
           <p className="text-lg">Kartik Bindra</p>
         </div>

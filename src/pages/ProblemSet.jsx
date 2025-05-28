@@ -4,6 +4,7 @@ import { fetchProblems } from "../api/api";
 import { Link, Navigate } from "react-router-dom";
 import useUserStore from "../store/userStore";
 import Navbar from "../components/Navbar";
+import DifficultyTag from "../components/DifficultyTag";
 
 const ProblemSet = () => {
   const [problems, setProblems] = useState([]);
@@ -36,12 +37,13 @@ const ProblemSet = () => {
                 />
               </div>
               <div className="problem-statement">
-                {problems.map((problem) => (
+                {problems.map((problem, idx) => (
                   <Link key={problem.id} to={`/problem/${problem.id}`}>
-                    <div className="problem-card">
-                      <h2>{problem.title}</h2>
-                      <p>
-                        <strong>Difficulty:</strong> {problem.difficulty}
+                    <div className="flex flex-row justify-between items-center bg-[#1A1A1A] p-4 mb-4 rounded-lg hover:bg-[#2A2A2A] transition-colors duration-300">
+                      <h2 className="font-semibold text-lg">{idx+1}. {problem.title}</h2>
+                      <p key={idx}>
+                        {/* <strong>Difficulty:</strong> {problem.difficulty} */}
+                        <DifficultyTag tag={problem.difficulty}/>
                       </p>
                     </div>
                   </Link>
