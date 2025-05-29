@@ -9,22 +9,44 @@ import AvatarProgressRing from "../components/avatarProgressRing";
 import contestTrophy from "../assets/trophy.svg";
 import { FaArrowRightLong, FaCheck, FaCross } from "react-icons/fa6";
 import latentNavLogo from "../assets/latentNavLogo.svg";
-import { getProblemAcceptance } from "../api/api";
+import { getUserProblemCount } from "../api/api";
+import { FaCircleHalfStroke } from "react-icons/fa6";
 
 
 const ProblemSet = () => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [problems, setProblems] = useState([]);
+  const [easyCount, setEasyCount] = useState(0);
+  const [mediumCount, setMediumCount] = useState(0);
+  const [hardCount, setHardCount] = useState(0);
+  const [easyTotal, setEasyTotal] = useState(0);
+  const [mediumTotal, setMediumTotal] = useState(0);
+  const [hardTotal, setHardTotal] = useState(0);
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.accessToken);
 
   async function fetchProblemSet() {
-    const response = await fetchProblems();
+    const response = await fetchProblems(user.id);
     setProblems([...response]);
+  }
+
+  async function fetchProblemCount() {
+    const response = await getUserProblemCount(user.id);
+    console.log("Problem Count Response:", response);
+    setEasyCount(response.easyCount);
+    setMediumCount(response.mediumCount);
+    setHardCount(response.hardCount);
+    setEasyTotal(response.totalEasyCount);
+    setMediumTotal(response.totalMediumCount);
+    setHardTotal(response.totalHardCount);
   }
 
 
   useEffect(() => {
     fetchProblemSet();
+    fetchProblemCount();
+    setLoading(false);
   }, []);
   const pathname = window.location.pathname;
   return (
@@ -46,22 +68,24 @@ const ProblemSet = () => {
               />
             </div>
             <div className="problem-statement">
-              {problems.map((problem, idx) => (
+              {loading ? <div className="w-full text-center justify-center">loading</div> : problems.map((problem, idx) => (
                 <Link key={problem.id} to={`/problem/${problem.id}`}>
                   <div className="flex flex-row justify-between items-center bg-[#1A1A1A] p-4 mb-4 rounded-lg hover:bg-[#2A2A2A] transition-colors duration-300">
-                    <div className="flex flex-row gap-3">
-                      {problem.isCorrect ? (
-                        <FaCheck/>
+                    <div className="flex flex-row gap-3 items-center">
+                      {problem.isSolved == true ? (
+                        <FaCheck className="text-green-500"/>
+                      ) : ( problem.isSolved == false ? (
+                        <FaCircleHalfStroke className="text-yellow-500"/>
                       ) : (
                         <div className="h-4 w-4"/>
-                      )}
+                      ))}
                       <h2 className="font-semibold text-lg">
                         {idx + 1}. {problem.title}
                       </h2>
                     </div>
                     <p className="text-gray-400 text-sm">
                       {problem.submissionCount > 0 ? 
-                      (problem.acceptedCount/problem.submissionCount).toFixed(2) : 0}%
+                      ((problem.acceptedCount/problem.submissionCount)*100).toFixed(2) : 0}%
                     </p>
                     <p key={idx}>
                       {/* <strong>Difficulty:</strong> {problem.difficulty} */}
@@ -78,21 +102,21 @@ const ProblemSet = () => {
                 {/* <div className="rounded-full w-22 h-22 flex items-center justify-center">
                 <div className="rounded-full bg-[#ffffff25] w-20 h-20"></div>
               </div> */}
-                <AvatarProgressRing progress={70} imageUrl={"../assets/latentNavLogo.png"} />
+                <AvatarProgressRing progress={((easyCount+mediumCount+hardCount)/(easyTotal+mediumTotal+hardTotal)*100).toFixed(2)} imageUrl={"../assets/latentNavLogo.png"} />
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-row justify-between w-[170px]">
                     <p className="text-lg font-medium text-green-500">Easy</p>
-                    <p className="text-white text-lg font-medium">1/10</p>
+                    <p className="text-white text-lg font-medium">{easyCount}/{easyTotal}</p>
                   </div>
                   <div className="flex flex-row justify-between">
                     <p className="text-yellow-500 text-lg font-medium">
                       Medium
                     </p>
-                    <p className="text-white text-lg font-medium">1/10</p>
+                    <p className="text-white text-lg font-medium">{mediumCount}/{mediumTotal}</p>
                   </div>
                   <div className="flex flex-row justify-between">
                     <p className="text-red-500 text-lg font-medium">Hard</p>
-                    <p className="text-white text-lg font-medium">1/10</p>
+                    <p className="text-white text-lg font-medium">{hardCount}/{hardTotal}</p>
                   </div>
                 </div>
               </div>

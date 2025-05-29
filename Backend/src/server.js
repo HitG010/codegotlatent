@@ -649,7 +649,7 @@ app.get("/allProblems/:userId", async (req, res) => {
     );
     problem.submissionCount = submission ? submission._count.id : 0;
     problem.isSolved =
-      problem.Problems.length > 0 ? problem.Problems[0].isSolved : false;
+      problem.Problems.length > 0 ? problem.Problems[0].isSolved : null;
     problem.acceptedCount = problem._count.submissions || 0;
     delete problem.Problems; // Remove the Problems array to clean up the response
     delete problem._count; // Remove the _count object to clean up the response
