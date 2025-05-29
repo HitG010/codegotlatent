@@ -7,7 +7,10 @@ import Navbar from "../components/Navbar";
 import DifficultyTag from "../components/DifficultyTag";
 import AvatarProgressRing from "../components/avatarProgressRing";
 import contestTrophy from "../assets/trophy.svg";
-import { FaArrowRightLong } from "react-icons/fa6";
+import { FaArrowRightLong, FaCheck, FaCross } from "react-icons/fa6";
+import latentNavLogo from "../assets/latentNavLogo.svg";
+import { getProblemAcceptance } from "../api/api";
+
 
 const ProblemSet = () => {
   const [problems, setProblems] = useState([]);
@@ -18,6 +21,7 @@ const ProblemSet = () => {
     const response = await fetchProblems();
     setProblems([...response]);
   }
+
 
   useEffect(() => {
     fetchProblemSet();
@@ -45,9 +49,20 @@ const ProblemSet = () => {
               {problems.map((problem, idx) => (
                 <Link key={problem.id} to={`/problem/${problem.id}`}>
                   <div className="flex flex-row justify-between items-center bg-[#1A1A1A] p-4 mb-4 rounded-lg hover:bg-[#2A2A2A] transition-colors duration-300">
-                    <h2 className="font-semibold text-lg">
-                      {idx + 1}. {problem.title}
-                    </h2>
+                    <div className="flex flex-row gap-3">
+                      {problem.isCorrect ? (
+                        <FaCheck/>
+                      ) : (
+                        <div className="h-4 w-4"/>
+                      )}
+                      <h2 className="font-semibold text-lg">
+                        {idx + 1}. {problem.title}
+                      </h2>
+                    </div>
+                    <p className="text-gray-400 text-sm">
+                      {problem.submissionCount > 0 ? 
+                      (problem.acceptedCount/problem.submissionCount).toFixed(2) : 0}%
+                    </p>
                     <p key={idx}>
                       {/* <strong>Difficulty:</strong> {problem.difficulty} */}
                       <DifficultyTag tag={problem.difficulty} />
@@ -63,7 +78,7 @@ const ProblemSet = () => {
                 {/* <div className="rounded-full w-22 h-22 flex items-center justify-center">
                 <div className="rounded-full bg-[#ffffff25] w-20 h-20"></div>
               </div> */}
-                <AvatarProgressRing progress={70} imageUrl={null} />
+                <AvatarProgressRing progress={70} imageUrl={"../assets/latentNavLogo.png"} />
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-row justify-between w-[170px]">
                     <p className="text-lg font-medium text-green-500">Easy</p>

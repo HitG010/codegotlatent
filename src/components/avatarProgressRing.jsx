@@ -36,7 +36,7 @@ const AvatarProgressRing = ({ progress = 70, imageComponent }) => {
       </svg>
       <div className="w-20 h-20 rounded-full overflow-hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white">
         {imageComponent ? (
-            <imageComponent />
+            <img src={imageComponent} alt="Avatar" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-sm bg-gray-300 text-gray-600">
           </div>
