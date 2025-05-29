@@ -55,6 +55,14 @@ model Contest {
   // Problems            ProblemUser[]
 }
 
+model ProblemTags{
+  id        String  @id @default(uuid())
+  problemId String
+  tag       String // e.g., "Dynamic Programming", "Graph Theory", etc.
+
+  problem Problem @relation(fields: [problemId], references: [id])
+}
+
 model Problem {
   id               String       @id @default(uuid())
   contestId        String? // Nullable for problems not in contests
@@ -69,6 +77,7 @@ model Problem {
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   contest         Contest?     @relation(fields: [contestId], references: [id])
+  tags              ProblemTags[]
   Problems        ProblemUser[]
   // @@index([contestId]) // Index for faster lookups
 

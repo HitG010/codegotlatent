@@ -1357,3 +1357,71 @@ async function submitContest(contestId) {
     throw error;
   }
 }
+
+app.get("/problem/:problemId/acceptance", async (req, res) => {
+  const { problemId } = req.params;
+  console.log("Problem ID:", problemId);
+  const totalSubmisionCount = await prisma.Submission.count({
+    where: {
+      problemId: problemId,
+    },
+  });
+  const acceptedSubmissionCount = await prisma.Submission.count({
+    where: {
+      problemId: problemId,
+      verdict: "Accepted",
+    },
+  });
+  const acceptanceRate = totalSubmisionCount
+    ? (acceptedSubmissionCount / totalSubmisionCount) * 100
+    : 0;
+  console.log("Total Submissions:", totalSubmisionCount);
+  console.log("Accepted Submissions:", acceptedSubmissionCount);
+  console.log("Acceptance Rate:", acceptanceRate);
+  res.status(200).json({
+    totalSubmissions: totalSubmisionCount,
+    acceptedSubmissions: acceptedSubmissionCount,
+    acceptanceRate: acceptanceRate.toFixed(2) + "%",
+  });
+});
+
+app.get("/user/:userId/problemCount", async (req, res) => {
+  const { userId } = req.params;
+  console.log("User ID:", userId);
+  const easyCount = await prisma.problemUser.count({
+    where: {
+      userId: userId,
+      isCorrect: true,
+      problem: {
+        difficulty: "Easy", // <-- Filter on the related model
+      },
+    },
+  });
+
+  const mediumCount = await prisma.problemUser.count({
+    where: {
+      userId: userId,
+      isCorrect: true,
+      problem: {
+        difficulty: "Medium",
+      },
+    },
+  });
+
+  const hardCount = await prisma.problemUser.count({
+    where: {
+      userId: userId,
+      isCorrect: true,
+      problem: {
+        difficulty: "Hard",
+      },
+    },
+  });
+
+  return res.status(200).json({
+    totalCount: easyCount + mediumCount + hardCount,
+    easyCount: easyCount,
+    mediumCount: mediumCount,
+    hardCount: hardCount,
+  });
+});

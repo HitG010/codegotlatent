@@ -370,7 +370,7 @@ const getContestUsers = async (contestId) => {
     console.error("Error fetching contest users:", error);
     throw error;
   }
-}
+};
 
 const fetchContestStartTime = async (contestId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/startTime`;
@@ -388,11 +388,13 @@ const fetchContestStartTime = async (contestId) => {
     console.error("Error fetching contest start time:", error);
     throw error;
   }
-}
+};
 
 // submit user's submitted predicted rank to the backend
 const submitRank = async (contestId, userId, rank) => {
-  const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/user/${userId}/rank/${rank}`;
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/contest/${contestId}/user/${userId}/rank/${rank}`;
   console.log("URL:", url);
   try {
     const response = await axios.post(url, {
@@ -405,6 +407,44 @@ const submitRank = async (contestId, userId, rank) => {
     return response.data;
   } catch (error) {
     console.error("Error submitting rank:", error);
+    throw error;
+  }
+};
+
+const getProblemAcceptance = async (problemId) => {
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/problem/${problemId}/acceptance`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching problem acceptance:", error);
+    throw error;
+  }
+};
+
+const getUserProblemCount = async (userId) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}/problemCount`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user problem count:", error);
     throw error;
   }
 };
@@ -429,4 +469,6 @@ export {
   getContestUsers,
   fetchContestStartTime,
   submitRank,
+  getProblemAcceptance,
+  getUserProblemCount,
 };
