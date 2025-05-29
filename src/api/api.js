@@ -1,6 +1,7 @@
 // import dotenv from "dotenv";
 // dotenv.config();
 import axios from "axios";
+import { use } from "react";
 
 async function api() {
   const options = {
@@ -147,8 +148,8 @@ const pollSubmissionStatus = async (
   }
 };
 
-const fetchProblems = async () => {
-  const url = `${import.meta.env.VITE_BASE_URL}/allProblems`;
+const fetchProblems = async (userId) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/allProblems/${userId}`;
   console.log("URL:", url);
   try {
     const response = await axios.get(url, {

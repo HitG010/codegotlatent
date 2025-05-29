@@ -569,10 +569,43 @@ app.post("/submitProblem", async (req, res) => {
   }
 });
 
-app.get("/allProblems", async (req, res) => {
-  const problems = await prisma.Problem.findMany({
-    include: {
-      contest: true,
+app.get("/allProblems/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  const submissionCount = await prisma.submission.groupBy({
+    by: ["problemId"],
+    select: {
+      problemId: true,
+      _count: {
+        select: {
+          id: true, // Count all submissions for the problem
+        },
+      },
+    },
+  });
+
+  const problems = await prisma.problem.findMany({
+    select: {
+      id: true,
+      title: true,
+      difficulty: true,
+      Problems: {
+        where: {
+          userId: userId, // Filter ProblemUser by specific user
+        },
+        select: {
+          isCorrect: true,
+        },
+      },
+      tags: true,
+      _count: {
+        select: {
+          submissions: {
+            where: {
+              verdict: "Accepted", // Count only correct submissions
+            },
+          },
+        },
+      },
     },
     where: {
       OR: [
@@ -586,6 +619,19 @@ app.get("/allProblems", async (req, res) => {
         },
       ],
     },
+  });
+
+  // Add submission count to each problem
+  problems.forEach((problem) => {
+    const submission = submissionCount.find(
+      (sub) => sub.problemId === problem.id
+    );
+    problem.submissionCount = submission ? submission._count.id : 0;
+    problem.isCorrect =
+      problem.Problems.length > 0 ? problem.Problems[0].isCorrect : false;
+    problem.acceptedCount = problem._count.submissions || 0;
+    delete problem.Problems; // Remove the Problems array to clean up the response
+    delete problem._count; // Remove the _count object to clean up the response
   });
   console.log(problems);
   res.status(200).json(problems);
@@ -1393,7 +1439,7 @@ app.get("/user/:userId/problemCount", async (req, res) => {
       userId: userId,
       isCorrect: true,
       problem: {
-        difficulty: "Easy", // <-- Filter on the related model
+        difficulty: "Easy",
       },
     },
   });
@@ -1418,8 +1464,40 @@ app.get("/user/:userId/problemCount", async (req, res) => {
     },
   });
 
+  // Need count of each difficulty level problems
+  const totalProblemsCount = await prisma.problem.groupBy({
+    by: ["difficulty"],
+    _count: {
+      id: true,
+    },
+    where: {
+      OR: [
+        {
+          contest: {
+            status: "Ended",
+          },
+        },
+        {
+          contest: null,
+        },
+      ],
+    },
+  });
+
+  const totalEasyCount =
+    totalProblemsCount.find((problem) => problem.difficulty === "Easy")?._count
+      .id || 0;
+  const totalMediumCount =
+    totalProblemsCount.find((problem) => problem.difficulty === "Medium")
+      ?._count.id || 0;
+  const totalHardCount =
+    totalProblemsCount.find((problem) => problem.difficulty === "Hard")?._count
+      .id || 0;
+
   return res.status(200).json({
-    totalCount: easyCount + mediumCount + hardCount,
+    totalEasyCount: totalEasyCount,
+    totalMediumCount: totalMediumCount,
+    totalHardCount: totalHardCount,
     easyCount: easyCount,
     mediumCount: mediumCount,
     hardCount: hardCount,
