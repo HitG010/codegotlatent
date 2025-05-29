@@ -267,7 +267,8 @@ app.post("/submitContestCode", async (req, res) => {
         contestId: contest_id,
       },
       update: {
-        isCorrect: isCorrect,
+        isSolved: isCorrect,
+        solvedInContest: isCorrect,
         score: isCorrect
           ? (
               await prisma.problem.findUnique({ where: { id: problem_id } })
@@ -287,7 +288,8 @@ app.post("/submitContestCode", async (req, res) => {
         problemId: problem_id,
         userId: userId,
         contestId: contest_id,
-        isCorrect: isCorrect,
+        isSolved: isCorrect,
+        solvedInContest: isCorrect,
         score: isCorrect
           ? (
               await prisma.problem.findUnique({ where: { id: problem_id } })
@@ -314,7 +316,26 @@ app.post("/submitContestCode", async (req, res) => {
       userId,
       contestStartTime.startTime
     );
+  } else {
+    const isCorrect = finalVerdict === "Accepted";
+    const updatedProblemUser = await prisma.problemUser.upsert({
+      where: {
+        userId_problemId: {
+          userId: userId,
+          problemId: problem_id,
+        },
+      },
+      update: {
+        isSolved: isCorrect,
+      },
+      create: {
+        problemId: problem_id,
+        userId: userId,
+        isSolved: isCorrect,
+      },
+    });
   }
+
   return res.send(submission);
 });
 
@@ -593,7 +614,7 @@ app.get("/allProblems/:userId", async (req, res) => {
           userId: userId, // Filter ProblemUser by specific user
         },
         select: {
-          isCorrect: true,
+          isSolved: true,
         },
       },
       tags: true,
@@ -627,8 +648,8 @@ app.get("/allProblems/:userId", async (req, res) => {
       (sub) => sub.problemId === problem.id
     );
     problem.submissionCount = submission ? submission._count.id : 0;
-    problem.isCorrect =
-      problem.Problems.length > 0 ? problem.Problems[0].isCorrect : false;
+    problem.isSolved =
+      problem.Problems.length > 0 ? problem.Problems[0].isSolved : false;
     problem.acceptedCount = problem._count.submissions || 0;
     delete problem.Problems; // Remove the Problems array to clean up the response
     delete problem._count; // Remove the _count object to clean up the response
@@ -1437,7 +1458,7 @@ app.get("/user/:userId/problemCount", async (req, res) => {
   const easyCount = await prisma.problemUser.count({
     where: {
       userId: userId,
-      isCorrect: true,
+      isSolved: true,
       problem: {
         difficulty: "Easy",
       },
@@ -1447,7 +1468,7 @@ app.get("/user/:userId/problemCount", async (req, res) => {
   const mediumCount = await prisma.problemUser.count({
     where: {
       userId: userId,
-      isCorrect: true,
+      isSolved: true,
       problem: {
         difficulty: "Medium",
       },
@@ -1457,7 +1478,7 @@ app.get("/user/:userId/problemCount", async (req, res) => {
   const hardCount = await prisma.problemUser.count({
     where: {
       userId: userId,
-      isCorrect: true,
+      isSolved: true,
       problem: {
         difficulty: "Hard",
       },

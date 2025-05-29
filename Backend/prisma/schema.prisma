@@ -91,7 +91,8 @@ model ProblemUser{
   contestId String?
   score     Int? // Score awarded based on correctness
   penalty    Int? 
-  isCorrect Boolean? // Whether the problem was solved correctly
+  isSolved Boolean? // Whether the problem was solved correctly
+  solvedInContest Boolean? // Whether the problem was solved during a contest
   finishedAt DateTime? // When the user finished the problem
 
   user      User    @relation(fields: [userId], references: [id])
