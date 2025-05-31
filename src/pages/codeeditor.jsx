@@ -116,7 +116,7 @@ const CodeEditor = ({ problemId, langId, userId }) => {
           style={{
             marginTop: "20px",
             padding: "10px",
-            backgroundColor: "#f8f9fa",
+            backgroundColor: "#212121",
             borderRadius: "4px",
           }}
         >
@@ -129,7 +129,7 @@ const CodeEditor = ({ problemId, langId, userId }) => {
           style={{
             marginTop: "20px",
             padding: "10px",
-            backgroundColor: "#f8f9fa",
+            backgroundColor: "#212121",
             borderRadius: "4px",
           }}
         >

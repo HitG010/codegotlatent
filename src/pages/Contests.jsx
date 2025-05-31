@@ -4,6 +4,7 @@ import { fetchContests } from "../api/api";
 import { parseDate, calculateDuration } from "../utils/date";
 import { Link, Navigate } from "react-router-dom";
 import useUserStore from "../store/userStore";
+import Navbar from "../components/Navbar";
 
 export default function Contests() {
   const [contest, setContest] = useState([]);
@@ -27,12 +28,11 @@ export default function Contests() {
     fetchAllContests();
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const pathname = window.location.pathname;
 
   return (
-    <div>
+    <div className="h-screen w-100vh flex flex-row justify-between bg-[#0F0F0F]">
+      <Navbar path={pathname}/>
       <h1>Contests</h1>
 
       {contest.map((contest) => (
