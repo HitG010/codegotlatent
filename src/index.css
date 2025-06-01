@@ -13,3 +13,25 @@ body {
     padding: 0;
     line-height: 1.6;
 }
+
+@layer utilities {
+  .scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 20px;
+  }
+
+  .scrollbar::-webkit-scrollbar-track {
+    border-radius: 100vh;
+    background:rgb(41, 41, 41);
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    background:rgb(82, 82, 82);
+    border-radius: 100vh;
+    border: 3px solid rgb(46, 46, 46);
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover {
+    background:rgb(104, 104, 104);
+  }
+}

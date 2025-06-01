@@ -665,6 +665,9 @@ app.get("/problem/:id", async (req, res) => {
     where: {
       id: problemId,
     },
+    include: {
+      tags: true,
+    }
   });
   console.log(problem);
   res.status(200).json(problem);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "../App.css";
 import { fetchProblem, fetchTestcases } from "../api/api";
 import CodeEditor from "../pages/codeeditor";
@@ -7,8 +7,16 @@ import { useParams, Navigate } from "react-router-dom";
 import useUserStore from "../store/userStore";
 import { ResizableBox } from 'react-resizable';
 import 'react-resizable/css/styles.css';
+import latentNavLogo from "../assets/latentNavLogo.png";
+import { LuAlarmClock } from "react-icons/lu";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github.css';
+import DifficultyTag from "../components/DifficultyTag";
 
 function Problem() {
+  const user = useUserStore((state) => state.user);
+  const token = useUserStore((state) => state.accessToken);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -17,17 +25,17 @@ function Problem() {
   const [testCaseError, setTestCaseError] = useState(null);
   const [langId, setLangId] = useState(54);
   const { id } = useParams();
-  const user = useUserStore((state) => state.user);
-  const token = useUserStore((state) => state.accessToken);
-  const screenHeight = window.innerHeight;
-  const screenWidth = window.innerWidth;
-  const [tile1Height, setTile1Height] = useState(screenHeight/2);
-  const [tile2Height, setTile2Height] = useState(screenHeight/2);
-  const [tile1Width, setTile1Width] = useState(screenWidth/2 - 10);
-  const [tile2Width, setTile2Width] = useState(screenWidth/2 - 10);
-  const [tile3Width, setTile3Width] = useState(screenWidth/2 - 10);
-
+  const [screenHeight, setScreenHeight] = useState(window.innerHeight-75);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const [tile1Height, setTile1Height] = useState((window.innerHeight-75) / 2);
+  const [tile2Height, setTile2Height] = useState((window.innerHeight-75) / 2);
+  const [tile1Width, setTile1Width] = useState((window.innerWidth) / 2 - 10);
+  const [tile2Width, setTile2Width] = useState((window.innerWidth) / 2 - 10);
+  const [tile3Width, setTile3Width] = useState((window.innerWidth) / 2 - 10);
   const containerRef = useRef(null);
+  
+  const minTileWidth = 200;
+  const minTileHeight = 100;
 
   const fetchTestCases = async () => {
     try {
@@ -56,6 +64,13 @@ function Problem() {
   useEffect(() => {
     fetchData();
     fetchTestCases();
+
+    const handleResize = () => {
+      setScreenHeight(window.innerHeight);
+      setScreenWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   if (loading) {
@@ -67,6 +82,149 @@ function Problem() {
   if (!data) {
     return <div>No data available</div>;
   }
+  
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setScreenHeight(window.innerHeight);
+  //     setScreenWidth(window.innerWidth);
+  //   };
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
+  
+  const startHorizontalDrag = (e) => {
+    const startX = e.clientX;
+    const initialTile3Width = tile3Width;
+    const initialTile1Width = tile1Width;
+
+    document.body.style.userSelect = 'none';
+
+    const onMouseMove = (e) => {
+      const delta = e.clientX - startX;
+      const newTile3Width = Math.max(minTileWidth, initialTile3Width - delta);
+      const newTile1Width = screenWidth - newTile3Width - 12; // accounting for drag handle
+
+      if (newTile1Width >= minTileWidth) {
+        setTile3Width(newTile3Width);
+        setTile1Width(newTile1Width);
+        setTile2Width(newTile1Width); // keep tile1 and tile2 in sync
+      }
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.userSelect = '';
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
+  const startVerticalDrag = (e) => {
+    const startY = e.clientY;
+    const initialTile1Height = tile1Height;
+    const initialTile2Height = tile2Height;
+
+    document.body.style.userSelect = 'none';
+
+    const onMouseMove = (e) => {
+      const delta = e.clientY - startY;
+      const newTile1Height = Math.max(minTileHeight, initialTile1Height + delta);
+      const newTile2Height = Math.max(minTileHeight, initialTile2Height - delta);
+
+      // if (newTile1Height + newTile2Height <= screenHeight - 12) {
+        setTile1Height(newTile1Height);
+        setTile2Height(newTile2Height);
+      // }
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.userSelect = '';
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+  
+  return (
+    <div className="flex flex-col h-screen w-full box-border bg-black overflow-hidden">
+    <div className="flex justify-between items-center px-8 pt-2 text-white h-[75px] overflow-hidden">
+      <div><img src={latentNavLogo} className="h-8 w-8"/></div>
+      <div className="flex items-center gap-4">
+      <div className="text-sm text-white/50 flex items-center gap-2"><button className="p-2 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer">Run</button></div>
+      <div className="text-sm text-white/50 flex items-center gap-2"><button className="p-2 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer">Submit</button></div>
+      <div className="text-sm text-white/50 flex items-center gap-2">Start Timer: <button className="p-2 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer"><LuAlarmClock className="h-5 w-5"/></button></div>
+      </div>
+      <div className="flex items-center">
+        <div className="rounded-full bg-white/50 text-sm text-white h-8 w-8"></div>
+        </div>
+      </div>
+    <div ref={containerRef} className="flex px-4 py-2 h-screen w-full box-border">
+      {/* Left column */}
+      <div className="flex flex-col" style={{ width: tile1Width }}>
+        <div className="p-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar" style={{ height: tile1Height }}>
+          <ProblemDesciptionComponent data={data} />
+        </div>
+
+        {/* Vertical Drag Handle */}
+        <div
+          onMouseDown={startVerticalDrag}
+          className="h-2 cursor-row-resize bg-[#ffffff15] flex items-center justify-center"
+        >
+          <div className="w-4 h-[2px] bg-white/20 rounded-full"></div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar" style={{ height: tile2Height }}>
+          Here goes Test Cases
+        </div>
+      </div>
+
+      {/* Horizontal Drag Handle */}
+      <div
+        onMouseDown={startHorizontalDrag}
+        className="w-2 cursor-col-resize bg-[#ffffff15] flex items-center justify-center"
+      >
+        <div className="w-[2px] h-4 bg-white/20 rounded-full"></div>
+      </div>
+
+      {/* Right Column: Code Editor */}
+      <div className="p-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar" style={{ width: tile3Width, height: screenHeight+8 }}>
+        Here goes Monaco Code Editor
+        <CodeEditor problemId={id} langId={langId} userId={user.id}/>
+      </div>
+    </div>
+    </div>
+  );
+}
+
+const ProblemDesciptionComponent = ({data}) => {
+  console.log("Problem Data:", data);
+  return (
+    <div className="problem-description">
+      <h1 className="text-3xl font-semibold">{data.title}</h1>
+      <div className="mt-1 flex gap-2">
+        <DifficultyTag tag={data.difficulty} />
+        <div>
+          {data.tags.map(((tag) => (
+          <p key={tag.id} className="px-3 py-1 rounded-full text-sm font-medium bg-white/15 text-white/50">
+            {tag.tag}
+          </p>
+        ))
+        )}
+        </div>
+        </div>
+      <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{data.description}</ReactMarkdown>
+      <p>Max Time Limit: {data.max_time_limit} seconds</p>
+      <p>Max Memory Limit: {data.max_memory_limit / 1024} MB</p>
+    </div>
+  )
+}
+
+export default Problem;
+
 
   // run testcases flow
   // problemID
@@ -85,123 +243,3 @@ function Problem() {
   // get the result for the submission
   // show the result in UI
   // populate database with submission result
-
-
-  const startHorizontalDrag = (e) => {
-    const startX = e.clientX;
-    const startWidth = tile3Width;
-
-    // Prevent text selection while dragging
-    document.body.style.userSelect = 'none';
-
-    const onMouseMove = (e) => {
-      const delta = e.clientX - startX;
-      setTile3Width(startWidth - delta);
-      setTile1Width(startWidth + delta);
-      setTile2Width(startWidth + delta);
-    };
-
-    const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      // Restore text selection
-      document.body.style.userSelect = '';
-    };
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  };
-
-  // Handle vertical drag (between Tile 1 and Tile 2)
-  const startVerticalDrag = (e) => {
-    const startY = e.clientY;
-    const startTile1 = tile1Height;
-    const startTile2 = tile2Height;
-
-    // Prevent text selection while dragging
-    document.body.style.userSelect = 'none';
-
-    const onMouseMove = (e) => {
-      const delta = e.clientY - startY;
-      setTile1Height(startTile1 + delta);
-      setTile2Height(startTile2 - delta);
-    };
-
-    const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      // Restore text selection
-      document.body.style.userSelect = '';
-    };
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  };
-
-  return (
-    <>
-     <div ref={containerRef} className="flex p-4 h-screen w-full box-border">
-      {/* Left column */}
-      <div className="flex flex-col" style={{ width: tile1Width }}>
-        <div
-          className="p-4 rounded-xl bg-[#212121]"
-          style={{ height: tile1Height }}
-        >
-          <ProblemDesciptionComponent data={data} />
-        </div>
-
-        {/* Vertical Drag Handle */}
-        <div
-          onMouseDown={startVerticalDrag}
-          className="h-2 cursor-row-resize bg-[#ffffff15] flex items-center justify-center"
-        ><div className="w-4 h-1 bg-white rounded-full"></div></div>
-
-        <div
-          className="p-4 rounded-xl bg-[#212121]"
-          style={{ height: tile2Height }}
-        >
-          here goes Test Cases
-        </div>
-      </div>
-
-      {/* Horizontal Drag Handle */}
-      <div
-        onMouseDown={startHorizontalDrag}
-        className="w-2 cursor-col-resize bg-[#ffffff15] flex items-center justify-center"
-      ><div className="w-1 h-4 bg-white rounded-full"></div></div>
-
-      {/* Tile 3 */}
-      <div
-        className="p-4 rounded-xl bg-[#212121]"
-        style={{ width: tile3Width }}
-      >
-        Here goes Monaco Code Editor
-      </div>
-    </div>
-      {/* <h2>Code Editor</h2>
-      {testCaseLoading ? (
-        <div>Loading Test Cases...</div>
-      ) : testCaseError ? (
-        <div>Error: {testCaseError.message}</div>
-      ) : (
-        <>
-          <CodeEditor problemId={id} langId={langId} userId={user.id} />
-        </>
-      )} */}
-    </>
-  );
-}
-
-const ProblemDesciptionComponent = ({data}) => {
-  return (
-    <div className="problem-description">
-      <h1>{data.title}</h1>
-      <p>{data.description}</p>
-      <p>Difficulty: {data.difficulty}</p>
-      <p>Max Time Limit: {data.max_time_limit} seconds</p>
-      <p>Max Memory Limit: {data.max_memory_limit / 1024} MB</p>
-    </div>
-  )
-}
-
-export default Problem;
