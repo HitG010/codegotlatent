@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "../App.css";
 import { fetchProblem, fetchTestcases } from "../api/api";
-import CodeEditor from "../pages/codeeditor";
+import { executeCode, pollSubmissionStatus, submitProblem } from "../api/api";
+// import CodeEditor from "../pages/codeeditor";
 import TestCases from "../components/Testcases";
 import { useParams, Navigate } from "react-router-dom";
 import useUserStore from "../store/userStore";
@@ -17,6 +18,9 @@ import DifficultyTag from "../components/DifficultyTag";
 function Problem() {
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.accessToken);
+  const [code, setCode] = useState("// Write your code here...");
+  const [result, setResult] = useState([]);
+  const [submissionResult, setSubmissionResult] = useState([]);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -60,6 +64,44 @@ function Problem() {
       setLoading(false);
     }
   };
+  
+    const handleRunSubmit = async () => {
+      if(!code || !testCases || !langId) {
+        console.error("Code, test cases, or language ID is missing");
+        return;
+      }
+
+      console.log("Submitted Code:", code);
+      // Simulate an API call to execute the code
+      executeCode(code, testCases, langId)
+        .then(async (result) => {
+          // long poll the server for submission status
+          console.log("Result:", result);
+          pollSubmissionStatus(result, id, 0, code, langId)
+            .then((data) => {
+              console.log("Polling Response:", data);
+              setResult(data);
+            })
+            .catch((error) => {
+              console.error("Error polling submission status:", error);
+            });
+        })
+        .catch((error) => {
+          console.error("Error executing code:", error);
+          setError(error);
+        });
+    };
+    const handleSubmit = async () => {
+      console.log("Submitted Code:", code);
+      try {
+        const result = await submitProblem(code, id, langId, null, user.id);
+        console.log("Result:", result);
+        setSubmissionResult(result);
+      } catch (error) {
+        console.error("Error submitting code:", error);
+        setError(error);
+      }
+    };
 
   useEffect(() => {
     fetchData();
@@ -154,8 +196,8 @@ function Problem() {
     <div className="flex justify-between items-center px-8 pt-2 text-white h-[75px] overflow-hidden">
       <div><img src={latentNavLogo} className="h-8 w-8"/></div>
       <div className="flex items-center gap-4">
-      <div className="text-sm text-white/50 flex items-center gap-2"><button className="p-2 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer">Run</button></div>
-      <div className="text-sm text-white/50 flex items-center gap-2"><button className="p-2 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer">Submit</button></div>
+      <div className="text-sm text-white/50 flex items-center gap-2"><button className="py-2 px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer" onClick={handleRunSubmit}>Run</button></div>
+      <div className="text-sm text-white/50 flex items-center gap-2"><button className="py-2 px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer" onClick={handleSubmit}>Submit</button></div>
       <div className="text-sm text-white/50 flex items-center gap-2">Start Timer: <button className="p-2 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer"><LuAlarmClock className="h-5 w-5"/></button></div>
       </div>
       <div className="flex items-center">
@@ -178,7 +220,7 @@ function Problem() {
         </div>
 
         <div className="p-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar" style={{ height: tile2Height }}>
-          Here goes Test Cases
+          <TestCases testCases={testCases} testcasesStatus={result} />
         </div>
       </div>
 
@@ -193,7 +235,7 @@ function Problem() {
       {/* Right Column: Code Editor */}
       <div className="p-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar" style={{ width: tile3Width, height: screenHeight+8 }}>
         Here goes Monaco Code Editor
-        <CodeEditor problemId={id} langId={langId} userId={user.id}/>
+        <CodeEditor langId={langId} code={code} SetCode={setCode}/>
       </div>
     </div>
     </div>
@@ -222,6 +264,155 @@ const ProblemDesciptionComponent = ({data}) => {
     </div>
   )
 }
+
+
+const CodeEditor = ({ langId, code, SetCode }) => {
+  // const [code, setCode] = useState("// Write your code here...");
+  // const [result, setResult] = useState([]);
+  // const [error, setError] = useState(null);
+  // const [testCases, setTestCases] = useState([]);
+  // const [testCaseLoading, setTestCaseLoading] = useState(true);
+  // const [testCaseError, setTestCaseError] = useState(null);
+  // const [submissionResult, setSubmissionResult] = useState([]);
+
+  // const fetchTestCases = async () => {
+  //   try {
+  //     const response = await fetchTestcases(problemId);
+  //     setTestCases([...response]);
+  //     console.log("Test Cases:", response);
+  //   } catch (err) {
+  //     setTestCaseError(err);
+  //   } finally {
+  //     setTestCaseLoading(false);
+  //   }
+  // };
+
+  const handleEditorChange = (event) => {
+    SetCode(event.target.value);
+  };
+
+  // const handleRunSubmit = async () => {
+  //   console.log("Submitted Code:", code);
+  //   // Simulate an API call to execute the code
+  //   executeCode(code, testCases, langId)
+  //     .then(async (result) => {
+  //       // long poll the server for submission status
+  //       console.log("Result:", result);
+  //       pollSubmissionStatus(result, problemId, 0, code, langId)
+  //         .then((data) => {
+  //           console.log("Polling Response:", data);
+  //           setResult(data);
+  //         })
+  //         .catch((error) => {
+  //           console.error("Error polling submission status:", error);
+  //         });
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error executing code:", error);
+  //       setError(error);
+  //     });
+  // };
+  // const handleSubmit = async () => {
+  //   console.log("Submitted Code:", code);
+  //   try {
+  //     const result = await submitProblem(code, problemId, langId, null, userId);
+  //     console.log("Result:", result);
+  //     setSubmissionResult(result);
+  //   } catch (error) {
+  //     console.error("Error submitting code:", error);
+  //     setError(error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchTestCases();
+  // }, []);
+
+  return (
+    <div style={{ height: "40vh", display: "flex", flexDirection: "column" }}>
+      <textarea
+        style={{
+          flex: 1,
+          width: "100%",
+          padding: "10px",
+          fontSize: "16px",
+          fontFamily: "monospace",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+          minHeight: "200px",
+        }}
+        value={code}
+        onChange={handleEditorChange}
+      />
+      {/* <div className="submission flex flex-col">
+        <button
+          onClick={handleRunSubmit}
+          style={{
+            marginTop: "10px",
+            padding: "10px",
+            backgroundColor: "#007bff",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+          }}
+        >
+          Run Code
+        </button>
+        <button
+          onClick={handleSubmit}
+          style={{
+            marginTop: "10px",
+            padding: "10px",
+            backgroundColor: "#007bff",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+          }}
+        >
+          Submit Code
+        </button>
+      </div> */}
+
+      {/* {result && (
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "10px",
+            backgroundColor: "#212121",
+            borderRadius: "4px",
+          }}
+        >
+          <h3>Result:</h3>
+          <pre>{JSON.stringify(result)}</pre>
+        </div>
+      )} */}
+      {/* {submissionResult.length > 0 && (
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "10px",
+            backgroundColor: "#212121",
+            borderRadius: "4px",
+          }}
+        >
+          <h3>Submission Result:</h3>
+          <pre>{JSON.stringify(submissionResult)}</pre>
+        </div>
+      )}
+      {testCaseLoading ? (
+        <div>Loading Test Cases...</div>
+      ) : testCaseError ? (
+        <div>Error: {testCaseError.message}</div>
+      ) : (
+        <>
+          <Testcases testCases={testCases} testcasesStatus={result} />
+        </>
+      )} */}
+    </div>
+  );
+};
+
+
 
 export default Problem;
 
