@@ -4,7 +4,7 @@ import { fetchProblem, fetchTestcases } from "../api/api";
 import { executeCode, pollSubmissionStatus, submitProblem } from "../api/api";
 // import CodeEditor from "../pages/codeeditor";
 import TestCases from "../components/Testcases";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link } from "react-router-dom";
 import useUserStore from "../store/userStore";
 import { ResizableBox } from "react-resizable";
 import "react-resizable/css/styles.css";
@@ -211,9 +211,9 @@ function Problem() {
   return (
     <div className="flex flex-col h-screen w-full box-border bg-black overflow-hidden">
       <div className="flex justify-between items-center px-8 pt-2 text-white h-[75px] overflow-hidden">
-        <div>
+        <Link to={"/home"}>
           <img src={latentNavLogo} className="h-8 w-8" />
-        </div>
+        </Link>
         <div className="flex items-center gap-4">
           <div className="text-sm text-white/50 flex items-center gap-2">
             <button
@@ -284,14 +284,14 @@ function Problem() {
         </div>
 
         {/* Right Column: Code Editor */}
-        <div
+        {/* <div
           className="p-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar"
           style={{ width: tile3Width, height: screenHeight + 8 }}
         >
           Here goes Monaco Code Editor
           <CodeEditor langId={langId} code={code} SetCode={setCode} />
-        </div>
-      </div>
+        </div> */}
+      {/* </div> */}
       {/* Right Column: Code Editor */}
       <div className="rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar" style={{ width: tile3Width, height: screenHeight+8 }}>
         <label for="languages" className="text-sm">Choose a Language:</label>
@@ -304,7 +304,7 @@ function Problem() {
         <CodeEditor langId={langId} code={code} SetCode={setCode}/>
       </div>
     </div>
-    // </div>
+    </div>
   );
 }
 
