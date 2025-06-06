@@ -1,16 +1,17 @@
 import React from "react";
 import statusCode from "../data/statusCode";
+import { Testcase } from "./Testcase";
 import { useEffect, useState } from "react";
 
-const Testcases = ({ testCases, testcasesStatus }) => {
-  const [status, setStatus] = useState([]);
+const Testcases = ({ testCases, testcasesStatus, isLoading }) => {
+  // const [status, setStatus] = useState([]);
 
-  const handleSetStatus = async (testcasesStatus) => {
-    setStatus(testcasesStatus);
-  };
-  useEffect(() => {
-    handleSetStatus(testcasesStatus);
-  }, [testcasesStatus]);
+  // const handleSetStatus = async (testcasesStatus) => {
+  //   setStatus(testcasesStatus);
+  // };
+  // useEffect(() => {
+  //   handleSetStatus(testcasesStatus);
+  // }, [testcasesStatus]);
 
   if (!testCases) {
     return <div>No test cases available</div>;
@@ -21,27 +22,19 @@ const Testcases = ({ testCases, testcasesStatus }) => {
   return (
     <div>
       {testCases.map((testCase, index) => (
-        <div
+        <Testcase
           key={index}
-          style={{ margin: "10px", padding: "10px", border: "1px solid #ccc" }}
-        >
-          <h3>Test Case {index + 1}</h3>
-          <p>
-            <strong>Input:</strong> {testCase.input}
-          </p>
-          <p>
-            <strong>Input:</strong> {testCase.stdin}
-          </p>
-          <p>
-            <strong>Expected Output:</strong> {JSON.stringify(testCase.output)}
-          </p>
-          {testcasesStatus.length > index && (
-            <p>
-              <strong>Status:</strong>{" "}
-              {statusCode[testcasesStatus[index].status.id - 1]}
-            </p>
-          )}
-        </div>
+          input={testCase.input}
+          stdin={testCase.stdin}
+          output={testCase.output}
+          testCaseStatus={
+            testcasesStatus && testcasesStatus[index]
+              ? testcasesStatus[index]
+              : null
+          }
+          index={index}
+          isLoading={isLoading}
+        />
       ))}
     </div>
   );

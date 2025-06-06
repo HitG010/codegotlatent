@@ -667,7 +667,7 @@ app.get("/problem/:id", async (req, res) => {
     },
     include: {
       tags: true,
-    }
+    },
   });
   console.log(problem);
   res.status(200).json(problem);
