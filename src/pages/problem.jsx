@@ -14,6 +14,14 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github.css';
 import DifficultyTag from "../components/DifficultyTag";
+import Editor from "@monaco-editor/react";
+
+const langIdtoLangName = {
+  54: "cpp",
+  71: "python",
+  63: "javascript",
+  62: "java",
+}
 
 function Problem() {
   const user = useUserStore((state) => state.user);
@@ -233,8 +241,14 @@ function Problem() {
       </div>
 
       {/* Right Column: Code Editor */}
-      <div className="p-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar" style={{ width: tile3Width, height: screenHeight+8 }}>
-        Here goes Monaco Code Editor
+      <div className="rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar" style={{ width: tile3Width, height: screenHeight+8 }}>
+        <label for="languages" className="text-sm">Choose a Language:</label>
+        <select id="languages" name="languages" className="bg-[#ffffff15] text-white py-1 ml-2 rounded-md text-sm my-1" value={langId} onChange={(e) => setLangId(parseInt(e.target.value))}>
+          <option value={54} className="bg-[#ffffff15] text-black">C++</option>
+          <option value={71} className="bg-[#ffffff15] text-black">Python</option>
+          <option value={63} className="bg-[#ffffff15] text-black">JavaScript</option>
+          <option value={62} className="bg-[#ffffff15] text-black">Java</option>
+        </select>
         <CodeEditor langId={langId} code={code} SetCode={setCode}/>
       </div>
     </div>
@@ -267,148 +281,77 @@ const ProblemDesciptionComponent = ({data}) => {
 
 
 const CodeEditor = ({ langId, code, SetCode }) => {
-  // const [code, setCode] = useState("// Write your code here...");
-  // const [result, setResult] = useState([]);
-  // const [error, setError] = useState(null);
-  // const [testCases, setTestCases] = useState([]);
-  // const [testCaseLoading, setTestCaseLoading] = useState(true);
-  // const [testCaseError, setTestCaseError] = useState(null);
-  // const [submissionResult, setSubmissionResult] = useState([]);
+  // console.log("Code Editor Lang ID:", langId);
+  // console.log(langIdtoLangName[langId]);
 
-  // const fetchTestCases = async () => {
-  //   try {
-  //     const response = await fetchTestcases(problemId);
-  //     setTestCases([...response]);
-  //     console.log("Test Cases:", response);
-  //   } catch (err) {
-  //     setTestCaseError(err);
-  //   } finally {
-  //     setTestCaseLoading(false);
-  //   }
-  // };
-
-  const handleEditorChange = (event) => {
-    SetCode(event.target.value);
+  const handleEditorChange = (val) => {
+    SetCode(val);
   };
 
-  // const handleRunSubmit = async () => {
-  //   console.log("Submitted Code:", code);
-  //   // Simulate an API call to execute the code
-  //   executeCode(code, testCases, langId)
-  //     .then(async (result) => {
-  //       // long poll the server for submission status
-  //       console.log("Result:", result);
-  //       pollSubmissionStatus(result, problemId, 0, code, langId)
-  //         .then((data) => {
-  //           console.log("Polling Response:", data);
-  //           setResult(data);
-  //         })
-  //         .catch((error) => {
-  //           console.error("Error polling submission status:", error);
-  //         });
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error executing code:", error);
-  //       setError(error);
-  //     });
-  // };
-  // const handleSubmit = async () => {
-  //   console.log("Submitted Code:", code);
-  //   try {
-  //     const result = await submitProblem(code, problemId, langId, null, userId);
-  //     console.log("Result:", result);
-  //     setSubmissionResult(result);
-  //   } catch (error) {
-  //     console.error("Error submitting code:", error);
-  //     setError(error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchTestCases();
-  // }, []);
-
   return (
-    <div style={{ height: "40vh", display: "flex", flexDirection: "column" }}>
-      <textarea
-        style={{
-          flex: 1,
-          width: "100%",
-          padding: "10px",
-          fontSize: "16px",
-          fontFamily: "monospace",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-          minHeight: "200px",
-        }}
+      <Editor onChange={handleEditorChange}
+        height="100%"
+        width="100%"
+        defaultLanguage="cpp"
+        language={langIdtoLangName[langId]}
         value={code}
-        onChange={handleEditorChange}
-      />
-      {/* <div className="submission flex flex-col">
-        <button
-          onClick={handleRunSubmit}
-          style={{
-            marginTop: "10px",
-            padding: "10px",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-          }}
-        >
-          Run Code
-        </button>
-        <button
-          onClick={handleSubmit}
-          style={{
-            marginTop: "10px",
-            padding: "10px",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-          }}
-        >
-          Submit Code
-        </button>
-      </div> */}
-
-      {/* {result && (
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "10px",
-            backgroundColor: "#212121",
-            borderRadius: "4px",
-          }}
-        >
-          <h3>Result:</h3>
-          <pre>{JSON.stringify(result)}</pre>
-        </div>
-      )} */}
-      {/* {submissionResult.length > 0 && (
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "10px",
-            backgroundColor: "#212121",
-            borderRadius: "4px",
-          }}
-        >
-          <h3>Submission Result:</h3>
-          <pre>{JSON.stringify(submissionResult)}</pre>
-        </div>
-      )}
-      {testCaseLoading ? (
-        <div>Loading Test Cases...</div>
-      ) : testCaseError ? (
-        <div>Error: {testCaseError.message}</div>
-      ) : (
-        <>
-          <Testcases testCases={testCases} testcasesStatus={result} />
-        </>
-      )} */}
-    </div>
+        theme="vs-dark"
+        options={{
+          fontSize: 14,
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          automaticLayout: true,
+          wordWrap: "on",
+          wrappingIndent: "indent",
+          lineNumbers: "on",
+          lineNumbersMinChars: 3,
+          renderLineHighlight: "all",
+          contextmenu: true,
+          tabSize: 2,
+          acceptSuggestionOnEnter: "on",
+          suggestOnTriggerCharacters: true,
+          quickSuggestions: true,
+          quickSuggestionsDelay: 10,
+          parameterHints: true,
+          formatOnType: true,
+          formatOnPaste: true,
+          folding: true,
+          foldingStrategy: "auto",
+          foldingHighlight: true,
+          autoClosingBrackets: "always",
+          autoClosingQuotes: "always",
+          autoIndent: "full",
+          suggestSelection: "first",
+          snippetSuggestions: "inline",
+          renderWhitespace: "none",
+          renderControlCharacters: false,
+          renderIndentGuides: true,
+          overviewRulerLanes: 3,
+          overviewRulerBorder: true,
+          scrollbar: {
+            alwaysConsumeMouseWheel: false,
+            vertical: "auto",
+            horizontal: "auto",
+            useShadows: true,
+            verticalHasArrows: false,
+            horizontalHasArrows: false,
+            arrowSize: 11,
+            handleMouseWheel: true,
+            horizontalScrollbarSize: 10,
+            verticalScrollbarSize: 10,
+            mouseWheelScrollSensitivity: 1,
+            mouseWheelZoom: false,
+            scrollByPage: false,
+            smoothScrolling: true,
+            useShadows: true,
+            horizontalHasArrows: false,
+            verticalHasArrows: false,
+            horizontalScrollbarSize: 10,
+            verticalScrollbarSize: 10,
+            horizontalSliderSize: 10,
+            verticalSliderSize: 10,
+          },
+        }} />
   );
 };
 
