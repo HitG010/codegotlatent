@@ -304,7 +304,7 @@ function Problem() {
         <CodeEditor langId={langId} code={code} SetCode={setCode}/>
       </div>
     </div>
-    </div>
+    // </div>
   );
 }
 
