@@ -60,8 +60,16 @@ const ProblemSubmissions = ({ problemId, userId }) => {
               <td className="px-6 py-4">{index + 1}</td>
               <td className="px-6 py-4">{submission.verdict}</td>
               <td className="px-6 py-4">{langIdToName[submission.language]}</td>
-              <td className="px-6 py-4">{submission.executionTime} ms</td>
-              <td className="px-6 py-4">{submission.memoryUsage} KB</td>
+              <td className="px-6 py-4">
+                {submission.verdict !== "Accepted"
+                  ? "NA"
+                  : (submission.executionTime * 100).toFixed(2) + " ms"}
+              </td>
+              <td className="px-6 py-4">
+                {submission.verdict !== "Accepted"
+                  ? "NA"
+                  : (submission.memoryUsage / 1024).toFixed(2) + " MB"}
+              </td>
             </tr>
           ))}
         </tbody>
