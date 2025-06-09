@@ -450,6 +450,28 @@ const getUserProblemCount = async (userId) => {
   }
 };
 
+const getUserProblemSubmission = async (problemId, userId) => {
+  // console.log("User ID:", userId);
+  // console.log("Problem ID:", problemId);
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/user/${userId}/problem/${problemId}/submission`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user problem submission:", error);
+    throw error;
+  }
+};
+
 export {
   api,
   executeCode,
@@ -472,4 +494,5 @@ export {
   submitRank,
   getProblemAcceptance,
   getUserProblemCount,
+  getUserProblemSubmission,
 };

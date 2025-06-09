@@ -209,6 +209,8 @@ app.post("/submitContestCode", async (req, res) => {
     body: JSON.stringify({ submissions: submissions }),
   });
 
+  console.log("Result:", result);
+
   const resultJson = await result.json();
   console.log("Batch submission string: ", result);
   const tokensString = resultJson.map((item) => item.token).join(",");
@@ -1526,4 +1528,33 @@ app.get("/user/:userId/problemCount", async (req, res) => {
     mediumCount: mediumCount,
     hardCount: hardCount,
   });
+});
+
+app.get("/user/:userId/problem/:problemId/submission", async (req, res) => {
+  const { userId, problemId } = req.params;
+  try {
+    const result = await prisma.submission.findMany({
+      where: {
+        userId: userId,
+        problemId: problemId,
+      },
+      select: {
+        verdict: true,
+        createdAt: true,
+        language: true,
+        executionTime: true,
+        memoryUsage: true,
+        id: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    console.log("Submissions for user:", userId, "and problem:", problemId);
+    console.log("Result:", result);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error fetching submissions:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });

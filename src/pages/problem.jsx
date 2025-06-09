@@ -15,13 +15,10 @@ import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github.css";
 import DifficultyTag from "../components/DifficultyTag";
 import Editor from "@monaco-editor/react";
-
-const langIdtoLangName = {
-  54: "cpp",
-  71: "python",
-  63: "javascript",
-  62: "java",
-}
+import ProblemDescription from "../components/ProblemDescription";
+import CodeEditor from "../components/CodeEditor";
+import ProblemTab from "../components/ProblemTab";
+import ProblemSubmissions from "../components/ProblemSubmissions";
 
 function Problem() {
   const user = useUserStore((state) => state.user);
@@ -46,6 +43,7 @@ function Problem() {
   const [tile3Width, setTile3Width] = useState(window.innerWidth / 2 - 10);
   const containerRef = useRef(null);
 
+  const [tabId, setTabId] = useState(0);
   const minTileWidth = 200;
   const minTileHeight = 100;
 
@@ -105,7 +103,7 @@ function Problem() {
   const handleSubmit = async () => {
     console.log("Submitted Code:", code);
     try {
-      const result = await submitProblem(code, id, langId, null, user.id);
+      const result = await submitProoblem(code, id, langId, null, user.id);
       console.log("Result:", result);
       setSubmissionResult(result);
     } catch (error) {
@@ -249,10 +247,27 @@ function Problem() {
         {/* Left column */}
         <div className="flex flex-col" style={{ width: tile1Width }}>
           <div
-            className="p-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar"
+            className="pb-4 pl-4 pr-4 pt-2 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar flex flex-col"
             style={{ height: tile1Height }}
           >
-            <ProblemDesciptionComponent data={data} />
+            <div className="tabs w-full flex flex-row justify-start gap-3 items-center mb-1 border-b border-[#ffffff25] pt-2 pb-2">
+              <ProblemTab
+                title={"Problem"}
+                tabId={tabId}
+                index={0}
+                onClick={() => setTabId(0)}
+              />
+              <ProblemTab
+                title={"Submissions"}
+                tabId={tabId}
+                index={1}
+                onClick={() => setTabId(1)}
+              />
+            </div>
+            {tabId === 0 && <ProblemDescription data={data} />}
+            {tabId === 1 && (
+              <ProblemSubmissions problemId={id} userId={user.id} />
+            )}
           </div>
 
           {/* Vertical Drag Handle */}
@@ -291,141 +306,58 @@ function Problem() {
           Here goes Monaco Code Editor
           <CodeEditor langId={langId} code={code} SetCode={setCode} />
         </div> */}
-      {/* </div> */}
-      {/* Right Column: Code Editor */}
-      <div className="rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar" style={{ width: tile3Width, height: screenHeight+8 }}>
-        <label for="languages" className="text-sm">Choose a Language:</label>
-        <select id="languages" name="languages" className="bg-[#ffffff15] text-white py-1 ml-2 rounded-md text-sm my-1" value={langId} onChange={(e) => setLangId(parseInt(e.target.value))}>
-          <option value={54} className="bg-[#ffffff15] text-black">C++</option>
-          <option value={71} className="bg-[#ffffff15] text-black">Python</option>
-          <option value={63} className="bg-[#ffffff15] text-black">JavaScript</option>
-          <option value={62} className="bg-[#ffffff15] text-black">Java</option>
-        </select>
-        <CodeEditor langId={langId} code={code} SetCode={setCode}/>
+        {/* </div> */}
+        {/* Right Column: Code Editor */}
+        <div
+          className="rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar"
+          style={{ width: tile3Width, height: screenHeight + 8 }}
+        >
+          <label for="languages" className="text-sm">
+            Choose a Language:
+          </label>
+          <select
+            id="languages"
+            name="languages"
+            className="bg-[#ffffff15] text-white py-1 ml-2 rounded-md text-sm my-1"
+            value={langId}
+            onChange={(e) => setLangId(parseInt(e.target.value))}
+          >
+            <option value={54} className="bg-[#ffffff15] text-black">
+              C++
+            </option>
+            <option value={71} className="bg-[#ffffff15] text-black">
+              Python
+            </option>
+            <option value={63} className="bg-[#ffffff15] text-black">
+              JavaScript
+            </option>
+            <option value={62} className="bg-[#ffffff15] text-black">
+              Java
+            </option>
+          </select>
+          <CodeEditor langId={langId} code={code} SetCode={setCode} />
+        </div>
       </div>
-    </div>
     </div>
   );
 }
 
-const ProblemDesciptionComponent = ({ data }) => {
-  console.log("Problem Data:", data);
-  return (
-    <div className="problem-description">
-      <h1 className="text-3xl font-semibold">{data.title}</h1>
-      <div className="mt-1 flex gap-2">
-        <DifficultyTag tag={data.difficulty} />
-        <div>
-          {data.tags.map((tag) => (
-            <p
-              key={tag.id}
-              className="px-3 py-1 rounded-full text-sm font-medium bg-white/15 text-white/50"
-            >
-              {tag.tag}
-            </p>
-          ))}
-        </div>
-      </div>
-      <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
-        {data.description}
-      </ReactMarkdown>
-      <p>Max Time Limit: {data.max_time_limit} seconds</p>
-      <p>Max Memory Limit: {data.max_memory_limit / 1024} MB</p>
-    </div>
-  );
-};
-
-const CodeEditor = ({ langId, code, SetCode }) => {
-  // console.log("Code Editor Lang ID:", langId);
-  // console.log(langIdtoLangName[langId]);
-
-  const handleEditorChange = (val) => {
-    SetCode(val);
-  };
-
-  return (
-      <Editor onChange={handleEditorChange}
-        height="100%"
-        width="100%"
-        defaultLanguage="cpp"
-        language={langIdtoLangName[langId]}
-        value={code}
-        theme="vs-dark"
-        options={{
-          fontSize: 14,
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-          wordWrap: "on",
-          wrappingIndent: "indent",
-          lineNumbers: "on",
-          lineNumbersMinChars: 3,
-          renderLineHighlight: "all",
-          contextmenu: true,
-          tabSize: 2,
-          acceptSuggestionOnEnter: "on",
-          suggestOnTriggerCharacters: true,
-          quickSuggestions: true,
-          quickSuggestionsDelay: 10,
-          parameterHints: true,
-          formatOnType: true,
-          formatOnPaste: true,
-          folding: true,
-          foldingStrategy: "auto",
-          foldingHighlight: true,
-          autoClosingBrackets: "always",
-          autoClosingQuotes: "always",
-          autoIndent: "full",
-          suggestSelection: "first",
-          snippetSuggestions: "inline",
-          renderWhitespace: "none",
-          renderControlCharacters: false,
-          renderIndentGuides: true,
-          overviewRulerLanes: 3,
-          overviewRulerBorder: true,
-          scrollbar: {
-            alwaysConsumeMouseWheel: false,
-            vertical: "auto",
-            horizontal: "auto",
-            useShadows: true,
-            verticalHasArrows: false,
-            horizontalHasArrows: false,
-            arrowSize: 11,
-            handleMouseWheel: true,
-            horizontalScrollbarSize: 10,
-            verticalScrollbarSize: 10,
-            mouseWheelScrollSensitivity: 1,
-            mouseWheelZoom: false,
-            scrollByPage: false,
-            smoothScrolling: true,
-            useShadows: true,
-            horizontalHasArrows: false,
-            verticalHasArrows: false,
-            horizontalScrollbarSize: 10,
-            verticalScrollbarSize: 10,
-            horizontalSliderSize: 10,
-            verticalSliderSize: 10,
-          },
-        }} />
-  );
-};
-
 export default Problem;
 
-// run testcases flow
-// problemID
-// fetch testcases for problemID
-// submit the code with testcases (batch submission)
-// get the tokens for the submissions
-// poll the server for submission status
-// get the results for the submissions
-// show the results in UI
+// // run testcases flow
+// // problemID
+// // fetch testcases for problemID
+// // submit the code with testcases (batch submission)
+// // get the tokens for the submissions
+// // poll the server for submission status
+// // get the results for the submissions
+// // show the results in UI
 
-// submit code flow
-// get the code from the editor
-// submit the code to the server
-// get the token for the submission
-// poll the server for submission status
-// get the result for the submission
-// show the result in UI
-// populate database with submission result
+// // submit code flow
+// // get the code from the editor
+// // submit the code to the server
+// // get the token for the submission
+// // poll the server for submission status
+// // get the result for the submission
+// // show the result in UI
+// // populate database with submission result
