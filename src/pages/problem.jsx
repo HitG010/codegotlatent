@@ -15,6 +15,8 @@ import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github.css";
 import DifficultyTag from "../components/DifficultyTag";
 import Editor from "@monaco-editor/react";
+import SubmitDialog from "../components/submitDailog";
+import { Loader2, Play, UploadCloud } from "lucide-react";
 
 const langIdtoLangName = {
   54: "cpp",
@@ -44,6 +46,9 @@ function Problem() {
   const [tile1Width, setTile1Width] = useState(window.innerWidth / 2 - 10);
   const [tile2Width, setTile2Width] = useState(window.innerWidth / 2 - 10);
   const [tile3Width, setTile3Width] = useState(window.innerWidth / 2 - 10);
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [resultLoading, setResultLoading] = useState(false);
+  const [runLoading, setRunLoading] = useState(false);
   const containerRef = useRef(null);
 
   const minTileWidth = 200;
@@ -80,6 +85,8 @@ function Problem() {
     }
 
     setTestCaseLoading(true);
+    setRunLoading(true);
+    setResult([]);
 
     console.log("Submitted Code:", code);
     // Simulate an API call to execute the code
@@ -92,6 +99,7 @@ function Problem() {
             console.log("Polling Response:", data);
             setResult(data);
             setTestCaseLoading(false);
+            setRunLoading(false);
           })
           .catch((error) => {
             console.error("Error polling submission status:", error);
@@ -105,9 +113,12 @@ function Problem() {
   const handleSubmit = async () => {
     console.log("Submitted Code:", code);
     try {
+      setResultLoading(true);
       const result = await submitProblem(code, id, langId, null, user.id);
       console.log("Result:", result);
       setSubmissionResult(result);
+      setResultLoading(false);
+      setDialogOpen(true);
     } catch (error) {
       console.error("Error submitting code:", error);
       setError(error);
@@ -210,26 +221,31 @@ function Problem() {
 
   return (
     <div className="flex flex-col h-screen w-full box-border bg-black overflow-hidden">
+    <SubmitDialog isOpen={isDialogOpen}
+      onClose={() => setDialogOpen(false)}
+      verdict={submissionResult.verdict}
+      submissionId={submissionResult.id}
+      />
       <div className="flex justify-between items-center px-8 pt-2 text-white h-[75px] overflow-hidden">
         <Link to={"/home"}>
           <img src={latentNavLogo} className="h-8 w-8" />
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1">
           <div className="text-sm text-white/50 flex items-center gap-2">
-            <button
+            {runLoading ? <Loader2 className="animate-spin"/> : <button
               className="py-2 px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer"
               onClick={handleRunSubmit}
             >
-              Run
-            </button>
+              Run <Play className="h-3 w-3 inline-block ml-1 fill-white/65" />
+            </button>}
           </div>
           <div className="text-sm text-white/50 flex items-center gap-2">
-            <button
-              className="py-2 px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer"
+            {resultLoading ? <Loader2 className="animate-spin"/> : <button
+              className="py-2 px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer text-green-500"
               onClick={handleSubmit}
             >
-              Submit
-            </button>
+              Submit <UploadCloud className="h-4 w-4 inline-block ml-1" />
+            </button>}
           </div>
           <div className="text-sm text-white/50 flex items-center gap-2">
             Start Timer:{" "}
