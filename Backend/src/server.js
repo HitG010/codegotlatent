@@ -247,30 +247,37 @@ app.post("/submitContestCode", async (req, res) => {
   });
   console.log("Submission:", submission);
   console.log("submission created successfully. Verdict:", finalVerdict);
+  const isCorrect = finalVerdict === "Accepted";
+
   if (contest_id !== null) {
-    const isCorrect = finalVerdict === "Accepted";
-    const finishTime = await prisma.problemUser.findFirst({
+    // Get previous state for logical OR update
+    const existingEntry = await prisma.problemUser.findFirst({
       where: {
         userId: userId,
         problemId: problem_id,
         contestId: contest_id,
       },
       select: {
+        isSolved: true,
+        solvedInContest: true,
         finishedAt: true,
       },
     });
-    console.log("Finish Time:", finishTime);
+
+    const previousIsSolved = existingEntry?.isSolved || false;
+    const previousSolvedInContest = existingEntry?.solvedInContest || false;
+
     const updatedContestProblem = await prisma.problemUser.upsert({
       where: {
-        userId_problemId: {
+        userId_problemId_contestId: {
           userId: userId,
           problemId: problem_id,
+          contestId: contest_id,
         },
-        contestId: contest_id,
       },
       update: {
-        isSolved: isCorrect,
-        solvedInContest: isCorrect,
+        isSolved: previousIsSolved || isCorrect,
+        solvedInContest: previousSolvedInContest || isCorrect,
         score: isCorrect
           ? (
               await prisma.problem.findUnique({ where: { id: problem_id } })
@@ -279,12 +286,11 @@ app.post("/submitContestCode", async (req, res) => {
         penalty: {
           increment: isCorrect ? 0 : 1,
         },
-        finishedAt:
-          finishTime && finishTime.finishedAt
-            ? finishTime.finishedAt
-            : isCorrect
-            ? submission.createdAt
-            : null,
+        finishedAt: existingEntry?.finishedAt
+          ? existingEntry.finishedAt
+          : isCorrect
+          ? submission.createdAt
+          : null,
       },
       create: {
         problemId: problem_id,
@@ -298,13 +304,12 @@ app.post("/submitContestCode", async (req, res) => {
             )?.problemScore || 0
           : 0,
         penalty: isCorrect ? 0 : 1,
-        // Take the first submission time as the finished time
         finishedAt: isCorrect ? submission.createdAt : null,
       },
     });
-    console.log(updatedContestProblem);
-    // fetch contest start time
-    const contestStartTime = await prisma.Contest.findUnique({
+
+    // Fetch contest start time
+    const contestStartTime = await prisma.contest.findUnique({
       where: {
         id: contest_id,
       },
@@ -312,14 +317,26 @@ app.post("/submitContestCode", async (req, res) => {
         startTime: true,
       },
     });
-    console.log("Contest Start Time:", contestStartTime);
+
     const updatedContestUser = await updateContestUser(
       contest_id,
       userId,
       contestStartTime.startTime
     );
   } else {
-    const isCorrect = finalVerdict === "Accepted";
+    // For non-contest submissions, do only isSolved update with OR
+    const existingEntry = await prisma.problemUser.findFirst({
+      where: {
+        userId: userId,
+        problemId: problem_id,
+      },
+      select: {
+        isSolved: true,
+      },
+    });
+
+    const previousIsSolved = existingEntry?.isSolved || false;
+
     const updatedProblemUser = await prisma.problemUser.upsert({
       where: {
         userId_problemId: {
@@ -328,7 +345,7 @@ app.post("/submitContestCode", async (req, res) => {
         },
       },
       update: {
-        isSolved: isCorrect,
+        isSolved: previousIsSolved || isCorrect,
       },
       create: {
         problemId: problem_id,
