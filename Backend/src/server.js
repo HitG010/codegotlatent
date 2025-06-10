@@ -12,6 +12,7 @@ const { withAccelerate } = require("@prisma/extension-accelerate");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
+const { exec } = require("child_process");
 // const authRoutes = require("./routes/auth");
 
 const prisma = new PrismaClient().$extends(withAccelerate());
@@ -950,6 +951,36 @@ app.get("/submission/:submissionId/user/:userId", async (req, res) => {
     const submission = await prisma.Submission.findUnique({
       where: {
         id: submissionId,
+      },
+      select: {
+        id: true,
+        code: true,
+        verdict: true,
+        executionTime: true,
+        memoryUsage: true,
+        createdAt: true,
+        contestId: true,
+        userId: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+        problem: {
+          select: {
+            id: true,
+            title: true,
+            difficulty: true,
+          },
+        },
+        contest: {
+          select: {
+            id: true,
+            name: true,
+            status: true,
+          },
+        },
       },
     });
     if (!submission) {
