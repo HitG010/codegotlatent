@@ -32,7 +32,7 @@ async function api() {
 }
 
 // batch submission
-async function executeCode(code, testCases, langId) {
+async function executeCode(code, testCases, langId, probId) {
   console.log("Code:", typeof code);
   const options = {
     method: "POST",
@@ -46,6 +46,7 @@ async function executeCode(code, testCases, langId) {
     language_id: langId,
     testcases: testCases,
     callback_url: "http://localhost:5000/callback",
+    problem_id: probId,
   };
   const url = `${import.meta.env.VITE_BASE_URL}/batchSubmission`;
   console.log("URL:", url);

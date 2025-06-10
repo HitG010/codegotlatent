@@ -16,6 +16,7 @@ import ProblemDescription from "../components/ProblemDescription";
 import CodeEditor from "../components/CodeEditor";
 import ProblemTab from "../components/ProblemTab";
 import ProblemSubmissions from "../components/ProblemSubmissions";
+import { ClockFading, File } from "lucide-react";
 
 function Problem() {
   const user = useUserStore((state) => state.user);
@@ -83,7 +84,7 @@ function Problem() {
 
     console.log("Submitted Code:", code);
     // Simulate an API call to execute the code
-    executeCode(code, testCases, langId)
+    executeCode(code, testCases, langId, id)
       .then(async (result) => {
         // long poll the server for submission status
         console.log("Result:", result);
@@ -267,23 +268,26 @@ function Problem() {
         {/* Left column */}
         <div className="flex flex-col" style={{ width: tile1Width }}>
           <div
-            className="pb-4 pl-4 pr-4 pt-2 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar flex flex-col"
+            className="pb-1 pl-4 pr-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar flex flex-col"
             style={{ height: tile1Height }}
           >
-            <div className="tabs w-full flex flex-row justify-start gap-3 items-center mb-1 border-b border-[#ffffff25] pt-2 pb-2">
+            <div className="tabs w-full flex flex-row justify-start gap-1 items-center mb-1 border-b border-[#ffffff15] pt-1 pb-0.5">
+              <div className="flex gap-0.5 items-center justify-center">
               <ProblemTab
-                title={"Problem"}
+                // title={"Problem"}
+                title = {<div className="flex gap-0.5 items-center justify-center"><File className="inline-block mr-1 h-4 w-4 text-white/50"/> <span>Problem</span></div>}
                 tabId={tabId}
                 index={0}
                 onClick={() => setTabId(0)}
-              />
+              /></div>
+              <div className="flex gap-0.5 items-center justify-center">
               <ProblemTab
-                title={"Submissions"}
+                title = {<div className="flex gap-0.5 items-center justify-center"><ClockFading className="inline-block mr-1 h-4 w-4 text-white/50"/> <span>Submissions</span></div>}
                 tabId={tabId}
                 index={1}
                 onClick={() => setTabId(1)}
               />
-            </div>
+            </div></div>
             {tabId === 0 && <ProblemDescription data={data} />}
             {tabId === 1 && (
               <ProblemSubmissions problemId={id} userId={user.id} />
