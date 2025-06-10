@@ -186,6 +186,17 @@ app.post("/submitContestCode", async (req, res) => {
     },
   });
 
+  // fetch prolem memory and time limits
+  const problem = await prisma.Problem.findUnique({
+    where: {
+      id: problem_id,
+    },
+    select: {
+      max_memory_limit: true, // in kBs
+      max_time_limit: true, // in seconds
+    },
+  });
+
   const submissions = [];
   console.log("Submissions:", submissions);
   testcases.forEach((testCase) => {
@@ -194,6 +205,10 @@ app.post("/submitContestCode", async (req, res) => {
       language_id: language_id,
       stdin: testCase.stdin,
       expected_output: testCase.stdout,
+      // add memory and time limits
+      cpu_time_limit: problem.max_time_limit,
+      memory_limit: problem.max_memory_limit,
+      cpu_extra_time: 0, // in seconds, set to 0 for no extra time
     };
     submissions.push(submission);
   });
@@ -398,8 +413,18 @@ const updateContestUser = async (contestId, userId, contestStartTime) => {
 
 app.post("/batchSubmission", async (req, res) => {
   const body = await req.body;
-  const { testcases, language_id, source_code } = body;
+  const { testcases, language_id, source_code, problem_id } = body;
 
+  // fetch prolem memory and time limits
+  const problem = await prisma.Problem.findUnique({
+    where: {
+      id: problem_id,
+    },
+    select: {
+      max_memory_limit: true, // in kBs
+      max_time_limit: true, // in seconds
+    },
+  });
   const submissions = [];
   console.log("Submissions:", submissions);
   testcases.forEach((testCase) => {
@@ -408,6 +433,10 @@ app.post("/batchSubmission", async (req, res) => {
       language_id: language_id,
       stdin: testCase.stdin,
       expected_output: testCase.stdout,
+      // add memory and time limits
+      cpu_time_limit: problem.max_time_limit,
+      memory_limit: problem.max_memory_limit,
+      cpu_extra_time: 0, // in seconds, set to 0 for no extra time
     };
     submissions.push(submission);
   });
@@ -497,7 +526,7 @@ const getSubmissionStatus = async (id) => {
     },
   });
   const data = await response.json();
-  console.log("Response:", data);
+  // console.log("Response:", data);
   let count = 0;
   for (let i = 0; i < data.submissions.length; i++) {
     if (data.submissions[i].status.id < 3) {

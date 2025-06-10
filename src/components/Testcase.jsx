@@ -10,6 +10,7 @@ export const Testcase = ({
   index,
   isLoading,
 }) => {
+  console.log("Testcase Status:", testCaseStatus);
   return (
     <div className="relative flex items-start my-2 py-3 px-4 border border-white/10 rounded-xl shadow-lg bg-[#1a1a1a75]">
       <div className="flex flex-col w-full">
@@ -78,7 +79,26 @@ export const Testcase = ({
               <span className="text-white">{JSON.stringify(output)}</span>
               </div>
             </p>
-
+            {testCaseStatus && testCaseStatus.stdout && (
+              <p className="mb-2 text-white">
+                <span className="font-medium text-white">
+                Your Output:
+              </span>{" "}
+              <div className="text-sm font-mono bg-[#2a2a2a] p-2 rounded-md">
+              <span className="text-white">{testCaseStatus.stdout}</span>
+              </div>
+            </p>
+            )}
+            {testCaseStatus && !testCaseStatus.stdout && (
+              <p className="mb-2 text-white">
+                <span className="font-medium text-white">
+                Error:
+              </span>{" "}
+              <div className="text-sm font-mono bg-red-500/15 p-2 rounded-md">
+              <span className="text-red-500">{testCaseStatus.compile_output}</span>
+              </div>
+            </p>
+            )}
             {/* {testCaseStatus && (
               <p className="mt-4 text-gray-300 absolute inset-0 top-0 right-0 bg-[#1a1a1a75] p-4 rounded-b-xl">
                 <span

@@ -37,7 +37,7 @@ const ContestCodeEditor = ({ problemId, langId, contestId, userId }) => {
   const handleRunSubmit = async () => {
     console.log("Submitted Code:", code);
     // Simulate an API call to execute the code
-    executeCode(code, testCases, langId)
+    executeCode(code, testCases, langId, problemId)
       .then(async (result) => {
         // long poll the server for submission status
         console.log("Result:", result);

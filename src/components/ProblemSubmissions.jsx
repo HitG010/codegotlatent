@@ -36,36 +36,36 @@ const ProblemSubmissions = ({ problemId, userId }) => {
   }
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold text-white mb-4">Submissions</h2>
-      <table className="min-w-full bg-gray-700 text-white">
+    <div className="bg-[#ffffff08] rounded-lg shadow-md">
+      {/* <h2 className="text-xl font-semibold text-white mb-4">Submissions</h2> */}
+      <table className="min-w-full text-white">
         <thead>
           <tr>
-            <th className="px-6 py-3 text-left"></th>
-            <th className="px-6 py-3 text-left">Status</th>
-            <th className="px-6 py-3 text-left">Language</th>
-            <th className="px-6 py-3 text-left">Time</th>
-            <th className="px-6 py-3 text-left">Memory</th>
+            <th className="px-1 py-3 text-left"></th>
+            <th className="px-6 py-3 text-left font-medium text-sm text-[#ffffff65]">Status</th>
+            <th className="px-6 py-3 text-left font-medium text-sm text-[#ffffff65]">Language</th>
+            <th className="px-6 py-3 text-left font-medium text-sm text-[#ffffff65]">Time</th>
+            <th className="px-6 py-3 text-left font-medium text-sm text-[#ffffff65]">Memory</th>
           </tr>
         </thead>
         <tbody>
           {submissions.map((submission, index) => (
             <tr
               key={submission.id}
-              className="border-b border-gray-600 cursor-pointer hover:bg-gray-600"
+              className="border-b border-[#ffffff25] cursor-pointer hover:bg-[#ffffff05]"
               onClick={() =>
                 (window.location.href = `/submission/${submission.id}`)
               }
             >
-              <td className="px-6 py-4">{index + 1}</td>
-              <td className="px-6 py-4">{submission.verdict}</td>
-              <td className="px-6 py-4">{langIdToName[submission.language]}</td>
-              <td className="px-6 py-4">
+              <td className="px-6 py-4 text-[#ffffff65]">{index + 1}</td>
+              <td className={`px-6 py-4 font-semibold` + (submission.verdict !== "Accepted" ? " text-red-500" : " text-green-500")}>{submission.verdict}</td>
+              <td className="px-6 py-4 text-[#ffffff65]">{langIdToName[submission.language]}</td>
+              <td className={`px-6 py-4 text-[#ffffff65]`+(submission.verdict !== "Accepted" ? "" : " text-white")}>
                 {submission.verdict !== "Accepted"
                   ? "NA"
                   : (submission.executionTime * 100).toFixed(2) + " ms"}
               </td>
-              <td className="px-6 py-4">
+              <td className={`px-6 py-4 text-[#ffffff65]`+(submission.verdict !== "Accepted" ? "" : " text-white")}>
                 {submission.verdict !== "Accepted"
                   ? "NA"
                   : (submission.memoryUsage / 1024).toFixed(2) + " MB"}
