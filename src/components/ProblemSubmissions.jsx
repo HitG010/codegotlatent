@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { getUserProblemSubmission } from "../api/api";
-import { langIdToName } from "../data/langIdToName"; // Assuming this is the correct import path
-import { Link } from "react-router-dom"; // Assuming you're using react-router for navigation
+import { langIdToName } from "../data/langIdToName";
+import { useNavigate } from "react-router-dom";
 
 const ProblemSubmissions = ({ problemId, userId }) => {
-  // console.log("ProblemSubmissions component rendered with:", {
-  //   problemId,
-  //   userId,
-  // });
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -37,7 +34,6 @@ const ProblemSubmissions = ({ problemId, userId }) => {
 
   return (
     <div className="bg-[#ffffff08] rounded-lg shadow-md">
-      {/* <h2 className="text-xl font-semibold text-white mb-4">Submissions</h2> */}
       <table className="min-w-full text-white">
         <thead>
           <tr>
@@ -53,19 +49,18 @@ const ProblemSubmissions = ({ problemId, userId }) => {
             <tr
               key={submission.id}
               className="border-b border-[#ffffff25] cursor-pointer hover:bg-[#ffffff05]"
-              onClick={() =>
-                (window.location.href = `/submission/${submission.id}`)
-              }
+              onClick={() => window.open(`/submission/${submission.id}`, "_blank")}
+              style={{ transition: "background 0.2s" }}
             >
               <td className="px-6 py-4 text-[#ffffff65]">{index + 1}</td>
-              <td className={`px-6 py-4 font-semibold` + (submission.verdict !== "Accepted" ? " text-red-500" : " text-green-500")}>{submission.verdict}</td>
+              <td className={`px-6 py-4 font-semibold${submission.verdict !== "Accepted" ? " text-red-500" : " text-green-500"}`}>{submission.verdict}</td>
               <td className="px-6 py-4 text-[#ffffff65]">{langIdToName[submission.language]}</td>
-              <td className={`px-6 py-4 text-[#ffffff65]`+(submission.verdict !== "Accepted" ? "" : " text-white")}>
+              <td className={`px-6 py-4 text-[#ffffff65]${submission.verdict !== "Accepted" ? "" : " text-white"}`}>
                 {submission.verdict !== "Accepted"
                   ? "NA"
                   : (submission.executionTime * 100).toFixed(2) + " ms"}
               </td>
-              <td className={`px-6 py-4 text-[#ffffff65]`+(submission.verdict !== "Accepted" ? "" : " text-white")}>
+              <td className={`px-6 py-4 text-[#ffffff65]${submission.verdict !== "Accepted" ? "" : " text-white"}`}>
                 {submission.verdict !== "Accepted"
                   ? "NA"
                   : (submission.memoryUsage / 1024).toFixed(2) + " MB"}

@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { getSubmission } from "../api/api";
 import { langIdToName } from "../data/langIdToName"; // Assuming this is the correct import path
 import useUserStore from "../store/userStore";
+import Editor from "@monaco-editor/react";
 
 export default function Submission() {
   const [submission, setSubmission] = useState(null);
@@ -35,7 +36,7 @@ export default function Submission() {
       case "Wrong Answer":
         return "bg-red-500";
       case "Time Limit Exceeded":
-        return "bg-yellow-500 text-black";
+        return "bg-red-500 text-black";
       case "Compilation Error":
         return "bg-gray-500";
       default:
@@ -44,19 +45,19 @@ export default function Submission() {
   };
 
   if (!submission) {
-    return <p className="text-gray-700">Loading submission details...</p>;
+    return <p className="text-white">Loading submission details...</p>;
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg border border-gray-200">
-      <h1 className="text-2xl font-bold mb-6">Submission Details</h1>
+    <div className="max-w-4xl mx-auto mt-10 p-6 shadow-md rounded-lg border border-[#ffffff10] bg-[#212121] text-white">
+      <h1 className="text-2xl font-semibold mb-6">Submission Details</h1>
 
-      <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+      <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <span className="font-semibold">Submission ID:</span> {submission.id}
+          <span className="font-medium text-white/65">Submission ID:</span> {submission.id}
         </div>
         <div>
-          <span className="font-semibold">User:</span>{" "}
+          <span className="font-medium text-white/65">User:</span>{" "}
           <Link
             to={`/user/${submission.user.id}`}
             className="text-blue-600 hover:underline"
@@ -65,7 +66,7 @@ export default function Submission() {
           </Link>
         </div>
         <div>
-          <span className="font-semibold">Problem:</span>{" "}
+          <span className="font-medium text-white/65">Problem:</span>{" "}
           <Link
             to={`/problems/${submission.problem.id}`}
             className="text-blue-600 hover:underline"
@@ -74,7 +75,7 @@ export default function Submission() {
           </Link>
         </div>
         <div>
-          <span className="font-semibold">Contest:</span>{" "}
+          <span className="font-medium text-white/65">Contest:</span>{" "}
           {submission.contest ? (
             <Link
               to={`/contests/${submission.contest.id}`}
@@ -87,19 +88,19 @@ export default function Submission() {
           )}
         </div>
         <div>
-          <span className="font-semibold">Memory Usage:</span>{" "}
-          {submission.memoryUsage ?? "N/A"} MB
+          <span className="font-medium text-white/65">Memory Usage:</span>{" "}
+          {submission.memoryUsage ?? "N/A"} MB 
         </div>
         <div>
-          <span className="font-semibold">Execution Time:</span>{" "}
+          <span className="font-medium text-white/65">Execution Time:</span>{" "}
           {submission.executionTime ?? "N/A"} ms
         </div>
         <div className="col-span-2">
-          <span className="font-semibold">Submitted At:</span>{" "}
+          <span className="font-medium text-white/65">Submitted At:</span>{" "}
           {new Date(submission.createdAt).toLocaleString()}
         </div>
         <div className="col-span-2">
-          <span className="font-semibold">Verdict:</span>{" "}
+          <span className="font-medium text-white/65">Verdict:</span>{" "}
           <span
             className={`inline-block px-3 py-1 rounded-full text-white font-medium ${getVerdictColor(
               submission.verdict
@@ -112,9 +113,17 @@ export default function Submission() {
 
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-2">Code:</h3>
-        <pre className="bg-gray-100 text-black rounded-md p-4 overflow-auto text-sm whitespace-pre-wrap font-mono border border-gray-300">
-          {submission.code || "// No code submitted"}
-        </pre>
+        <Editor
+          height="400px"
+          language={langIdToName[submission.language]}
+          value={submission.code || "// No code submitted"}
+          theme="vs-dark"
+          options={{
+            readOnly: true,
+            minimap: { enabled: false },
+            wordWrap: "on",
+          }}
+        />
       </div>
     </div>
   );
