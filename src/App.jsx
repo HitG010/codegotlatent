@@ -89,10 +89,10 @@ const App = () => {
         }
       />
       <Route
-        path="/contest/:contestId/problem/:problemId"
+        path="/contest/:contestId/problem/:id"
         element={
           <AuthRoute>
-            <ContestProblem />
+            <Problem />
           </AuthRoute>
         }
       />
