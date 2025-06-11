@@ -13,6 +13,7 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
 const { exec } = require("child_process");
+const { stat } = require("fs");
 // const authRoutes = require("./routes/auth");
 
 const prisma = new PrismaClient().$extends(withAccelerate());
@@ -178,7 +179,21 @@ app.put("/callback", (req, res) => {
 
 app.post("/submitContestCode", async (req, res) => {
   const body = await req.body;
-  const { problem_id, language_id, source_code, contest_id, userId } = body;
+  const { problem_id, language_id, source_code, userId } = body;
+
+  let contest_id = await prisma.Problem.findUnique({
+    where: {
+      id: problem_id,
+      contest: {
+        status: "Ongoing", // Ensure the contest is ongoing
+      },
+    },
+    select: {
+      contestId: true, // Get the contest ID if the problem is part of an ongoing contest
+    },
+  });
+
+  contest_id = contest_id.contestId;
 
   const testcases = await prisma.TestCase.findMany({
     where: {
@@ -716,8 +731,22 @@ app.get("/problem/:id", async (req, res) => {
     },
     include: {
       tags: true,
+      testCases: {
+        where: {
+          isPublic: true,
+        },
+      },
+      contest: true,
     },
   });
+  if (!problem) {
+    return res.status(404).json({ error: "Problem not found" });
+  }
+  if (problem.contestId != null && problem.contest.status !== "Ended") {
+    return res
+      .status(403)
+      .json({ error: "Problem is part of an ongoing contest" });
+  }
   console.log(problem);
   res.status(200).json(problem);
 });
@@ -1544,8 +1573,20 @@ app.get("/user/:userId/problemCount", async (req, res) => {
       problem: {
         difficulty: "Easy",
       },
+      OR: [
+        {
+          contest: {
+            status: "Ended",
+          },
+        },
+        {
+          contest: null,
+        },
+      ],
     },
   });
+
+  console.log("Easy Count:", easyCount);
 
   const mediumCount = await prisma.problemUser.count({
     where: {
@@ -1554,6 +1595,16 @@ app.get("/user/:userId/problemCount", async (req, res) => {
       problem: {
         difficulty: "Medium",
       },
+      OR: [
+        {
+          contest: {
+            status: "Ended",
+          },
+        },
+        {
+          contest: null,
+        },
+      ],
     },
   });
 
@@ -1564,6 +1615,16 @@ app.get("/user/:userId/problemCount", async (req, res) => {
       problem: {
         difficulty: "Hard",
       },
+      OR: [
+        {
+          contest: {
+            status: "Ended",
+          },
+        },
+        {
+          contest: null,
+        },
+      ],
     },
   });
 
