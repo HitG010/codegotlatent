@@ -52,7 +52,7 @@ model Contest {
   status               String        @default("Upcoming") // "Upcoming", "Ongoing", "Ended"
   problems            Problem[]
   submissions         Submission[]
-  // Problems            ProblemUser[]
+  ProblemUsers            ProblemUser[]
 }
 
 model ProblemTags{
@@ -97,6 +97,7 @@ model ProblemUser{
 
   user      User    @relation(fields: [userId], references: [id])
   problem   Problem @relation(fields: [problemId], references: [id])
+  contest   Contest? @relation(fields: [contestId], references: [id])
   @@unique([userId, problemId])
 }
 

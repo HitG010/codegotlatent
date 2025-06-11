@@ -28,7 +28,7 @@ function Problem() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [testCases, setTestCases] = useState([]);
-  const [testCaseLoading, setTestCaseLoading] = useState(true);
+  const [testCaseLoading, setTestCaseLoading] = useState(false);
   const [testCaseError, setTestCaseError] = useState(null);
   const [langId, setLangId] = useState(54);
   const { id } = useParams();
@@ -121,7 +121,7 @@ function Problem() {
 
   useEffect(() => {
     fetchData();
-    fetchTestCases();
+    // fetchTestCases();
 
     const handleResize = () => {
       setScreenHeight(window.innerHeight);
@@ -273,21 +273,33 @@ function Problem() {
           >
             <div className="tabs w-full flex flex-row justify-start gap-1 items-center mb-1 border-b border-[#ffffff15] pt-1 pb-0.5">
               <div className="flex gap-0.5 items-center justify-center">
-              <ProblemTab
-                // title={"Problem"}
-                title = {<div className="flex gap-0.5 items-center justify-center"><File className="inline-block mr-1 h-4 w-4 text-white/50"/> <span>Problem</span></div>}
-                tabId={tabId}
-                index={0}
-                onClick={() => setTabId(0)}
-              /></div>
+                <ProblemTab
+                  // title={"Problem"}
+                  title={
+                    <div className="flex gap-0.5 items-center justify-center">
+                      <File className="inline-block mr-1 h-4 w-4 text-white/50" />{" "}
+                      <span>Problem</span>
+                    </div>
+                  }
+                  tabId={tabId}
+                  index={0}
+                  onClick={() => setTabId(0)}
+                />
+              </div>
               <div className="flex gap-0.5 items-center justify-center">
-              <ProblemTab
-                title = {<div className="flex gap-0.5 items-center justify-center"><ClockFading className="inline-block mr-1 h-4 w-4 text-white/50"/> <span>Submissions</span></div>}
-                tabId={tabId}
-                index={1}
-                onClick={() => setTabId(1)}
-              />
-            </div></div>
+                <ProblemTab
+                  title={
+                    <div className="flex gap-0.5 items-center justify-center">
+                      <ClockFading className="inline-block mr-1 h-4 w-4 text-white/50" />{" "}
+                      <span>Submissions</span>
+                    </div>
+                  }
+                  tabId={tabId}
+                  index={1}
+                  onClick={() => setTabId(1)}
+                />
+              </div>
+            </div>
             {tabId === 0 && <ProblemDescription data={data} />}
             {tabId === 1 && (
               <ProblemSubmissions problemId={id} userId={user.id} />
@@ -307,7 +319,7 @@ function Problem() {
             style={{ height: tile2Height }}
           >
             <TestCases
-              testCases={testCases}
+              testCases={data.testCases}
               testcasesStatus={result}
               isLoading={testCaseLoading}
             />
