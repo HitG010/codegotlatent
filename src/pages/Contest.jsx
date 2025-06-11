@@ -13,6 +13,9 @@ import CountdownTimer from "../components/CountdownTimer";
 import { Link, useParams } from "react-router-dom";
 import io from "socket.io-client";
 import useUserStore from "../store/userStore";
+import { Check, Clock } from "lucide-react";
+import { GoStopwatch } from "react-icons/go";
+import cglContest from "../assets/cglContest.png";
 
 const socket = io(import.meta.env.VITE_BASE_URL, {
   path: "/socket.io",
@@ -140,27 +143,35 @@ export default function Contest() {
   }
 
   return (
-    <div>
-      <h1>Contest</h1>
-      <h2>{contest.name}</h2>
-      <h3>{contestStatus}</h3>
-      <p>{contest.description}</p>
-      <p>Start Time: {parseDate(contest.startTime)}</p>
-      <p>End Time: {parseDate(contest.endTime)}</p>
-      <p>Duration: {calculateDuration(contest.startTime, contest.endTime)}</p>
+    <div className="flex flex-row rounded-lg text-white max-w-240 mt-10 p-6 mx-auto">
+      {/* <h1>Contest</h1> */}
+      <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border border-[#ffffff10]">
+      <img src={cglContest} alt="CGL Contest" className="rounded-lg mb-4" />
+      <div className="flex flex-row items-center gap-4 mb-2">
+        <h2 className="text-4xl font-semibold">{contest.name}</h2>
+        <h3 className="rounded-full bg-green-500/10 text-green-500 border border-1 border-[#ffffff15] text-sm px-3 py-1">{contestStatus}</h3>
+      </div>
+      <p className="text-white/65 mb-2">{contest.description}</p>
+      <div className="flex flex-row items-center gap-2 mb-2">
+        <p className="rounded-md px-4 py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65"><Clock className="h-4 w-4"/> {parseDate(contest.startTime)}</p>
+        {/* <p>End Time: {parseDate(contest.endTime)}</p> */}
+        <p className="rounded-md px-4 py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65"><GoStopwatch /> {calculateDuration(contest.startTime, contest.endTime)}</p>
+      </div>
       {contest.status === "Upcoming" && !isRegistered && (
-        <button onClick={handleClickRegister}>Register</button>
+        <button onClick={handleClickRegister} 
+        className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer">Register</button>
       )}
       {contest.status === "Upcoming" && isRegistered && (
         <div>
-          <button onClick={handleClickUnregister}>Unregister</button>
-          <p>You are registered for this contest</p>
+          <button onClick={handleClickUnregister}
+          className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer">Unregister</button>
+          <button className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer"><Check/> Registered</button>
           <CountdownTimer startTime={contest.startTime}></CountdownTimer>
         </div>
       )}
       {contest.status === "Ongoing" && isRegistered && (
         <div>
-          <p>You are registered for this contest</p>
+          <button className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer disabled:bg-white/65 disabled:cursor-not-allowed" disabled={true}><Check className="w-4 h-4"/> Registered</button>
           <CountdownTimer startTime={contest.endTime}></CountdownTimer>
         </div>
       )}
@@ -169,54 +180,16 @@ export default function Contest() {
           <p>The contest has ended</p>
         </div>
       )}
-      {contest.status === "Ongoing" && isRegistered && (
-        <div>
-          <h2>Problems</h2>
-          {allProblems.map((problem) => (
-            <div key={problem.id}>
-              <Link to={`/contest/${contestId}/problem/${problem.id}`}>
-                <h3>{problem.title}</h3>
-              </Link>
-            </div>
-          ))}
-        </div>
-      )}
+      
       {/*card displaying number of current participants in the contest */}
-      <div>
-        <h2>Current Participants</h2>
-        <p>{contest.currentParticipants}</p>
+      <div className="flex gap-2 items-center mt-4">
+        <h2 className="text-white/65">Current Participants</h2>
+        <p className="rounded-md px-2 py-0.5 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white font-semibold">{contest?.currentParticipants || 0}</p>
       </div>
-      {/* {isRegistered && contest.status === "Ongoing" && (
-        // dialog box to accept user's predicted ranking
-        <div>
-          <h2>Submit your predicted ranking</h2>
-          <form>
-            <label>
-              Predicted Rank:
-              <input type="number" name="predictedRank" value={predictedRank} onChange={
-                (e) => setPredictedRank(e.target.value)
-              }/>
-            </label>
-            <button type="submit" onClick={
-              async (e) => {
-                e.preventDefault();
-                console.log("Submitting predicted rank:", predictedRank);
-                const response = await submitRank(
-                  contestId,
-                  userId,
-                  predictedRank
-                );
-                console.log("Response:", response);
-                // setPredictedRank(null);
-              }
-            }>Submit</button>
-          </form>
-        </div>
-      )} */}
       {isRegistered && isStarting2min && (
         <div>
-          <h2>Contest is starting in 2 minutes</h2>
-          <p>Please submit your predicted rank for the contest</p>
+          <h2 className="text-lg font-semibold">Contest is starting in 2 minutes</h2>
+          <p className="text-lg font-semibold">Please submit your predicted rank for the contest</p>
           <form>
             <label>
               Predicted Rank:
@@ -240,10 +213,58 @@ export default function Contest() {
                 console.log("Response:", response);
                 // setPredictedRank(null);
               }}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"
             >
               Submit
             </button>
           </form>
+        </div>
+      )}
+      {isRegistered && !isStarting2min && (
+        <div className="opacity-50 border rounded-lg p-4 bg-[#ffffff10]">
+          <h2 className="text-lg font-semibold">Guess Your Rank</h2>
+          <form className="flex flex-col gap-2 w-full">
+            <label className="flex items-center justify-center gap-2 w-full">
+              Predicted Rank:
+              <input
+                type="number"
+                name="predictedRank"
+                value={predictedRank}
+                // onChange={(e) => setPredictedRank(e.target.value)}
+                className="border border-1 border-[#ffffff25] rounded px-2 py-1 w-full"
+              />
+            </label>
+            <button
+              type="submit"
+              onClick={async (e) => {
+                e.preventDefault();
+                console.log("Submitting predicted rank:", predictedRank);
+                const response = await submitRank(
+                  contestId,
+                  userId,
+                  predictedRank
+                );
+                console.log("Response:", response);
+                // setPredictedRank(null);
+              }}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"
+            >
+              Submit
+            </button>
+          </form>
+        </div>
+      )}
+      </div>
+      {contest.status === "Ongoing" && isRegistered && (
+        <div>
+          <h2>Problems</h2>
+          {allProblems.map((problem) => (
+            <div key={problem.id}>
+              <Link to={`/contest/${contestId}/problem/${problem.id}`}>
+                <h3>{problem.title}</h3>
+              </Link>
+            </div>
+          ))}
         </div>
       )}
     </div>
