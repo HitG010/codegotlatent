@@ -304,16 +304,16 @@ app.post("/submitContestCode", async (req, res) => {
           userId: userId,
           problemId: problem_id,
         },
-        contestId: contest_id,
       },
       update: {
         isSolved: previousIsSolved || isCorrect,
         solvedInContest: previousSolvedInContest || isCorrect,
-        score: (isCorrect || previousIsSolved)
-          ? (
-              await prisma.problem.findUnique({ where: { id: problem_id } })
-            )?.problemScore || 0
-          : 0,
+        score:
+          isCorrect || previousIsSolved
+            ? (
+                await prisma.problem.findUnique({ where: { id: problem_id } })
+              )?.problemScore || 0
+            : 0,
         penalty: {
           increment: isCorrect ? 0 : 1,
         },
@@ -390,26 +390,23 @@ app.post("/submitContestCode", async (req, res) => {
 });
 
 const updateContestUser = async (contestId, userId, contestStartTime) => {
-  const contestProblems = await prisma.problemUser.findMany({
+  const response = await prisma.problemUser.aggregate({
     where: {
       contestId: contestId,
       userId: userId,
+      solvedInContest: true,
+    },
+    _sum: {
+      penalty: true,
+      score: true,
     },
   });
-  console.log("Contest Problems:", contestProblems);
-  let totalScore = 0;
-  let totalPenalty = 0;
+  console.log("Response: ", response);
+  const totalPenalties = response._sum.penalty;
+  const totalScore = response._sum.score;
   let totalFinishTime = contestStartTime;
-  contestProblems.forEach((contestProblem) => {
-    totalScore += contestProblem.score;
-    totalFinishTime = Math.max(
-      contestProblem.finishedAt ? contestProblem.finishedAt : 0,
-      totalFinishTime
-    );
-    totalPenalty += contestProblem.penalty;
-  });
   // add 5 mins for each penalty
-  if (totalFinishTime != 0) totalFinishTime += totalPenalty * 5 * 60 * 1000;
+  if (totalFinishTime != 0) totalFinishTime += totalPenalties * 5 * 60 * 1000;
   const updatedContestUser = await prisma.contestUser.update({
     where: {
       userId_contestId: {
@@ -418,9 +415,9 @@ const updateContestUser = async (contestId, userId, contestStartTime) => {
       },
     },
     data: {
-      score: totalScore,
-      penalty: totalPenalty,
       finishTime: new Date(totalFinishTime),
+      score: totalScore || 0,
+      penalty: totalPenalties || 0,
     },
   });
   return updatedContestUser;
