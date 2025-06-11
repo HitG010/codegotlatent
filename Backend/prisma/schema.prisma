@@ -109,8 +109,8 @@ model ContestUser {
   actualRank   Int? // Actual rank (calculated post-contest)
   ratingChange Int? // How much rating changed after the contest
   finishTime   DateTime? // When the user finished the contest
-  score        Int? // Total score in the contest
-  penalty      Int? // Total penalty time (in seconds)
+  // score        Int? // Total score in the contest
+  // penalty      Int? // Total penalty time (in seconds)
 
   user    User    @relation(fields: [userId], references: [id])
   contest Contest @relation(fields: [contestId], references: [id])

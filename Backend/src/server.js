@@ -216,7 +216,7 @@ app.post("/submitContestCode", async (req, res) => {
   console.log("Submissions:", submissions);
   testcases.forEach((testCase) => {
     const submission = {
-      source_code: source_code,
+      source_code: source_code || "// No code submitted",
       language_id: language_id,
       stdin: testCase.stdin,
       expected_output: testCase.stdout,
@@ -300,16 +300,16 @@ app.post("/submitContestCode", async (req, res) => {
 
     const updatedContestProblem = await prisma.problemUser.upsert({
       where: {
-        userId_problemId_contestId: {
+        userId_problemId: {
           userId: userId,
           problemId: problem_id,
-          contestId: contest_id,
         },
+        contestId: contest_id,
       },
       update: {
         isSolved: previousIsSolved || isCorrect,
         solvedInContest: previousSolvedInContest || isCorrect,
-        score: isCorrect
+        score: (isCorrect || previousIsSolved)
           ? (
               await prisma.problem.findUnique({ where: { id: problem_id } })
             )?.problemScore || 0
@@ -742,6 +742,7 @@ app.get("/problem/:id", async (req, res) => {
   if (!problem) {
     return res.status(404).json({ error: "Problem not found" });
   }
+  console.log("Problem:", problem);
   if (problem.contestId != null && problem.contest.status !== "Ended") {
     return res
       .status(403)
@@ -985,6 +986,14 @@ app.get(
       const isRegistered = await checkIsRegistered(contestId, userId);
       if (isRegistered) {
         const problem = await prisma.Problem.findUnique({
+          include: {
+            tags: true,
+            testCases: {
+              where: {
+                isPublic: true,
+              },
+            },
+          },
           where: {
             id: problemId,
             contestId: contestId,

@@ -92,7 +92,7 @@ const App = () => {
         path="/contest/:contestId/problem/:id"
         element={
           <AuthRoute>
-            <Problem />
+            <ContestProblem />
           </AuthRoute>
         }
       />
