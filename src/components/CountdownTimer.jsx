@@ -1,3 +1,4 @@
+import { Hourglass } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const CountdownTimer = ({ startTime, isOngoing }) => {
@@ -26,8 +27,8 @@ const CountdownTimer = ({ startTime, isOngoing }) => {
   }, [startTime]);
 
   return (
-    <div className="text-lg font-bold text-blue-600">
-      Contest {isOngoing ? "starts" : "ends"} in: {timeLeft.hours}h{" "}
+    <div className="text-lg font-semibold text-[#ffffff] bg-[#ffffff10] px-3 py-1 rounded-md flex gap-2 justify-center items-center">
+      <Hourglass className="h-4 w-4"/> {timeLeft.hours}h{" "}
       {timeLeft.minutes}m {timeLeft.seconds}s
     </div>
   );
