@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react'
 import { useParams } from 'react-router-dom'
 import { getContestUsers, fetchContestStartTime } from '../api/api'
+import { Link } from 'react-router-dom'
+import { ExternalLink } from 'lucide-react'
 
 const contestRanking = () => {
     const { contestId } = useParams()
@@ -29,18 +31,37 @@ const contestRanking = () => {
   return (
     <div>
       {/* This is the contest rating page for the contest : {contestId} */}
-      <div className='flex flex-col items-center justify-center w-full mx-auto'>
-        <h1 className='text-2xl font-bold text-[#f1f3f5]'>Contest Ranking</h1>
+      <div className='flex flex-col mt-12 h-screen mx-16'>
+        <div className='flex flex-row items-center justify-between mb-8'>
+        <h1 className='text-4xl font-semibold text-[#f1f3f5]'>Contest Ranking</h1>
+        <Link to={`/contest/${contestId}`} target='_blank' className='text-md font-medium text-white/65 bg-[#ffffff10] px-3 py-1 rounded-md flex gap-2 justify-center items-center hover:bg-[#ffffff15] hover:text-white transition-all duration-300'>
+          Go To Contest <ExternalLink className='w-4 h-4 text-white/65'/>
+          </Link>
+        </div>
         <div className='flex flex-col items-center justify-center'>
-          {users && users.map((user) => (
-            <div key={user.userId} className='flex flex-row items-center justify-between w-full gap-16'>
-              <h1 className='text-lg font-bold text-[#f1f3f5]'>{user.userId}</h1>
-              <h1 className='text-lg font-bold text-[#f1f3f5]'>{user.ratingChange}</h1>
-              <h1 className='text-lg font-bold text-[#f1f3f5]'>{user.penalty}</h1>
-              <h1 className='text-lg font-bold text-[#f1f3f5]'>
-                {((new Date(user.finishTime) - new Date(startTime)) / (60 * 1000)).toFixed(2)} minutes
-              </h1>
-            </div>
+          {users && users.map((user, key) => (
+            <React.Fragment key={user.userId}>
+              <div className='flex flex-row items-center justify-between w-full bg-[#ffffff05] p-4 rounded-lg mb-2 border border-[#ffffff10]'>
+                <h1 className='text-lg font-medium text-white'>{key + 1}</h1>
+                <Link to={`/user/${user.userId}`} className='text-lg font-semibold text-white hover:text-yellow-300'>{user.userId}</Link>
+                <h1 className='text-lg font-medium text-white'>
+                  {((new Date(user.finishTime) - new Date(startTime)) / (60 * 1000)).toFixed(2)} minutes
+                </h1>
+                <h1 className={`text-lg font-medium text-white` + (user.ratingChange > 0 ? ' text-green-500' : ' text-red-500')}>{user.ratingChange}</h1>
+                {/* <h1 className='text-lg font-medium text-white'>{user.penalty}</h1> */}
+                <div className='flex flex-row items-center gap-2'>
+                  {user.problems && user.problems.map((problem, index) => (
+                    <div key={index} className='flex flex-row items-center justify-between w-full bg-[#ffffff05] p-4 rounded-lg mb-2 border border-[#ffffff10]'>
+                      {/* <h1 className='text-lg font-medium text-white'>{problem.problemId}</h1> */}
+                      <h1 className='text-lg font-medium text-white'>{(new Date(problem.finishedAt).getTime() - new Date(startTime).getTime()) / 1000} seconds</h1>
+                      <h1 className='text-lg font-medium text-white'>{problem.solvedInContest === true ? <span className='text-green-500'>Solved</span> : <span className='text-red-500'>Not Solved</span>}</h1>
+                      <h1 className='text-lg font-medium text-white'>{problem.score}</h1>
+                      <h1 className={`text-lg font-medium text-white`}>{problem.penalty}</h1>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </React.Fragment>
           ))}
         </div>
         </div>
