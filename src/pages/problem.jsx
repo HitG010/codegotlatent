@@ -63,7 +63,7 @@ function Problem() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetchProblem(id);
+      const response = await fetchProblem(id, user.id);
       setData(response);
     } catch (err) {
       setError(err);

@@ -719,8 +719,8 @@ app.get("/allProblems/:userId", async (req, res) => {
   res.status(200).json(problems);
 });
 
-app.get("/problem/:id", async (req, res) => {
-  const problemId = req.params.id;
+app.get("/problem/:problemId/user/:userId", async (req, res) => {
+  const { problemId, userId } = req.params;
   console.log("Problem ID:", problemId);
   const problem = await prisma.Problem.findUnique({
     where: {
@@ -736,6 +736,18 @@ app.get("/problem/:id", async (req, res) => {
       contest: true,
     },
   });
+  const isSolved = await prisma.problemUser.findFirst({
+    where: {
+      problemId: problemId,
+      userId: userId,
+    },
+    select: {
+      isSolved: true,
+    },
+  });
+
+  problem.isSolved = isSolved;
+
   if (!problem) {
     return res.status(404).json({ error: "Problem not found" });
   }
@@ -920,8 +932,8 @@ app.post("/contest/:contestId/unregister/:userId", async (req, res) => {
   }
 });
 
-app.get("/contest/:contestId/problems", async (req, res) => {
-  const { contestId } = req.params;
+app.get("/contest/:contestId/problems/user/:userId", async (req, res) => {
+  const { contestId, userId } = req.params;
   console.log("Contest ID:", contestId);
   try {
     const contest = await prisma.Contest.findUnique({
@@ -944,6 +956,30 @@ app.get("/contest/:contestId/problems", async (req, res) => {
           orderBy: {
             problemScore: "asc",
           },
+          select: {
+            id: true,
+            title: true,
+            problemScore: true,
+            difficulty: true,
+            Problems: {
+              where: {
+                userId: userId,
+                contestId: contestId,
+              },
+              select: {
+                solvedInContest: true,
+              },
+            },
+          },
+        });
+        // console.log("Problems:", problems);
+        // Flatten solvedInContest for each problem
+        problems.forEach((problem) => {
+          problem.solvedInContest =
+            problem.Problems.length > 0
+              ? problem.Problems[0].solvedInContest
+              : false;
+          delete problem.Problems;
         });
         console.log("Problems:", problems);
         res.status(200).json(problems);
@@ -1294,23 +1330,33 @@ app.get("/contest/:contestId/users", async (req, res) => {
       where: {
         contestId: contestId,
       },
-      include: {
-        user: true,
+      orderBy: { actualRank: "asc" },
+    });
+
+    // Now fetch all ProblemUser data for this contest
+    const allProblemUsers = await prisma.problemUser.findMany({
+      where: {
+        contestId: contestId,
       },
-      orderBy: [{ score: "desc" }, { finishTime: "asc" }, { penalty: "asc" }],
     });
-    console.log("Contest Users:", contestUsers);
-    // convert this contestUsers to a list
-    const contestUsersList = contestUsers.map((contestUser) => {
-      return {
-        userId: contestUser.userId,
-        username: contestUser.user.username,
-        score: contestUser.score,
-        finishTime: contestUser.finishTime,
-        penalty: contestUser.penalty,
-      };
-    });
-    res.status(200).send(contestUsersList);
+
+    // Group problemUser entries by userId
+    const problemsByUser = new Map();
+
+    for (const pu of allProblemUsers) {
+      if (!problemsByUser.has(pu.userId)) {
+        problemsByUser.set(pu.userId, []);
+      }
+      problemsByUser.get(pu.userId).push(pu);
+    }
+
+    // Attach problem data to each contest user
+    const contestLeaderboard = contestUsers.map((userEntry) => ({
+      ...userEntry,
+      problems: problemsByUser.get(userEntry.userId) || [],
+    }));
+    console.log("Contest Leaderboard:", contestLeaderboard);
+    res.status(200).send(contestLeaderboard);
   } catch (error) {
     console.error("Error fetching contest ranking:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -1699,6 +1745,24 @@ app.get("/user/:userId/problem/:problemId/submission", async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching submissions:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/contest/:contestId/participants", async (req, res) => {
+  // get the number of participants in the contest
+  const { contestId } = req.params;
+  console.log("Contest ID:", contestId);
+  try {
+    const participantsCount = await prisma.contestUser.count({
+      where: {
+        contestId: contestId,
+      },
+    });
+    console.log("Participants Count:", participantsCount);
+    res.status(200).json({ participantsCount });
+  } catch (error) {
+    console.error("Error fetching participants count:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
