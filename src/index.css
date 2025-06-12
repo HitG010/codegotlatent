@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin '@tailwindcss/typography';
 @font-face {
     font-family: "Overused Grotesk";
     src: url('https://raw.githubusercontent.com/RandomMaerks/Overused-Grotesk/master/fonts/variable/OverusedGroteskRoman-VF.ttf') format('truetype');

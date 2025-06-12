@@ -10,6 +10,9 @@ import Navbar from "../components/Navbar";
 import contestTrophy from "../assets/trophy.svg";
 import language from "../assets/language.svg";
 import { FaArrowRightLong } from "react-icons/fa6";
+import ReactMarkdown from "react-markdown";
+import Rules from "../components/Rules";
+import "../App.css";
 
 const Home = () => {
   const user = useUserStore((state) => state.user);
@@ -19,9 +22,9 @@ const Home = () => {
   const pathname = window.location.pathname;
   // alert("Home Page");
   return (
-    <div className="h-screen w-100vh flex flex-row justify-between bg-[#0F0F0F]">
+    <div className="h-screen w-100vh flex flex-row justify-between bg-[#0F0F0F] overflow-hidden scrollbar">
       <Navbar path={pathname}/>
-      <div className="home flex flex-col h-full w-[80%] p-10 pt-16 bg-[#0F0F0F]">
+      <div className="home flex flex-col h-full w-[80%] p-10 pt-16 bg-[#0F0F0F] overflow-auto scrollbar">
         <div className="flex flex-col gap-1 justify-self-start">
           <h1 className="text-white text-4xl font-semibold">
             Welcome, {user.email} 👋
@@ -64,6 +67,7 @@ const Home = () => {
             />
           </Link>
         </div>
+        <Rules />
       </div>
     </div>
   );

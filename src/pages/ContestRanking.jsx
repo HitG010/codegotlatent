@@ -28,14 +28,14 @@ const contestRanking = () => {
 
   return (
     <div>
-      This is the contest rating page for the contest : {contestId}
-      <div className='flex flex-col items-center justify-center w-full'>
+      {/* This is the contest rating page for the contest : {contestId} */}
+      <div className='flex flex-col items-center justify-center w-full mx-auto'>
         <h1 className='text-2xl font-bold text-[#f1f3f5]'>Contest Ranking</h1>
         <div className='flex flex-col items-center justify-center'>
           {users && users.map((user) => (
             <div key={user.userId} className='flex flex-row items-center justify-between w-full gap-16'>
-              <h1 className='text-lg font-bold text-[#f1f3f5]'>{user.username}</h1>
-              <h1 className='text-lg font-bold text-[#f1f3f5]'>{user.score}</h1>
+              <h1 className='text-lg font-bold text-[#f1f3f5]'>{user.userId}</h1>
+              <h1 className='text-lg font-bold text-[#f1f3f5]'>{user.ratingChange}</h1>
               <h1 className='text-lg font-bold text-[#f1f3f5]'>{user.penalty}</h1>
               <h1 className='text-lg font-bold text-[#f1f3f5]'>
                 {((new Date(user.finishTime) - new Date(startTime)) / (60 * 1000)).toFixed(2)} minutes
