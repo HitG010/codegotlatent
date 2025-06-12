@@ -166,8 +166,10 @@ const fetchProblems = async (userId) => {
   }
 };
 
-const fetchProblem = async (problemId) => {
-  const url = `${import.meta.env.VITE_BASE_URL}/problem/${problemId}`;
+const fetchProblem = async (problemId, userId) => {
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/problem/${problemId}/user/${userId}`;
   console.log("URL:", url);
   try {
     const response = await axios.get(url, {
@@ -298,8 +300,10 @@ const unregisterUser = async (contestId, userId) => {
   }
 };
 
-const getAllContestProblems = async (contestId) => {
-  const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/problems`;
+const getAllContestProblems = async (contestId, userId) => {
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/contest/${contestId}/problems/user/${userId}`;
   console.log("URL:", url);
   try {
     const response = await axios.get(url, {
@@ -473,6 +477,26 @@ const getUserProblemSubmission = async (problemId, userId) => {
   }
 };
 
+const getContestParticipants = async (contestId) => {
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/contest/${contestId}/participants`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contest participants:", error);
+    throw error;
+  }
+};
+
 export {
   api,
   executeCode,
@@ -496,4 +520,5 @@ export {
   getProblemAcceptance,
   getUserProblemCount,
   getUserProblemSubmission,
+  getContestParticipants,
 };
