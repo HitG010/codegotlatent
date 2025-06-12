@@ -745,8 +745,10 @@ app.get("/problem/:problemId/user/:userId", async (req, res) => {
       isSolved: true,
     },
   });
-
-  problem.isSolved = isSolved;
+  if(!isSolved){
+    problem.isSolved = null;
+  }
+  else problem.isSolved = isSolved.isSolved;
 
   if (!problem) {
     return res.status(404).json({ error: "Problem not found" });
@@ -947,7 +949,7 @@ app.get("/contest/:contestId/problems/user/:userId", async (req, res) => {
       },
     });
     console.log("Contest:", contest);
-    if (contest.status === "Ongoing") {
+    if (contest.status !== "Upcoming") {
       try {
         const problems = await prisma.Problem.findMany({
           where: {

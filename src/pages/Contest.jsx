@@ -49,7 +49,7 @@ export default function Contest() {
 
   const fetchAllProblems = async () => {
     console.log("Fetching all problems for contest:", contestId);
-    if (isRegistered && contest.status === "Ongoing") {
+    if (isRegistered && contest.status !== "Upcoming") {
       try {
         const response = await getAllContestProblems(contestId, userId);
         console.log("Contest Problems:", response);
@@ -312,7 +312,7 @@ export default function Contest() {
           </div>
         )}
       </div>
-      {contest.status === "Ongoing" && isRegistered && (
+      {contest.status !== "Upcoming" && isRegistered && (
         <div className=" flex flex-col gap-4 w-full">
           <h2 className="text-4xl font-semibold mb-2 inline-block">Problems</h2>
           <div className="flex flex-col gap-0.5 w-full">
