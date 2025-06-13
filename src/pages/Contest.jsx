@@ -38,7 +38,7 @@ export default function Contest() {
   console.log(userId);
   const [predictedRank, setPredictedRank] = useState(0);
   const [totalParticipants, setTotalParticipants] = useState(0);
-  const [isStarting2min, setIsStarting2min] = useState(false);
+  // const [isStarting2min, setIsStarting2min] = useState(false);
 
   const [isRegistered, setIsRegistered] = useState(false);
   const [contestStatus, setContestStatus] = useState("Upcoming");
@@ -111,20 +111,25 @@ export default function Contest() {
     console.log("Response:", response);
     setIsRegistered(response.isRegistered);
   };
+
+  // webhook listeners for contest events
+  // Contest Rank Guess Phase Started Webhook
   socket.on(
-    "contestStarted",
+    "contestRankGuessPhaseStarted",
     ({ contestId: startedContestId, updatedContest }) => {
       console.log("Contest started:", startedContestId);
       if (contestId === startedContestId) {
-        setContestStatus("Ongoing");
+        setContestStatus("Rank Guess Phase");
         setContest(updatedContest);
         fetchTotalParticipants();
         // fetchAllProblems();
         // ask for their predicted rank for the contest for the starting 2 minutes
-        setIsStarting2min(true);
+        // setIsStarting2min(true);
       }
     }
   );
+
+  // Contest Ended Webhook
   socket.on(
     "contestEnded",
     ({ contestId: startedContestId, updatedContest }) => {
@@ -134,15 +139,34 @@ export default function Contest() {
       }
     }
   );
-  socket.on("2minEloped", ({ contestId: startedContestId }) => {
+
+  // Rank Guess Phase Ended Webhook
+  socket.on("contestStarted", ({ contestId: startedContestId }) => {
     if (contestId === startedContestId) {
       // setContestStatus("Ongoing");
       // setContest(updatedContest);
       fetchAllProblems();
       // isStarting2min = false;
-      setIsStarting2min(false);
+      // setIsStarting2min(false);
+      setContestStatus("Ongoing");
     }
   });
+
+  // Contest Rating Update Phase Started Webhook
+  socket.on(
+    "contestRatingPending",
+    ({ contestId: startedContestId, updatedContest }) => {
+      if (contestId === startedContestId) {
+        setContestStatus("System Testing");
+        setContest(updatedContest);
+        // fetchAllProblems();
+        // fetchTotalParticipants();
+        // setIsStarting2min(false);
+        // setIsStarting2min(false);
+      }
+    }
+  );
+
   useEffect(() => {
     console.log("Contest ID:", contestId);
     fetchContest();
@@ -161,7 +185,7 @@ export default function Contest() {
         <img src={cglContest} alt="CGL Contest" className="rounded-lg mb-4" />
         <div className="flex flex-row items-center gap-4 mb-2">
           <h2 className="text-4xl font-semibold">{contest.name}</h2>
-          <h3 className="rounded-full bg-green-500/10 text-green-500 border border-1 border-[#ffffff15] text-sm px-3 py-1">
+          <h3 className="rounded-full bg-white/5 text-white/65 border border-1 border-[#ffffff15] text-sm px-3 py-1">
             {contestStatus}
           </h3>
         </div>
@@ -190,15 +214,25 @@ export default function Contest() {
               onClick={handleClickUnregister}
               className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer"
             >
-              Unregister
-            </button>
-            <button className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer">
               <Check /> Registered
             </button>
-            Rank Guess Starts in: <CountdownTimer startTime={contest.startTime}></CountdownTimer>
+            {/* <button className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer">
+              <Check /> Registered
+            </button> */}
+            {/* <Rank Guess Starts in: <CountdownTimer startTime={contest.startTime}></CountdownTimer> */}
+            {contest.status === "Upcoming" && (
+              <div className="flex gap-2 items-center mt-2">
+                Rank Guess Phase Starts in:{" "} <CountdownTimer startTime={contest.rankGuessStartTime}></CountdownTimer>
+              </div>
+            )}
           </div>
         )}
-        {contest.status === "Ongoing" && isRegistered && (
+        {contest.status === "Rank Guess Phase" && (
+          <div className="flex gap-2 items-center mt-2">
+            Contest Starts in: <CountdownTimer startTime={contest.startTime}></CountdownTimer>
+          </div>
+        )}
+        {contest.status !== "Upcoming" && contest.status !== "Rank Guess Phase" && isRegistered && (
           <div>
             <button
               className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer disabled:bg-white/65 disabled:cursor-not-allowed"
@@ -206,13 +240,25 @@ export default function Contest() {
             >
               <Check className="w-4 h-4" /> Registered
             </button>
-            <div className="flex gap-2 items-center mt-2">Contest Ends in: <CountdownTimer startTime={contest.endTime}></CountdownTimer></div>
+            {contest.status === "Ongoing" && (
+              <div className="flex gap-2 items-center mt-2">
+                Contest Ends in: <CountdownTimer startTime={contest.endTime}></CountdownTimer>
+              </div>
+            )}
           </div>
         )}
-        {contest.status === "Ended" && (
+        {contest.status === "Rating Update Pending" && (
           <div>
-            <p>The contest has ended</p>
+            <p>The contest has ended. Rating Update is in progress.</p>
           </div>
+        )}
+        {contest.status !== "Upcoming" && contest.status !== "Rank Guess Phase" && !isRegistered && (
+          <button
+            disabled={true}
+            className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer"
+          >
+            Register
+          </button>
         )}
 
         {/*card displaying number of current participants in the contest */}
@@ -222,11 +268,11 @@ export default function Contest() {
             {totalParticipants}
           </p>
         </div>
-        {isRegistered && isStarting2min && (
+        {isRegistered && contest.status === "Rank Guess Phase" && (
           <div>
-            <h2 className="text-lg font-semibold">
+            {/* <h2 className="text-lg font-semibold">
               Contest is starting in <CountdownTimer startTime={contest.startTime + 2*60*100}></CountdownTimer>
-            </h2>
+            </h2> */}
             <p className="text-lg font-semibold">
               Please submit your predicted rank for the contest
             </p>
@@ -250,6 +296,7 @@ export default function Contest() {
                     userId,
                     predictedRank
                   );
+                  // setPredictedRank()
                   console.log("Response:", response);
                   // setPredictedRank(null);
                 }}
@@ -260,7 +307,7 @@ export default function Contest() {
             </form>
           </div>
         )}
-        {isRegistered && !isStarting2min && (
+        {isRegistered && contest.status !== "Rank Guess Phase" && (
           <div className="border border-1 border-yellow-500/45 rounded-lg p-4 bg-[#ffffff10] mt-2">
             <h2 className="text-lg font-semibold">Guess Your Rank</h2>
           {/* Contest is starting in <CountdownTimer startTime={contest.startTime + 2*60*100}></CountdownTimer> */}
@@ -312,11 +359,11 @@ export default function Contest() {
           </div>
         )}
       </div>
-      {contest.status !== "Upcoming" && isRegistered && (
+      {isRegistered && (
         <div className=" flex flex-col gap-4 w-full">
           <h2 className="text-4xl font-semibold mb-2 inline-block">Problems</h2>
           <div className="flex flex-col gap-0.5 w-full">
-            {allProblems.map((problem) => (
+            {allProblems && allProblems.map((problem) => (
             <div key={problem.id}>
               <Link to={`/contest/${contestId}/problem/${problem.id}`}
               className="text-lg font-semibold text-white hover:text-yellow-500 transition duration-200 bg-[#ffffff05] rounded-md px-4 py-2 mb-2 hover:bg-[#ffffff10] border border-1 border-[#ffffff15] flex justify-between items-center w-full">

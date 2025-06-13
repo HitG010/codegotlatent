@@ -95,12 +95,14 @@ const contestRanking = () => {
                               <span className="text-red-500">Not Solved</span>
                             )}
                           </h1>
-                          <h1 className="text-lg font-medium text-white">
+                          <h1 className="text-lg font-medium text-white px-2 py-0.2 rounded-full bg-white/5 flex gap-2 items-center">
                             {problem.score}
                           </h1>
-                          <h1 className={`text-lg font-medium text-white`}>
-                            {problem.penalty}
-                          </h1>
+                          {problem.penalty > 0 && (
+                            <h1 className={`text-lg font-medium text-red-500 px-2 py-0.2 rounded-full bg-red-500/10 flex gap-2 items-center`}>
+                              {problem.penalty} <Bug className='h-4 w-4'/>
+                            </h1>
+                          )}
                         </div>
                       ))}
                   </div>
