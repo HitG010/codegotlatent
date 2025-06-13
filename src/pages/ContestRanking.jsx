@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getContestUsers, fetchContestStartTime } from "../api/api";
 import { Link } from "react-router-dom";
-import { ExternalLink } from "lucide-react";
+import { Bug, ExternalLink } from "lucide-react";
 
 const contestRanking = () => {
   const { contestId } = useParams();

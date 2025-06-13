@@ -59,30 +59,74 @@ io.on("connection", (socket) => {
   console.log("A user connected", socket.id);
 });
 
-async function scheduleContests() {
+async function scheduleUpcomingContests() {
   const contests = await prisma.Contest.findMany({
     where: {
       status: "Upcoming",
     },
+    select: {
+      rankGuessStartTime: true,
+      id: true,
+    },
+  });
+  console.log("Contests:", contests);
+  contests.forEach((contest) => {
+    const rankGuessStartTime = new Date(contest.rankGuessStartTime);
+    console.log("Rank Guess Start Time:", rankGuessStartTime);
+
+    const date = rankGuessStartTime.getDate();
+    const month = rankGuessStartTime.getMonth(); // 0-11
+    const year = rankGuessStartTime.getFullYear();
+    const hour = rankGuessStartTime.getHours();
+    const minute = rankGuessStartTime.getMinutes();
+    const second = rankGuessStartTime.getSeconds();
+    // console.log("start time:", startTime);
+    // const date = new Date(start);
+    const RankGuessDate = new Date(year, month, date, hour, minute, second);
+    // console.log("Start Time:", startTime);
+    schedule.scheduleJob(RankGuessDate, async () => {
+      console.log("Contest Rank Guess phase started:", contest.name);
+      // Update the contest status to "Ongoing"
+      const updatedContest = await prisma.Contest.update({
+        where: {
+          id: contest.id,
+        },
+        data: {
+          status: "Rank Guess Phase",
+        },
+      });
+      console.log("Contest updated:", updatedContest);
+      io.emit("contestRankGuessPhaseStarted", { contestId: contest.id, updatedContest });
+    });
+  });
+}
+
+async function scheduleRankGuessContests() {
+  const contests = await prisma.Contest.findMany({
+    where: {
+      status: "Rank Guess Phase",
+    },
+    select: {
+      startTime: true,
+      id: true,
+    }
   });
   console.log("Contests:", contests);
   contests.forEach((contest) => {
     const startTime = new Date(contest.startTime);
-    const endTime = new Date(contest.endTime);
     console.log("Start Time:", startTime);
-    console.log("End Time:", endTime);
-    // rule.tz = "Asia/Kolkata";
+
     const date = startTime.getDate();
     const month = startTime.getMonth(); // 0-11
     const year = startTime.getFullYear();
     const hour = startTime.getHours();
     const minute = startTime.getMinutes();
     const second = startTime.getSeconds();
-    console.log("start time:", startTime);
+    // console.log("start time:", startTime);
     // const date = new Date(start);
-    const startDate = new Date(year, month, date, hour, minute, second);
-    console.log("Start Time:", startTime);
-    schedule.scheduleJob(startDate, async () => {
+    const StartDate = new Date(year, month, date, hour, minute, second);
+    // console.log("Start Time:", startTime);
+    schedule.scheduleJob(StartDate, async () => {
       console.log("Contest started:", contest.name);
       // Update the contest status to "Ongoing"
       const updatedContest = await prisma.Contest.update({
@@ -96,48 +140,77 @@ async function scheduleContests() {
       console.log("Contest updated:", updatedContest);
       io.emit("contestStarted", { contestId: contest.id, updatedContest });
     });
-    // schedule the 2 min eloped event
-    const elopedTime = new Date(startTime.getTime() + 2 * 60 * 1000);
-    const elopedRule = new schedule.RecurrenceRule();
-    // elopedRule.tz = "Etc/UTC";
-    const elopeddate = elopedTime.getDate();
-    const elopedmonth = elopedTime.getMonth(); // 0-11
-    const elopedyear = elopedTime.getFullYear();
-    const elopedhour = elopedTime.getHours();
-    const elopedminute = elopedTime.getMinutes();
-    const elopedsecond = elopedTime.getSeconds();
-    console.log("Eloped Rule:", elopedRule);
-    const elopedDate = new Date(
-      elopedyear,
-      elopedmonth,
-      elopeddate,
-      elopedhour,
-      elopedminute,
-      elopedsecond
-    );
-    schedule.scheduleJob(elopedDate, async () => {
-      console.log("Contest 2 min eloped:", contest.name);
-      io.emit("2minEloped", { contestId: contest.id });
+  });
+}
+
+async function scheduleOngoingContests() {
+  const contests = await prisma.Contest.findMany({
+    where: {
+      status: "Ongoing",
+    },
+    select: {
+      endTime: true,
+      id: true,
+    },
+  });
+  console.log("Contests:", contests);
+  contests.forEach((contest) => {
+    const endTime = new Date(contest.endTime);
+    console.log("End Time:", endTime);
+    const date = endTime.getDate();
+    const month = endTime.getMonth(); // 0-11
+    const year = endTime.getFullYear();
+    const hour = endTime.getHours();
+    const minute = endTime.getMinutes();
+    const second = endTime.getSeconds();
+    // console.log("end time:", endTime);
+    // const date = new Date(end);
+    const EndDate = new Date(year, month, date, hour, minute, second);
+    // console.log("End Time:", endTime);
+    schedule.scheduleJob(EndDate, async () => {
+      console.log("Contest rating update phase started:", contest.name);
+      // Update the contest status to "Ended"
+      const updatedContest = await prisma.Contest.update({
+        where: {
+          id: contest.id,
+        },
+        data: {
+          status: "Rating Update Pending",
+        },
+      });
+      console.log("Contest updated:", updatedContest);
+      io.emit("contestRatingPending", { contestId: contest.id, updatedContest });
+      
     });
-    const endRule = new schedule.RecurrenceRule();
-    // endRule.tz = "Etc/UTC";
-    const enddate = endTime.getDate();
-    const endmonth = endTime.getMonth(); // 0-11
-    const endyear = endTime.getFullYear();
-    const endhour = endTime.getHours();
-    const endminute = endTime.getMinutes();
-    const endsecond = endTime.getSeconds();
-    console.log("End Rule:", endRule);
-    const endDate = new Date(
-      endyear,
-      endmonth,
-      enddate,
-      endhour,
-      endminute,
-      endsecond
-    );
-    schedule.scheduleJob(endDate, async () => {
-      console.log("Contest ended:", contest.name);
+  });
+}
+
+async function scheduleRatingPendingContests() {
+  const contests = await prisma.Contest.findMany({
+    where: {
+      status: "Rating Update Pending",
+    },
+    select: {
+      endTime: true,
+      id: true,
+    },
+  });
+  console.log("Contests:", contests);
+  contests.forEach((contest) => {
+    const endTime = new Date(contest.endTime);
+    console.log("End Time:", endTime);
+    const date = endTime.getDate();
+    const month = endTime.getMonth(); // 0-11
+    const year = endTime.getFullYear();
+    const hour = endTime.getHours();
+    const minute = endTime.getMinutes();
+    const second = endTime.getSeconds();
+    // console.log("end time:", endTime);
+    // const date = new Date(end);
+    const EndDate = new Date(year, month, date, hour, minute, second);
+    // console.log("End Time:", endTime);
+    schedule.scheduleJob(EndDate + 30*1000, async () => {
+      console.log("Contest Rating Update Phase Started:", contest.name);
       // Update the contest status to "Ended"
       const updatedContest = await prisma.Contest.update({
         where: {
@@ -149,15 +222,54 @@ async function scheduleContests() {
       });
       console.log("Contest updated:", updatedContest);
       io.emit("contestEnded", { contestId: contest.id, updatedContest });
-    });
 
-    // update the rankings after 30 seconds after the contest ends
-    schedule.scheduleJob(new Date(endDate.getTime() + 30 * 1000), async () => {
-      console.log("Updating contest rankings:", contest.name);
-      submitContest(contest.id);
     });
   });
 }
+
+// async function scheduleRatingUpdateContests() {
+//   const contests = await prisma.Contest.findMany({
+//     where: {
+//       status: "Rating Update Pending",
+//     },
+//     select: {
+//       endTime: true,
+//       id: true,
+//     },
+//   });
+//   console.log("Contests:", contests);
+//   contests.forEach((contest) => {
+//     const endTime = new Date(contest.endTime);
+//     console.log("End Time:", endTime);
+
+//     const date = endTime.getDate();
+//     const month = endTime.getMonth(); // 0-11
+//     const year = endTime.getFullYear();
+//     const hour = endTime.getHours();
+//     const minute = endTime.getMinutes();
+//     const second = endTime.getSeconds();
+//     // console.log("end time:", endTime);
+//     // const date = new Date(end);
+//     const EndDate = new Date(year, month, date, hour, minute, second);
+//     // console.log("End Time:", endTime);
+//     schedule.scheduleJob(EndDate + 5*60*1000, async () => {
+//       console.log("Contest Rating Update Finished:", contest.name);
+//       // Update the contest status to "Ended"
+//       const updatedContest = await prisma.Contest.update({
+//         where: {
+//           id: contest.id,
+//         },
+//         data: {
+//           status: "Rating Update Finished",
+//         },
+//       });
+//       console.log("Contest updated:", updatedContest);
+//       io.emit("contestRatingUpdateFinished", { contestId: contest.id, updatedContest });
+
+//     });
+//   });
+// }
+
 
 // scheduleContests();
 // CALL THE FUNCTION TO SCHEDULE CONTESTS AFTER 1 DAY FOR AUTOMATICALLY SCHEDULING NEWLY CREATED CONTESTS IN THE DATABASE IN FUTURE
@@ -169,7 +281,12 @@ async function scheduleContests() {
 // create a similiar cron job for every 1 min
 cron.schedule("*/1 * * * *", async () => {
   console.log("Scheduling contests");
-  await scheduleContests();
+  // status -> upcoming, rank guess, ongoing, rating pending, ended
+  await scheduleUpcomingContests();
+  await scheduleRankGuessContests();
+  await scheduleOngoingContests();
+  await scheduleRatingPendingContests();
+  console.log("Contests scheduled");
 });
 
 app.put("/callback", (req, res) => {

@@ -44,6 +44,7 @@ model Contest {
   name                 String
   description          String?
   startTime            DateTime
+  rankGuessStartTime   DateTime? // Nullable for contests without a rank guess phase
   endTime              DateTime
   participants         ContestUser[]
   numberOfParticipants Int?          @default(0) // Number of participants
