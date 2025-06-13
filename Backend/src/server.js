@@ -96,7 +96,10 @@ async function scheduleUpcomingContests() {
         },
       });
       console.log("Contest updated:", updatedContest);
-      io.emit("contestRankGuessPhaseStarted", { contestId: contest.id, updatedContest });
+      io.emit("contestRankGuessPhaseStarted", {
+        contestId: contest.id,
+        updatedContest,
+      });
     });
   });
 }
@@ -109,7 +112,7 @@ async function scheduleRankGuessContests() {
     select: {
       startTime: true,
       id: true,
-    }
+    },
   });
   console.log("Contests:", contests);
   contests.forEach((contest) => {
@@ -179,8 +182,10 @@ async function scheduleOngoingContests() {
         },
       });
       console.log("Contest updated:", updatedContest);
-      io.emit("contestRatingPending", { contestId: contest.id, updatedContest });
-      
+      io.emit("contestRatingPending", {
+        contestId: contest.id,
+        updatedContest,
+      });
     });
   });
 }
@@ -209,7 +214,7 @@ async function scheduleRatingPendingContests() {
     // const date = new Date(end);
     const EndDate = new Date(year, month, date, hour, minute, second);
     // console.log("End Time:", endTime);
-    schedule.scheduleJob(EndDate + 30*1000, async () => {
+    schedule.scheduleJob(EndDate + 30 * 1000, async () => {
       console.log("Contest Rating Update Phase Started:", contest.name);
       // Update the contest status to "Ended"
       const updatedContest = await prisma.Contest.update({
@@ -222,7 +227,6 @@ async function scheduleRatingPendingContests() {
       });
       console.log("Contest updated:", updatedContest);
       io.emit("contestEnded", { contestId: contest.id, updatedContest });
-
     });
   });
 }
@@ -270,7 +274,6 @@ async function scheduleRatingPendingContests() {
 //   });
 // }
 
-
 // scheduleContests();
 // CALL THE FUNCTION TO SCHEDULE CONTESTS AFTER 1 DAY FOR AUTOMATICALLY SCHEDULING NEWLY CREATED CONTESTS IN THE DATABASE IN FUTURE
 // cron.schedule("0 0 * * *", async () => {
@@ -294,6 +297,7 @@ app.put("/callback", (req, res) => {
   res.status(200).send("OK");
 });
 
+// Submission of any type of code for a problem ( contest or not )
 app.post("/submitContestCode", async (req, res) => {
   const body = await req.body;
   const { problem_id, language_id, source_code, userId } = body;
@@ -810,7 +814,9 @@ app.get("/allProblems/:userId", async (req, res) => {
       OR: [
         {
           contest: {
-            status: "Ended",
+            status: {
+              in: ["Ended", "Rating Update Pending"], // Include problems from ended or rating pending contests
+            },
           },
         },
         {
@@ -870,7 +876,11 @@ app.get("/problem/:problemId/user/:userId", async (req, res) => {
     return res.status(404).json({ error: "Problem not found" });
   }
   console.log("Problem:", problem);
-  if (problem.contestId != null && problem.contest.status !== "Ended") {
+  if (
+    problem.contestId != null &&
+    problem.contest.status !== "Ended" &&
+    problem.contest.status !== "Rating Update Pending"
+  ) {
     return res
       .status(403)
       .json({ error: "Problem is part of an ongoing contest" });
@@ -940,6 +950,7 @@ app.post("/auth", async (req, res) => {
   }
 });
 
+// Check if user already exists
 app.post("/checkExistingUser", async (req, res) => {
   const { email } = req.body;
   console.log("Request Body:", req.body);
@@ -959,6 +970,7 @@ app.post("/checkExistingUser", async (req, res) => {
   }
 });
 
+// Get all contests
 app.get("/contests", async (req, res) => {
   try {
     const contests = await prisma.Contest.findMany({
@@ -974,6 +986,7 @@ app.get("/contests", async (req, res) => {
   }
 });
 
+// Get contest by ID
 app.get("/contest/:id", async (req, res) => {
   const contestId = req.params.id;
   console.log("Contest ID:", contestId);
@@ -991,6 +1004,7 @@ app.get("/contest/:id", async (req, res) => {
   }
 });
 
+// Check if user is registered for a contest
 app.get("/contest/:contestId/participants/:userId", async (req, res) => {
   const { contestId, userId } = req.params;
 
@@ -1013,6 +1027,16 @@ app.post("/contest/:contestId/register/:userId", async (req, res) => {
   console.log("Contest ID:", contestId);
   console.log("User ID:", userId);
   try {
+    // Check if contest status is Upcoming before registering
+    const contest = await prisma.Contest.findUnique({
+      where: { id: contestId },
+      select: { status: true },
+    });
+    if (!contest || contest.status !== "Upcoming") {
+      return res
+        .status(400)
+        .json({ error: "Contest is not open for registration." });
+    }
     const result = await prisma.contestUser.create({
       data: {
         contestId: contestId,
@@ -1037,6 +1061,9 @@ app.post("/contest/:contestId/unregister/:userId", async (req, res) => {
           contestId: contestId,
           userId: userId,
         },
+        contest: {
+          status: "Upcoming", // Ensure the contest is still upcoming
+        },
       },
     });
     console.log("Result:", result);
@@ -1054,54 +1081,50 @@ app.get("/contest/:contestId/problems/user/:userId", async (req, res) => {
     const contest = await prisma.Contest.findUnique({
       where: {
         id: contestId,
-
-        // check if the time of req is greater than the start time of the contest + 2mins
-        startTime: {
-          lte: new Date(Date.now() - 2 * 60 * 1000),
+        status: {
+          in: ["Ongoing", "Rating Update Pending", "Ended"],
         },
       },
     });
     console.log("Contest:", contest);
-    if (contest.status !== "Upcoming") {
-      try {
-        const problems = await prisma.Problem.findMany({
-          where: {
-            contestId: contestId,
-          },
-          orderBy: {
-            problemScore: "asc",
-          },
-          select: {
-            id: true,
-            title: true,
-            problemScore: true,
-            difficulty: true,
-            Problems: {
-              where: {
-                userId: userId,
-                contestId: contestId,
-              },
-              select: {
-                solvedInContest: true,
-              },
+    try {
+      const problems = await prisma.Problem.findMany({
+        where: {
+          contestId: contestId,
+        },
+        orderBy: {
+          problemScore: "asc",
+        },
+        select: {
+          id: true,
+          title: true,
+          problemScore: true,
+          difficulty: true,
+          Problems: {
+            where: {
+              userId: userId,
+              contestId: contestId,
+            },
+            select: {
+              solvedInContest: true,
             },
           },
-        });
-        // console.log("Problems:", problems);
-        // Flatten solvedInContest for each problem
-        problems.forEach((problem) => {
-          problem.solvedInContest =
-            problem.Problems.length > 0
-              ? problem.Problems[0].solvedInContest
-              : false;
-          delete problem.Problems;
-        });
-        console.log("Problems:", problems);
-        res.status(200).json(problems);
-      } catch (error) {
-        console.error("Error fetching problems:", error);
-        res.status(500).json({ error: "Internal server error" });
-      }
+        },
+      });
+      // console.log("Problems:", problems);
+      // Flatten solvedInContest for each problem
+      problems.forEach((problem) => {
+        problem.solvedInContest =
+          problem.Problems.length > 0
+            ? problem.Problems[0].solvedInContest
+            : false;
+        delete problem.Problems;
+      });
+      console.log("Problems:", problems);
+      res.status(200).json(problems);
+    } catch (error) {
+      console.error("Error fetching problems:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   } catch (error) {
     console.error("Error fetching problems:", error);
@@ -1213,7 +1236,10 @@ app.get("/submission/:submissionId/user/:userId", async (req, res) => {
         id: submission.contestId,
       },
     });
-    if (contest.status === "Ended") {
+    if (
+      contest.status === "Ended" ||
+      contest.status === "Rating Update Pending"
+    ) {
       return res.status(200).json(submission);
     } else {
       return res.status(403).json({ error: "Contest has not ended yet" });
@@ -1433,6 +1459,9 @@ app.get("/contest/:contestId/users", async (req, res) => {
         id: contestId,
       },
     });
+    if (contest.status == "Rating Update Pending") {
+      return res.status(200).json({ data: "System testing is underway" });
+    }
     if (contest.status !== "Ended") {
       return res.status(403).json({ error: "Contest has not ended yet" });
     }
@@ -1756,7 +1785,9 @@ app.get("/user/:userId/problemCount", async (req, res) => {
       OR: [
         {
           contest: {
-            status: "Ended",
+            status: {
+              in: ["Ended", "Rating Update Pending"],
+            },
           },
         },
         {
@@ -1778,7 +1809,9 @@ app.get("/user/:userId/problemCount", async (req, res) => {
       OR: [
         {
           contest: {
-            status: "Ended",
+            status: {
+              in: ["Ended", "Rating Update Pending"],
+            },
           },
         },
         {
@@ -1798,7 +1831,9 @@ app.get("/user/:userId/problemCount", async (req, res) => {
       OR: [
         {
           contest: {
-            status: "Ended",
+            status: {
+              in: ["Ended", "Rating Update Pending"],
+            },
           },
         },
         {
@@ -1818,7 +1853,9 @@ app.get("/user/:userId/problemCount", async (req, res) => {
       OR: [
         {
           contest: {
-            status: "Ended",
+            status: {
+              in: ["Ended", "Rating Update Pending"],
+            },
           },
         },
         {
