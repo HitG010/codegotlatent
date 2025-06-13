@@ -1551,51 +1551,30 @@ app.get("/contest/:contestId/startTime", async (req, res) => {
 app.post(
   "/contest/:contestId/user/:userId/rank/:predictedrank",
   async (req, res) => {
-    let { contestId, userId, predictedrank } = req.params;
-    // const { predictedRanking } = req.body;
-    console.log("Contest ID:", contestId);
-    console.log("User ID:", userId);
-    console.log("Predicted Ranking:", predictedrank);
-    let randomrank = 0;
-    // fetch the number of users in the contest
-    try {
-      const contest = await prisma.Contest.findUnique({
-        where: {
-          id: contestId,
+    const { contestId, userId, predictedrank } = req.params;
+
+    const updatedUser = await prisma.contestUser.update({
+      where: {
+        userId_contestId: {
+          userId: userId,
+          contestId: contestId,
         },
-        select: {
-          participants: true,
+        contest: {
+          status: "Rank Guess Phase", // Ensure the contest is in the correct phase
         },
+      },
+      data: {
+        rankGuess: parseInt(predictedrank, 10),
+      },
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        error: "Contest user not found or contest is not in rank guess phase.",
       });
-      console.log("Contest Participants:", contest.participants);
-      if (predictedrank == 0) {
-        randomrank =
-          Math.floor(Math.random() * contest.participants.length) + 1;
-        console.log("Random Rank:", randomrank);
-        predictedrank = randomrank;
-      }
-    } catch (error) {
-      console.error("Error fetching contest participants:", error);
-      return res.status(500).json({ error: "Internal server error" });
     }
-    try {
-      const result = await prisma.contestUser.update({
-        where: {
-          userId_contestId: {
-            userId: userId,
-            contestId: contestId,
-          },
-        },
-        data: {
-          rankGuess: parseInt(predictedrank),
-        },
-      });
-      console.log("Result:", result);
-      res.status(200).json(result);
-    } catch (error) {
-      console.error("Error fetching contest ranking:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
+    console.log("Updated User:", updatedUser);
+    res.status(200).json(updatedUser);
   }
 );
 
@@ -1638,6 +1617,16 @@ function assignRanks(users) {
     });
   });
 
+  return users;
+}
+
+function assignRandomGuesses(users) {
+  // Assign random rank guesses to user whose predicted rank is null
+  users.forEach((user) => {
+    if (user.rankGuess === null) {
+      user.rankGuess = Math.floor(Math.random() * users.length) + 1; // Random rank between 1 and number of users
+    }
+  });
   return users;
 }
 
@@ -1741,8 +1730,12 @@ async function submitContest(contestId) {
     const rankedUsers = assignRanks(contestUsers);
     console.log("Ranked Users:", rankedUsers);
 
+    // assign random guesses to users who have not guessed their rank
+    const usersWithGuesses = assignRandomGuesses(rankedUsers);
+    console.log("Users with Guesses:", usersWithGuesses);
+
     // calculate rating changes
-    const usersWithRatingChanges = calculateRatingChanges(rankedUsers);
+    const usersWithRatingChanges = calculateRatingChanges(usersWithGuesses);
     console.log("Users with Rating Changes:", usersWithRatingChanges);
 
     return usersWithRatingChanges;
@@ -1935,6 +1928,49 @@ app.get("/contest/:contestId/participants", async (req, res) => {
     res.status(200).json({ participantsCount });
   } catch (error) {
     console.error("Error fetching participants count:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get user data for the profile page
+app.get("user/:userId", async (req, res) => {
+  const { userId } = req.params;
+  console.log("User ID:", userId);
+
+  // Fetch user data along with their recent submissions
+  try {
+    const user = await prisma.User.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        rating: true,
+        pastRatings: true,
+        submissions: {
+          orderBy: { createdAt: "desc" },
+          take: 5, // Fetch only the last 5 submissions
+          select: {
+            id: true,
+            verdict: true,
+            createdAt: true,
+            problem: {
+              select: {
+                title: true,
+                difficulty: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    console.log("User Data:", user);
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

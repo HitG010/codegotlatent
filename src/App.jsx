@@ -105,6 +105,7 @@ const App = () => {
         }
       />
       <Route path="/contest/:contestId/ranking" element={<ContestRanking />} />
+      <Route path="/user/:userId" element={<h1>User Profile</h1>} />
       {/* Add more routes as needed */}
     </Routes>
     // </UserProvider>
