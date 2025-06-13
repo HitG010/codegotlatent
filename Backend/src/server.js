@@ -1329,6 +1329,19 @@ app.get("/contest/:contestId/users", async (req, res) => {
         contestId: contestId,
       },
       orderBy: { actualRank: "asc" },
+      select: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+        rankGuess: true,
+        actualRank: true,
+        finishTime: true,
+        score: true,
+        penalty: true,
+      },
     });
 
     // Now fetch all ProblemUser data for this contest
