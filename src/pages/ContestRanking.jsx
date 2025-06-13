@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import { useParams } from 'react-router-dom'
 import { getContestUsers, fetchContestStartTime } from '../api/api'
 import { Link } from 'react-router-dom'
-import { ExternalLink } from 'lucide-react'
+import { Bug, ExternalLink } from 'lucide-react'
 
 const contestRanking = () => {
     const { contestId } = useParams()
@@ -55,8 +55,8 @@ const contestRanking = () => {
                       {/* <h1 className='text-lg font-medium text-white'>{problem.problemId}</h1> */}
                       <h1 className='text-lg font-medium text-white'>{(new Date(problem.finishedAt).getTime() - new Date(startTime).getTime()) / 1000} seconds</h1>
                       <h1 className='text-lg font-medium text-white'>{problem.solvedInContest === true ? <span className='text-green-500'>Solved</span> : <span className='text-red-500'>Not Solved</span>}</h1>
-                      <h1 className='text-lg font-medium text-white'>{problem.score}</h1>
-                      <h1 className={`text-lg font-medium text-white`}>{problem.penalty}</h1>
+                      <h1 className='text-lg font-medium text-white px-2 py-0.2 rounded-full bg-white/5 flex gap-2 items-center'>{problem.score}</h1>
+                      <h1 className={`text-lg font-medium text-red-500 px-2 py-0.2 rounded-full bg-red-500/10 flex gap-2 items-center`}>{problem.penalty}<Bug className='h-4 w-4'/></h1>
                     </div>
                   ))}
                 </div>
