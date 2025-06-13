@@ -32,7 +32,7 @@ export default function Contests() {
 
   return (
     <div className="h-screen w-100vh flex flex-row justify-between bg-[#0F0F0F]">
-      <Navbar path={pathname}/>
+      <Navbar path={pathname} />
       <h1>Contests</h1>
 
       {contest.map((contest) => (

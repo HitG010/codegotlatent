@@ -745,10 +745,9 @@ app.get("/problem/:problemId/user/:userId", async (req, res) => {
       isSolved: true,
     },
   });
-  if(!isSolved){
+  if (!isSolved) {
     problem.isSolved = null;
-  }
-  else problem.isSolved = isSolved.isSolved;
+  } else problem.isSolved = isSolved.isSolved;
 
   if (!problem) {
     return res.status(404).json({ error: "Problem not found" });
@@ -846,9 +845,6 @@ app.post("/checkExistingUser", async (req, res) => {
 app.get("/contests", async (req, res) => {
   try {
     const contests = await prisma.Contest.findMany({
-      where: {
-        status: "Upcoming",
-      },
       include: {
         participants: false,
       },
