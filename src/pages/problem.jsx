@@ -84,7 +84,7 @@ function Problem() {
 
     console.log("Submitted Code:", code);
     // Simulate an API call to execute the code
-    executeCode(code, testCases, langId, id)
+    executeCode(code, data.testCases, langId, id)
       .then(async (result) => {
         // long poll the server for submission status
         console.log("Result:", result);

@@ -315,9 +315,8 @@ app.post("/submitContestCode", async (req, res) => {
       contestId: true, // Get the contest ID if the problem is part of an ongoing contest
     },
   });
-
-  contest_id = contest_id.contestId;
-
+  console.log("Contest ID hue hue hue:", contest_id);
+  if(contest_id) contest_id = contest_id.contestId;
   const testcases = await prisma.TestCase.findMany({
     where: {
       problemId: problem_id,
@@ -1949,7 +1948,7 @@ app.get("user/:userId", async (req, res) => {
         pastRatings: true,
         submissions: {
           orderBy: { createdAt: "desc" },
-          take: 5, // Fetch only the last 5 submissions
+          // take: 10, // Fetch only the last 10 submissions
           select: {
             id: true,
             verdict: true,

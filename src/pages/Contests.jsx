@@ -34,9 +34,9 @@ export default function Contests() {
     <div className="h-screen w-100vh flex flex-row justify-between bg-[#0F0F0F]">
       <Navbar path={pathname} />
       <h1>Contests</h1>
-
+      <div className="flex flex-col items-center justify-center">
       {contest.map((contest) => (
-        <div key={contest.id}>
+        <div key={contest.id} >
           <Link to={`/contest/${contest.id}`}>
             <div>
               <h2>{contest.title}</h2>
@@ -50,6 +50,7 @@ export default function Contests() {
           </Link>
         </div>
       ))}
+      </div>
     </div>
   );
 }
