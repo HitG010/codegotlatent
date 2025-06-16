@@ -54,12 +54,13 @@ export default function Submission() {
 
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <span className="font-medium text-white/65">Submission ID:</span> {submission.id}
+          <span className="font-medium text-white/65">Submission ID:</span>{" "}
+          {submission.id}
         </div>
         <div>
           <span className="font-medium text-white/65">User:</span>{" "}
           <Link
-            to={`/user/${submission.user.id}`}
+            to={`/user/${submission.user.username}`}
             className="text-blue-600 hover:underline"
           >
             {submission.user.username}
@@ -89,7 +90,7 @@ export default function Submission() {
         </div>
         <div>
           <span className="font-medium text-white/65">Memory Usage:</span>{" "}
-          {submission.memoryUsage ?? "N/A"} MB 
+          {submission.memoryUsage ?? "N/A"} MB
         </div>
         <div>
           <span className="font-medium text-white/65">Execution Time:</span>{" "}

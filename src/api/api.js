@@ -497,8 +497,8 @@ const getContestParticipants = async (contestId) => {
   }
 };
 
-const getUserData = async (userId) => {
-  const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}`;
+const getUserData = async (userName) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/user/${userName}`;
   console.log("URL:", url);
   try {
     const response = await axios.get(url, {

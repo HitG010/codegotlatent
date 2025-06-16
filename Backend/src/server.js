@@ -1765,9 +1765,9 @@ app.get("/problem/:problemId/acceptance", async (req, res) => {
   });
 });
 
-app.get("/user/:userId/problemCount", async (req, res) => {
-  const { userId } = req.params;
+const getUserProblemCount = async (userId) => {
   console.log("User ID:", userId);
+
   const easyCount = await prisma.problemUser.count({
     where: {
       userId: userId,
@@ -1868,14 +1868,27 @@ app.get("/user/:userId/problemCount", async (req, res) => {
     totalProblemsCount.find((problem) => problem.difficulty === "Hard")?._count
       .id || 0;
 
-  return res.status(200).json({
-    totalEasyCount: totalEasyCount,
-    totalMediumCount: totalMediumCount,
-    totalHardCount: totalHardCount,
-    easyCount: easyCount,
-    mediumCount: mediumCount,
-    hardCount: hardCount,
-  });
+  return {
+    easyCount,
+    mediumCount,
+    hardCount,
+    totalEasyCount,
+    totalMediumCount,
+    totalHardCount,
+  };
+};
+
+app.get("/user/:userId/problemCount", async (req, res) => {
+  const { userId } = req.params;
+  console.log("User ID:", userId);
+  try {
+    const problemCount = await getUserProblemCount(userId);
+    console.log("Problem Count:", problemCount);
+    res.status(200).json(problemCount);
+  } catch (error) {
+    console.error("Error fetching problem count:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.get("/user/:userId/problem/:problemId/submission", async (req, res) => {
@@ -1926,14 +1939,14 @@ app.get("/contest/:contestId/participants", async (req, res) => {
 });
 
 // Get user data for the profile page
-app.get("user/:userId", async (req, res) => {
-  const { userId } = req.params;
-  console.log("User ID:", userId);
+app.get("/user/:userName", async (req, res) => {
+  const { userName } = req.params;
+  console.log("User Name he he he :", userName);
 
   // Fetch user data along with their recent submissions
   try {
-    const user = await prisma.User.findUnique({
-      where: { id: userId },
+    const user = await prisma.user.findUnique({
+      where: { username: userName },
       select: {
         id: true,
         username: true,
@@ -1957,6 +1970,8 @@ app.get("user/:userId", async (req, res) => {
         },
       },
     });
+    const problemCount = await getUserProblemCount(user.id);
+    user.problemCount = problemCount;
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
