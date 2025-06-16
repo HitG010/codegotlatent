@@ -182,6 +182,8 @@ async function scheduleOngoingContests() {
         },
       });
       console.log("Contest updated:", updatedContest);
+      // call the ranking update function
+      submitContest(contest.id);
       io.emit("contestRatingPending", {
         contestId: contest.id,
         updatedContest,
@@ -214,7 +216,7 @@ async function scheduleRatingPendingContests() {
     // const date = new Date(end);
     const EndDate = new Date(year, month, date, hour, minute, second);
     // console.log("End Time:", endTime);
-    schedule.scheduleJob(EndDate + 30 * 1000, async () => {
+    schedule.scheduleJob(new Date(EndDate.getTime() + 2 * 60 * 1000), async () => {
       console.log("Contest Rating Update Phase Started:", contest.name);
       // Update the contest status to "Ended"
       const updatedContest = await prisma.Contest.update({
@@ -1087,6 +1089,9 @@ app.get("/contest/:contestId/problems/user/:userId", async (req, res) => {
       },
     });
     console.log("Contest:", contest);
+    if(!contest) {
+      return res.status(404).json({ error: "Contest not found or not started yet" });
+    }
     try {
       const problems = await prisma.Problem.findMany({
         where: {
@@ -1496,6 +1501,8 @@ app.get("/contest/:contestId/users", async (req, res) => {
         contestId: contestId,
       },
     });
+    // console.log("Contest Users:", contestUsers);
+    console.log("All Problem Users hue hue hue:", allProblemUsers);
 
     // Group problemUser entries by userId
     const problemsByUser = new Map();
@@ -1510,7 +1517,7 @@ app.get("/contest/:contestId/users", async (req, res) => {
     // Attach problem data to each contest user
     const contestLeaderboard = contestUsers.map((userEntry) => ({
       ...userEntry,
-      problems: problemsByUser.get(userEntry.userId) || [],
+      problems: problemsByUser.get(userEntry.user.id) || [],
     }));
     console.log("Contest Leaderboard:", contestLeaderboard);
     res.status(200).send(contestLeaderboard);
