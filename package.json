@@ -28,6 +28,7 @@
     "react-markdown": "^10.1.0",
     "react-resizable": "^3.0.5",
     "react-router-dom": "^7.4.1",
+    "recharts": "^2.15.3",
     "rehype-highlight": "^7.0.2",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
