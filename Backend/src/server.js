@@ -1442,14 +1442,15 @@ app.post("/auth/refresh-token", async (req, res) => {
 
 app.post("/auth/logout", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
+  console.log("Refresh Token:", refreshToken);
   if (!refreshToken) {
     return res.status(401).json({ message: "Refresh token not found." });
   }
 
   try {
-    await prisma.User.update({
+    await prisma.UserRefreshToken.update({
       where: { refreshToken },
-      data: { refreshToken: null },
+      data: { refreshToken: "" },
     });
     res
       .clearCookie("refreshToken")
@@ -2078,6 +2079,32 @@ app.get("/tags", async (req, res) => {
     res.json(allTags);
   } catch (error) {
     console.error("Error fetching tags:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// get user details for the setting page 
+app.get("/user/:userId/details", async (req, res) => {
+  const { userId } = req.params;
+  console.log("User ID:", userId);
+  try {
+    const user = await prisma.User.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        rating: true,
+        pastRatings: true,
+      },
+    });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    console.log("User Details:", user);
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user details:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

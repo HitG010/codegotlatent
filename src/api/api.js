@@ -545,6 +545,40 @@ const getAllTags = async () => {
   return response.data;
 };
 
+// for settings page
+const getUserDetails = async (userId) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}/details`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    throw error;
+  }
+};
+
+// function logoutUser(userId) {
+//   const url = `${import.meta.env.VITE_BASE_URL}/auth/logout/${userId}`;
+//   console.log("URL:", url);
+//   return axios
+//     .post(url, {}, { headers: { "Content-Type": "application/json" } })
+//     .then((response) => {
+//       console.log("Logout Response:", response.data);
+//       return response.data;
+//     })
+//     .catch((error) => {
+//       console.error("Error logging out user:", error);
+//       throw error;
+//     });
+// }
+
 export {
   api,
   executeCode,
@@ -572,4 +606,5 @@ export {
   getUserData,
   addProblem,
   getAllTags,
+  getUserDetails,
 };
