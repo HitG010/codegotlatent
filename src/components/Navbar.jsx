@@ -32,10 +32,10 @@ export default function Navbar({
         </div>
       </div>
       <div className="end-section flex flex-col gap-2">
-        <div className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300">
+        <Link to={'/settings'} className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300">
           <IoSettingsOutline className="text-white opacity-50 text-2xl mr-2" />
           <p className="text-lg opacity-50">Settings</p>
-        </div>
+        </Link>
         <div className="h-[1px] bg-white opacity-10"></div>
         <div className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300">
           <IoSettingsOutline className="text-white opacity-50 text-2xl mr-2" />

@@ -33,7 +33,7 @@ model User {
 model UserRefreshToken {
   id           String   @id @default(uuid())
   userId       String   @unique
-  refreshToken String   @unique
+  refreshToken String?   @unique
   createdAt    DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
