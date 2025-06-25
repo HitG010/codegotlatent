@@ -2083,7 +2083,7 @@ app.get("/tags", async (req, res) => {
   }
 });
 
-// get user details for the setting page 
+// get user details for the setting page
 app.get("/user/:userId/details", async (req, res) => {
   const { userId } = req.params;
   console.log("User ID:", userId);
