@@ -21,7 +21,6 @@ import { ClockFading, File } from "lucide-react";
 function Problem() {
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.accessToken);
-  const [code, setCode] = useState("// Write your code here...");
   const [result, setResult] = useState([]);
   const [submissionResult, setSubmissionResult] = useState([]);
   const [data, setData] = useState(null);
@@ -32,6 +31,8 @@ function Problem() {
   const [testCaseError, setTestCaseError] = useState(null);
   const [langId, setLangId] = useState(54);
   const { id } = useParams();
+  const savedCode = localStorage.getItem(`code${id}`);
+  const [code, setCode] = useState(savedCode || "// Write your code here\n\n");
   const [screenHeight, setScreenHeight] = useState(window.innerHeight - 75);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [tile1Height, setTile1Height] = useState((window.innerHeight - 75) / 2);
@@ -371,7 +372,7 @@ function Problem() {
               Java
             </option>
           </select>
-          <CodeEditor langId={langId} code={code} SetCode={setCode} />
+          <CodeEditor langId={langId} code={code} SetCode={setCode} probId={id} />
         </div>
       </div>
     </div>

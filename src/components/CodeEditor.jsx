@@ -1,12 +1,13 @@
 import Editor from "@monaco-editor/react";
 import { langIdToName } from "../data/langIdToName";
 
-const CodeEditor = ({ langId, code, SetCode }) => {
+const CodeEditor = ({ langId, code, SetCode, probId }) => {
   // console.log("Code Editor Lang ID:", langId);
   // console.log(langIdtoLangName[langId]);
 
   const handleEditorChange = (val) => {
     SetCode(val);
+    localStorage.setItem(`code${probId}`, val);
   };
 
   return (
