@@ -33,7 +33,7 @@ model User {
 model UserRefreshToken {
   id           String   @id @default(uuid())
   userId       String   @unique
-  refreshToken String   @unique
+  refreshToken String?   @unique
   createdAt    DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
@@ -58,10 +58,8 @@ model Contest {
 
 model ProblemTags{
   id        String  @id @default(uuid())
-  problemId String
   tag       String // e.g., "Dynamic Programming", "Graph Theory", etc.
-
-  problem Problem @relation(fields: [problemId], references: [id])
+  problems  Problem[] @relation("ProblemToTags")
 }
 
 model Problem {
@@ -78,7 +76,7 @@ model Problem {
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   contest         Contest?     @relation(fields: [contestId], references: [id])
-  tags              ProblemTags[]
+  tags              ProblemTags[] @relation("ProblemToTags")
   Problems        ProblemUser[]
   // @@index([contestId]) // Index for faster lookups
 
