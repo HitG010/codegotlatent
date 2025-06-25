@@ -515,6 +515,36 @@ const getUserData = async (userName) => {
   }
 };
 
+const addProblem = async (problemData) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/addProblem`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.post(url, problemData, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding problem:", error);
+    throw error;
+  }
+};
+
+const getAllTags = async () => {
+  const url = `${import.meta.env.VITE_BASE_URL}/tags`;
+  const response = await axios.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
+  console.log("Response:", response.data);
+  return response.data;
+};
+
 // for settings page
 const getUserDetails = async (userId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}/details`;
@@ -574,5 +604,7 @@ export {
   getUserProblemSubmission,
   getContestParticipants,
   getUserData,
+  addProblem,
+  getAllTags,
   getUserDetails,
 };

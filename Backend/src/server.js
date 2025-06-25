@@ -2000,23 +2000,87 @@ app.get("/user/:userName", async (req, res) => {
 app.post("/addTestCase", async (req, res) => {
   const { problemId, input, stdin, output, stdout, isPublic } = req.body;
   console.log("Request Body:", req.body);
-  // try {
-  const testCase = await prisma.testCase.create({
-    data: {
-      input: JSON.stringify(input),
-      stdin: stdin,
-      output: output,
-      stdout: stdout,
-      problemId: problemId,
-      isPublic: isPublic || false,
-    },
-  });
-  console.log("Test Case:", testCase);
-  res.status(200).json(testCase);
-  // } catch {
-  //   console.error("Error creating test case:");
-  //   res.status(500).json({ "Internal server error": "Internal server error" });
-  // }
+  try {
+    const testCase = await prisma.testCase.create({
+      data: {
+        input: JSON.stringify(input),
+        stdin: stdin,
+        output: output,
+        stdout: stdout,
+        problemId: problemId,
+        isPublic: isPublic || false,
+      },
+    });
+    console.log("Test Case:", testCase);
+    res.status(200).json(testCase);
+  } catch (error) {
+    console.error("Error creating test case:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/addProblem", async (req, res) => {
+  let {
+    title,
+    description,
+    difficulty,
+    problemScore,
+    contestId,
+    max_time_limit,
+    max_memory_limit,
+    tags,
+    testCases,
+  } = req.body;
+  if (!title || !description || !difficulty) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+  if (!contestId) {
+    contestId = null; // Allow for problems not associated with a contest
+  }
+  try {
+    const problem = await prisma.problem.create({
+      data: {
+        title,
+        description,
+        difficulty,
+        problemScore,
+        contestId,
+        max_time_limit,
+        max_memory_limit,
+        tags: {
+          connect: tags.map((tagId) => ({ id: tagId })), // connect existing tags
+        },
+        testCases: {
+          create: testCases.map((testCase) => ({
+            input: JSON.stringify(testCase.input),
+            stdin: testCase.stdin,
+            output: testCase.output,
+            stdout: testCase.stdout,
+            isPublic: testCase.isPublic || false,
+          })),
+        },
+      },
+    });
+
+    console.log("Problem Created:", problem);
+    res.status(201).json(problem);
+  } catch (error) {
+    console.error("Error creating problem:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /tags
+app.get("/tags", async (req, res) => {
+  try {
+    const allTags = await prisma.problemTags.findMany({
+      select: { id: true, tag: true },
+    });
+    res.json(allTags);
+  } catch (error) {
+    console.error("Error fetching tags:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // get user details for the setting page 
