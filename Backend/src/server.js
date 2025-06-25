@@ -216,20 +216,23 @@ async function scheduleRatingPendingContests() {
     // const date = new Date(end);
     const EndDate = new Date(year, month, date, hour, minute, second);
     // console.log("End Time:", endTime);
-    schedule.scheduleJob(new Date(EndDate.getTime() + 2 * 60 * 1000), async () => {
-      console.log("Contest Rating Update Phase Started:", contest.name);
-      // Update the contest status to "Ended"
-      const updatedContest = await prisma.Contest.update({
-        where: {
-          id: contest.id,
-        },
-        data: {
-          status: "Ended",
-        },
-      });
-      console.log("Contest updated:", updatedContest);
-      io.emit("contestEnded", { contestId: contest.id, updatedContest });
-    });
+    schedule.scheduleJob(
+      new Date(EndDate.getTime() + 2 * 60 * 1000),
+      async () => {
+        console.log("Contest Rating Update Phase Started:", contest.name);
+        // Update the contest status to "Ended"
+        const updatedContest = await prisma.Contest.update({
+          where: {
+            id: contest.id,
+          },
+          data: {
+            status: "Ended",
+          },
+        });
+        console.log("Contest updated:", updatedContest);
+        io.emit("contestEnded", { contestId: contest.id, updatedContest });
+      }
+    );
   });
 }
 
@@ -316,7 +319,7 @@ app.post("/submitContestCode", async (req, res) => {
     },
   });
   console.log("Contest ID hue hue hue:", contest_id);
-  if(contest_id) contest_id = contest_id.contestId;
+  if (contest_id) contest_id = contest_id.contestId;
   const testcases = await prisma.TestCase.findMany({
     where: {
       problemId: problem_id,
@@ -574,7 +577,9 @@ app.post("/batchSubmission", async (req, res) => {
     };
     submissions.push(submission);
   });
-  console.log("Submissions:", submissions);
+  // console.log("Submissions:", submissions);
+
+  console.log(JSON.stringify({ submissions: submissions }));
 
   const url = `${process.env.JUDGE0_API}/submissions/batch`;
   const response = await fetch(url, {
@@ -1088,8 +1093,10 @@ app.get("/contest/:contestId/problems/user/:userId", async (req, res) => {
       },
     });
     console.log("Contest:", contest);
-    if(!contest) {
-      return res.status(404).json({ error: "Contest not found or not started yet" });
+    if (!contest) {
+      return res
+        .status(404)
+        .json({ error: "Contest not found or not started yet" });
     }
     try {
       const problems = await prisma.Problem.findMany({
@@ -1987,4 +1994,26 @@ app.get("/user/:userName", async (req, res) => {
     console.error("Error fetching user data:", error);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+app.post("/addTestCase", async (req, res) => {
+  const { problemId, input, stdin, output, stdout, isPublic } = req.body;
+  console.log("Request Body:", req.body);
+  // try {
+  const testCase = await prisma.testCase.create({
+    data: {
+      input: JSON.stringify(input),
+      stdin: stdin,
+      output: output,
+      stdout: stdout,
+      problemId: problemId,
+      isPublic: isPublic || false,
+    },
+  });
+  console.log("Test Case:", testCase);
+  res.status(200).json(testCase);
+  // } catch {
+  //   console.error("Error creating test case:");
+  //   res.status(500).json({ "Internal server error": "Internal server error" });
+  // }
 });
