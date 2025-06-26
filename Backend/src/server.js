@@ -2108,3 +2108,25 @@ app.get("/user/:userId/details", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+app.post("/user/:userId/update", async (req, res) => {
+  const { userID } = req.params;
+  const { username, name, Bio, Location, pfpId } = req.body;
+  try {
+    const updatedUser = await prisma.User.update({
+      where: { id: userID },
+      data: {
+        username,
+        name,
+        Bio,
+        Location,
+        pfpId,
+      },
+    });
+    console.log("Updated User:", updatedUser);
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
