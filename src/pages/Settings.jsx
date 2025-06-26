@@ -90,8 +90,9 @@ return (
                         value={userDetails?.email || ''}
                         onChange={handleChange}
                         className="py-1 px-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
+                        disabled
                     />
-                    <button
+                    {/* <button
                         onClick={() => {
                             // Add logic to update email
                             alert('Email updated!');
@@ -99,7 +100,7 @@ return (
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
                     >
                         Edit <Pencil className='w-3 h-3 inline' />
-                    </button>
+                    </button> */}
                 </div>
                 <h2 className="text-white/65 text-lg font-medium">Password</h2>
                 <div className='flex gap-2 col-span-4'>
