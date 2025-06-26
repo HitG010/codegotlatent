@@ -564,6 +564,24 @@ const getUserDetails = async (userId) => {
   }
 };
 
+const updateUserDetails = async (userId, userDetails) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}/update`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.post(url, userDetails, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    throw error;
+  }
+};
+
 // function logoutUser(userId) {
 //   const url = `${import.meta.env.VITE_BASE_URL}/auth/logout/${userId}`;
 //   console.log("URL:", url);
