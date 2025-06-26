@@ -625,4 +625,5 @@ export {
   addProblem,
   getAllTags,
   getUserDetails,
+  updateUserDetails
 };

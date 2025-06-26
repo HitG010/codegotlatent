@@ -5,10 +5,31 @@ import { SlPuzzle } from "react-icons/sl";
 import { HiMiniTrophy } from "react-icons/hi2";
 import { IoSettingsOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
+import { getUserDetails } from "../api/api";
+import useUserStore from "../store/userStore";
+import { avatars } from "./Avatars";
 
 export default function Navbar({
+  
   path
 }) {
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
+  const [userDetails, setUserDetails] = React.useState(null);
+
+  // Fetch user details when the component mounts
+  React.useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const details = await getUserDetails(user.id);
+        setUserDetails(details);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+    fetchUserDetails();
+  }, [user.id]);
+
   // This component renders a sidebar navigation bar with links to Home, Problems, and Contests.
   return (
     <div className="navbar h-full w-[20%] bg-[#1A1A1A] flex flex-col p-6 justify-between transion-all duration-300">
@@ -37,10 +58,10 @@ export default function Navbar({
           <p className="text-lg opacity-50">Settings</p>
         </Link>
         <div className="h-[1px] bg-white opacity-10"></div>
-        <div className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300">
-          <IoSettingsOutline className="text-white opacity-50 text-2xl mr-2" />
-          <p className="text-lg">Kartik Bindra</p>
-        </div>
+        <Link to={`/user/${userDetails?.username}`} className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300">
+          <img src={avatars[userDetails?.pfpId - 1] || null} alt="" className="h-10 w-10 rounded-full mr-2 bg-black" />
+          <p className="text-lg">{userDetails?.username}</p>
+        </Link>
       </div>
     </div>
   );

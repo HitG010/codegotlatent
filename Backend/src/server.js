@@ -2094,8 +2094,10 @@ app.get("/user/:userId/details", async (req, res) => {
         id: true,
         username: true,
         email: true,
-        rating: true,
-        pastRatings: true,
+        name: true,
+        Bio: true,
+        Location: true,
+        pfpId: true,
       },
     });
     if (!user) {
@@ -2110,11 +2112,13 @@ app.get("/user/:userId/details", async (req, res) => {
 });
 
 app.post("/user/:userId/update", async (req, res) => {
-  const { userID } = req.params;
+  const { userId } = req.params;
   const { username, name, Bio, Location, pfpId } = req.body;
+  console.log("User ID:", userId);
+
   try {
-    const updatedUser = await prisma.User.update({
-      where: { id: userID },
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
       data: {
         username,
         name,

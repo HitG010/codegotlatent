@@ -1,10 +1,12 @@
 import React from 'react'
-import { getUserDetails, unregisterUser } from "../api/api";
+import { getUserDetails, updateUserDetails } from "../api/api";
 import useUserStore from "../store/userStore";
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import { Link } from 'react-router-dom';
 import { ExternalLink, Pencil, Check } from 'lucide-react';
+// import avatar1_cgl from '../assets/avatar1_cgl.png';
+import {avatars, fallbackAvatar} from '../components/Avatars';
 
 function Settings() {
 const user = useUserStore((state) => state.user);
@@ -13,9 +15,10 @@ console.log('user in settings', user);
 const [userDetails, setUserDetails] = React.useState(null);
 const [editField, setEditField] = React.useState({
     username: true,
-    fullName: true,
-    bio: true,
-    location: true,
+    name: true,
+    Bio: true,
+    Location: true,
+    pfpId: true,
 });
 React.useEffect(() => {
     const fetchUserDetails = async () => {
@@ -35,6 +38,18 @@ const handleChange = (e) => {
         ...prev,
         [name]: value,
     }));
+};
+
+const handleUpdateUserDetails = async () => {
+    try {
+        const updatedDetails = await updateUserDetails(user.id, userDetails);
+        setUserDetails(updatedDetails);
+        // alert('User details updated successfully!');
+        console.log('User details updated successfully:', updatedDetails);
+    } catch (error) {
+        console.error('Error updating user details:', error);
+        // alert('Failed to update user details. Please try again.');
+    }
 };
 
 const handleLogout = () => {
@@ -57,7 +72,7 @@ return (
         <div className="home flex flex-col h-full w-[80%] p-10 pt-16 bg-[#0F0F0F] overflow-auto scrollbar">
         <h2 className="text-white text-4xl font-semibold">Settings</h2>
         <div className='mt-8 flex gap-16'>
-            <img src={userDetails?.avatar || ''} alt="User Avatar" className="h-24 w-24 rounded-full bg-[#ffffff20]"/>
+            <img src={userDetails?.pfpId ? avatars[userDetails.pfpId-1] : fallbackAvatar()} alt="" className="h-24 w-24 rounded-full bg-[#000] border border-[#ffffff35]"/>
             <div>
                 <p className="text-white text-sm text-white/65">Username</p>
                 <p className="text-white text-2xl font-semibold">{userDetails?.username}</p>
@@ -85,7 +100,7 @@ return (
                             setEditField((prev) => ({ ...prev, username: !prev.username }));
                             if( editField.username == false) {
                                 // Logic to save the username
-                                alert('Username updated!');
+                                handleUpdateUserDetails();
                             }
                         }}
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
@@ -116,82 +131,126 @@ return (
                 <h2 className="text-white/65 text-lg font-medium">Password</h2>
                 <div className='flex gap-2 col-span-4'>
                     {/* <input
-                        type="password"
-                        name="password"
-                        placeholder="Change Password"
-                        className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
-                    />
-                    <button
-                        onClick={() => {
-                            // Add logic to update password
-                            alert('Password updated!');
-                        }}
-                        className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                        Change <Pencil className='w-3 h-3 inline' />
-                    </button> */}
-                    <Link to="/forgot-password" className="text-blue-500 hover:underline">Click to change password</Link>
+                                            type="password"
+                                            name="password"
+                                            placeholder="Change Password"
+                                            className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
+                                        />
+                                        <button
+                                            onClick={() => {
+                                                // Add logic to update password
+                                                alert('Password updated!');
+                                            }}
+                                            className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+                                        >
+                                            Change <Pencil className='w-3 h-3 inline' />
+                                        </button> */}
+                                        <Link to="/forgot-password" className="text-yellow-500 hover:underline">Click to change password</Link>
+                                    </div>
+                                    <h2 className="text-white/65 text-lg font-medium">Choose Avatar</h2>
+                                    <div className='flex gap-2 col-span-4'>
+                                        {avatars.map((avatar, idx) => (
+                                            <img
+                                                key={idx}
+                                                src={avatar}
+                                                alt={`Avatar ${idx + 1}`}
+                                                className={`h-10 w-10 rounded-full cursor-pointer ${Number(userDetails?.pfpId) === idx + 1 ? 'border border-2 border-yellow-500' : ''}`}
+                                                onClick={async () => {
+                                                    // Only update if a different avatar is selected
+                                                    if (Number(userDetails?.pfpId) !== idx + 1) {
+                                                        const newDetails = { ...userDetails, pfpId: String(idx + 1) };
+                                                        setUserDetails(newDetails);
+                                                        try {
+                                                            const updated = await updateUserDetails(user.id, newDetails);
+                                                            setUserDetails(updated);
+                                                        } catch (error) {
+                                                            // Optionally revert UI if update fails
+                                                            setUserDetails(userDetails);
+                                                            console.error('Failed to update avatar:', error);
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        ))}
+                        {/* handleUpdateUserDetails();
+                    }} /> */}
+
                 </div>
             </div>
 
 
-            <h2 className="text-white text-2xl font-medium mt-4">Basic Information</h2>
+            <h2 className="text-2xl font-medium mt-4">Basic Information</h2>
             <div className='grid grid-cols-5 gap-1 items-center'>
                 <h2 className="text-white/65 text-lg font-medium">Full Name</h2>
                 <div className='flex gap-2 col-span-4'>
                     <input
                         type="text"
-                        name="fullName"
-                        value={userDetails?.fullName || ''}
+                        name="name"
+                        value={userDetails?.name || ""}
                         onChange={handleChange}
-                        className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
+                        className={"p-2 w-full focus:bg-[#ffffff10] rounded border border-[#ffffff20]"}
+                        placeholder={userDetails?.name ? '' : 'No name set'}
+                        disabled = {editField.name}
                     />
                     <button
-                        onClick={() => {
-                            // Add logic to update full name
-                            alert('Full Name updated!');
+                         onClick={() => {
+                            setEditField((prev) => ({ ...prev, name: !prev.name }));
+                            if( editField.name == false) {
+                                // Logic to save the name
+                                handleUpdateUserDetails();
+                            }
                         }}
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
                     >
-                        Edit <Pencil className='w-3 h-3 inline' />
+                        {(editField.name == false) ? <>Save <Check className='w-3 h-3 inline' /></> : <>Edit <Pencil className='w-3 h-3 inline' /></>}
                     </button>
                 </div>
                 <h2 className="text-white/65 text-lg font-medium">Bio</h2>
-                <div className='flex gap-2 col-span-4'>
+                <div className='flex gap-2 col-span-4 items-start'>
                     <textarea
-                        name="bio"
-                        value={userDetails?.bio || ''}
+                        name="Bio"
+                        value={userDetails?.Bio || ""}
                         onChange={handleChange}
                         className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
                         rows="3"
+                        disabled = {editField.Bio}
+                        placeholder={userDetails?.Bio ? '' : 'No bio set'}
                     />
                     <button
-                        onClick={() => {
-                            // Add logic to update bio
-                            alert('Bio updated!');
+                         onClick={() => {
+                            setEditField((prev) => ({ ...prev, Bio: !prev.Bio }));
+                            if( editField.Bio == false) {
+                                // Logic to save the bio
+                                handleUpdateUserDetails();
+                            }
                         }}
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
                     >
-                        Edit <Pencil className='w-3 h-3 inline' />
+                        {(editField.Bio == false) ? <>Save <Check className='w-3 h-3 inline' /></> : <>Edit <Pencil className='w-3 h-3 inline' /></>}
                     </button>
                 </div>
                 <h2 className="text-white/65 text-lg font-medium">Location</h2>
                 <div className='flex gap-2 col-span-4'>
                     <input
                         type="text"
-                        name="location"
-                        value={userDetails?.location || ''}
+                        name="Location"
+                        value={userDetails?.Location || ""}
+                        placeholder={userDetails?.Location ? '' : 'No location set'}
                         onChange={handleChange}
                         className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
+                        disabled = {editField.Location}
                     />
                     <button
                         onClick={() => {
-                            // Add logic to update location
-                            alert('Location updated!');
+                            setEditField((prev) => ({ ...prev, Location: !prev.Location }));
+                            if( editField.Location == false) {
+                                // Logic to save the location
+                                handleUpdateUserDetails();
+                            }
                         }}
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
                     >
-                        Edit <Pencil className='w-3 h-3 inline' />
+                        {(editField.Location == false) ? <>Save <Check className='w-3 h-3 inline' /></> : <>Edit <Pencil className='w-3 h-3 inline' /></>}
                     </button>
                 </div>
                 {/* <h2 className="text-white/65 text-lg font-medium">Website</h2> */}
