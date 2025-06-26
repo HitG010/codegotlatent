@@ -1,4 +1,3 @@
-import React from "react";
 import {
   LineChart,
   Line,
@@ -29,28 +28,33 @@ const RatingGraph = ({ ratings }) => {
   }));
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 w-full">
-      <h2 className="text-xl font-semibold text-center mb-4 text-gray-800">Rating Progress</h2>
-      <ResponsiveContainer height={300}>
+    <div className=" rounded-2xl shadow-lg w-full">
+      {/* <h2 className="text-xl font-semibold text-center mb-4 text-gray-800">Rating Progress</h2> */}
+      <ResponsiveContainer height={200}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff25" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff25" />
           <XAxis
             dataKey="contest"
             tickFormatter={(value) => `#${value + 1}`}
-            tick={{ fontSize: 12, fill: "#6b7280" }}
+            tick={{ fontSize: 0, fill: "#ffffff05" }}
+            axisLine={{ stroke: "#ffffff05" }}
+            tickLine={{ stroke: "#ffffff15" }}
           />
           <YAxis
             domain={["dataMin - 50", "dataMax + 50"]}
-            tick={{ fontSize: 12, fill: "#6b7280" }}
+            tick={{ fontSize: 0, fill: "#ffffff05" }}
+            axisLine={{ stroke: "#ffffff05" }}
+            tickLine={{ stroke: "#ffffff15" }}
           />
           <Tooltip content={<RatingTooltip />} />
           <Line
-            type="monotone"
+            type="linear"
             dataKey="rating"
-            stroke="#6366f1"
+            stroke="#ffffff"
             strokeWidth={3}
-            activeDot={{ r: 6, stroke: "#4f46e5", strokeWidth: 2, fill: "#a5b4fc" }}
-            dot={{ r: 3, fill: "#6366f1" }}
+            activeDot={{ r: 7, stroke: "#ffffff", strokeWidth: 3, fill: "#ffffff" }}
+            dot={{ r: 4, fill: "#fff", stroke: "#000", strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>
