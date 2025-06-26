@@ -53,12 +53,12 @@ export default function Navbar({
         </div>
       </div>
       <div className="end-section flex flex-col gap-2">
-        <Link to={'/settings'} className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300">
-          <IoSettingsOutline className="text-white opacity-50 text-2xl mr-2" />
-          <p className="text-lg opacity-50">Settings</p>
+        <Link to={'/settings'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300 ${path === '/settings' ? 'bg-[#2A2A2A]' : ''}`}>
+          <IoSettingsOutline className={`text-2xl mr-2 ${path === '/settings' ? 'text-white' : 'text-white/65'}`} />
+          <p className={`text-lg ${path === '/settings' ? 'text-white' : 'text-white/65'}`}>Settings</p>
         </Link>
         <div className="h-[1px] bg-white opacity-10"></div>
-        <Link to={`/user/${userDetails?.username}`} className="flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300">
+        <Link to={`/user/${userDetails?.username}`} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300 ${path === `/user/${userDetails?.username}` ? 'bg-[#2A2A2A]' : ''}`}>
           <img src={avatars[userDetails?.pfpId - 1] || null} alt="" className="h-10 w-10 rounded-full mr-2 bg-black" />
           <p className="text-lg">{userDetails?.username}</p>
         </Link>

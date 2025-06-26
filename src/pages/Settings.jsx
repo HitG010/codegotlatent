@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { ExternalLink, Pencil, Check } from 'lucide-react';
 // import avatar1_cgl from '../assets/avatar1_cgl.png';
 import {avatars, fallbackAvatar} from '../components/Avatars';
+import { useParams } from 'react-router-dom';
 
 function Settings() {
 const user = useUserStore((state) => state.user);
@@ -20,6 +21,7 @@ const [editField, setEditField] = React.useState({
     Location: true,
     pfpId: true,
 });
+const pathname = window.location.pathname;
 React.useEffect(() => {
     const fetchUserDetails = async () => {
         try {
@@ -68,7 +70,7 @@ const handleLogout = () => {
 
 return (
     <div  className="h-screen w-100vh flex flex-row justify-between bg-[#0F0F0F] overflow-hidden scrollbar">
-        <Navbar />
+        <Navbar path={pathname}/>
         <div className="home flex flex-col h-full w-[80%] p-10 pt-16 bg-[#0F0F0F] overflow-auto scrollbar">
         <h2 className="text-white text-4xl font-semibold">Settings</h2>
         <div className='mt-8 flex gap-16'>
