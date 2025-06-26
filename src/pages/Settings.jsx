@@ -4,13 +4,19 @@ import useUserStore from "../store/userStore";
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Pencil } from 'lucide-react';
+import { ExternalLink, Pencil, Check } from 'lucide-react';
 
 function Settings() {
 const user = useUserStore((state) => state.user);
 const clearUser = useUserStore((state) => state.clearUser);
 console.log('user in settings', user);
 const [userDetails, setUserDetails] = React.useState(null);
+const [editField, setEditField] = React.useState({
+    username: true,
+    fullName: true,
+    bio: true,
+    location: true,
+});
 React.useEffect(() => {
     const fetchUserDetails = async () => {
         try {
@@ -71,15 +77,20 @@ return (
                         value={userDetails?.username || ''}
                         onChange={handleChange}
                         className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
+                        disabled = {editField.username} // Disable input for username
                     />
                     <button
                         onClick={() => {
                             // Add logic to update username
-                            alert('Username updated!');
+                            setEditField((prev) => ({ ...prev, username: !prev.username }));
+                            if( editField.username == false) {
+                                // Logic to save the username
+                                alert('Username updated!');
+                            }
                         }}
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
                     >
-                        Edit <Pencil className='w-3 h-3 inline' />
+                        {(editField.username == false) ? <>Save <Check className='w-3 h-3 inline' /></> : <>Edit <Pencil className='w-3 h-3 inline' /></>}
                     </button>
                 </div>
                 <h2 className="text-white/65 text-lg font-medium">Email</h2>
@@ -104,7 +115,7 @@ return (
                 </div>
                 <h2 className="text-white/65 text-lg font-medium">Password</h2>
                 <div className='flex gap-2 col-span-4'>
-                    <input
+                    {/* <input
                         type="password"
                         name="password"
                         placeholder="Change Password"
@@ -118,7 +129,8 @@ return (
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
                     >
                         Change <Pencil className='w-3 h-3 inline' />
-                    </button>
+                    </button> */}
+                    <Link to="/forgot-password" className="text-blue-500 hover:underline">Click to change password</Link>
                 </div>
             </div>
 
