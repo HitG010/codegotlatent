@@ -2143,3 +2143,15 @@ app.post("/user/:userId/update", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+app.get("/tags", async (req, res) => {
+  try {
+    const allTags = await prisma.problemTags.findMany({
+      select: { id: true, tag: true },
+    });
+    res.json(allTags);
+  } catch (error) {
+    console.error("Error fetching tags:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
