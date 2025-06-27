@@ -110,6 +110,7 @@ const App = () => {
       <Route path="/contest/:contestId/ranking" element={<ContestRanking />} />
       <Route path="/user/:userName" element={<User />} />
       <Route path="/admin" element={<Admin />} />
+
       <Route path="/settings" element={<Settings />} />
       {/* Add more routes as needed */}
     </Routes>

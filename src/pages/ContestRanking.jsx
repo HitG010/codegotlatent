@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getContestUsers, fetchContestStartTime } from "../api/api";
+import {
+  getContestUsers,
+  fetchContestStartTime,
+  getAllContestProblems,
+} from "../api/api";
 import { Link } from "react-router-dom";
 import { Bug, ExternalLink } from "lucide-react";
 
@@ -10,6 +14,7 @@ const contestRanking = () => {
   // fetch the users in the contest using the contestId
   const [users, setUsers] = useState([]);
   const [startTime, setStartTime] = useState(new Date().getTime());
+  const [problems, setProblems] = useState([]);
   useEffect(() => {
     const fetchUsers = async () => {
       const response = await getContestUsers(contestId);
@@ -23,6 +28,12 @@ const contestRanking = () => {
       setStartTime(response);
     };
     fetchStartTime();
+    const fetchProblems = async () => {
+      const response = await getAllContestProblems(contestId);
+      console.log(response, "Contest Problems");
+      setProblems(response);
+    };
+    fetchProblems();
   }, [contestId]);
 
   console.log(typeof startTime, "Start Time");
@@ -99,8 +110,10 @@ const contestRanking = () => {
                             {problem.score}
                           </h1>
                           {problem.penalty > 0 && (
-                            <h1 className={`text-lg font-medium text-red-500 px-2 py-0.2 rounded-full bg-red-500/10 flex gap-2 items-center`}>
-                              {problem.penalty} <Bug className='h-4 w-4'/>
+                            <h1
+                              className={`text-lg font-medium text-red-500 px-2 py-0.2 rounded-full bg-red-500/10 flex gap-2 items-center`}
+                            >
+                              {problem.penalty} <Bug className="h-4 w-4" />
                             </h1>
                           )}
                         </div>
