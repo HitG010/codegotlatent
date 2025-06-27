@@ -2142,3 +2142,20 @@ app.post("/user/:userId/update", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+app.post("/problem/:problemId/deleteAllTestCases", async (req, res) => {
+  const { problemId } = req.params;
+  console.log("Problem ID:", problemId);
+  try {
+    const deletedTestCases = await prisma.testCase.deleteMany({
+      where: {
+        problemId: problemId,
+      },
+    });
+    console.log("Deleted Test Cases:", deletedTestCases);
+    res.status(200).json(deletedTestCases);
+  } catch (error) {
+    console.error("Error deleting test cases:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
