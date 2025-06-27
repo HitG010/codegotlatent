@@ -12,6 +12,7 @@ const contestRanking = () => {
   const [users, setUsers] = useState([]);
   const [startTime, setStartTime] = useState(new Date().getTime());
   const [problems, setProblems] = useState([]);
+  const [problems, setProblems] = useState([]);
   useEffect(() => {
     const fetchUsers = async () => {
       const response = await getContestUsers(contestId);
@@ -25,6 +26,12 @@ const contestRanking = () => {
       setStartTime(response);
     };
     fetchStartTime();
+    const fetchProblems = async () => {
+      const response = await getAllContestProblems(contestId);
+      console.log(response, "Contest Problems");
+      setProblems(response);
+    };
+    fetchProblems();
     const fetchProblems = async () => {
       const response = await getAllContestProblems(contestId);
       console.log(response, "Contest Problems");
