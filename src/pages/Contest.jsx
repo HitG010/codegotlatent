@@ -393,6 +393,16 @@ export default function Contest() {
             </ul>
           </div>
           </div>
+          {contest.status === "Ended" && (
+            <div className="bg-[#ffffff05] rounded-lg p-4 mt-4
+            border border-1 border-[#ffffff10]">
+              <h2 className="text-2xl font-semibold mb-2">Contest Rankings</h2>
+              <p className="text-white/65">The contest has ended. You can view your results and ratings by visiting the rankings page.</p>
+              <Link to={`/contest/${contestId}/ranking`} className="text-black bg-white rounded-md font-medium px-3 py-2 text-center hover:bg-white/65 transition-all duration-300 mt-2 inline-block w-full">
+                View Rankings
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </div>

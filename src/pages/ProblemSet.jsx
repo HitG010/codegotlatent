@@ -9,8 +9,9 @@ import AvatarProgressRing from "../components/avatarProgressRing";
 import contestTrophy from "../assets/trophy.svg";
 import { FaArrowRightLong, FaCheck, FaCross } from "react-icons/fa6";
 import latentNavLogo from "../assets/latentNavLogo.svg";
-import { getUserProblemCount } from "../api/api";
+import { getUserProblemCount, getUserDetails } from "../api/api";
 import { FaCircleHalfStroke } from "react-icons/fa6";
+import { avatars } from "../components/Avatars";
 
 
 const ProblemSet = () => {
@@ -25,10 +26,23 @@ const ProblemSet = () => {
   const [hardTotal, setHardTotal] = useState(0);
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.accessToken);
+  const [userDetails, setUserDetails] = useState(null);
 
   async function fetchProblemSet() {
     const response = await fetchProblems(user.id);
     setProblems([...response]);
+  }
+
+  async function fetchUserDetails() {
+    try {
+      const details = await getUserDetails(user.id);
+      console.log("User Details:", details);
+      // return details;
+      setUserDetails(details);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      setError("Failed to fetch user details");
+    }
   }
 
   async function fetchProblemCount() {
@@ -46,6 +60,7 @@ const ProblemSet = () => {
   useEffect(() => {
     fetchProblemSet();
     fetchProblemCount();
+    fetchUserDetails();
     setLoading(false);
   }, []);
   const pathname = window.location.pathname;
@@ -102,7 +117,7 @@ const ProblemSet = () => {
                 {/* <div className="rounded-full w-22 h-22 flex items-center justify-center">
                 <div className="rounded-full bg-[#ffffff25] w-20 h-20"></div>
               </div> */}
-                <AvatarProgressRing progress={((easyCount+mediumCount+hardCount)/(easyTotal+mediumTotal+hardTotal)*100).toFixed(2)} imageUrl={"../assets/latentNavLogo.png"} />
+                <AvatarProgressRing progress={((easyCount+mediumCount+hardCount)/(easyTotal+mediumTotal+hardTotal)*100).toFixed(2)} imageComponent={avatars[userDetails?.pfpId - 1]} />
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-row justify-between w-[170px]">
                     <p className="text-lg font-medium text-green-500">Easy</p>
