@@ -1492,6 +1492,7 @@ app.get("/contest/:contestId/users", async (req, res) => {
           select: {
             id: true,
             username: true,
+            pfpId: true,
           },
         },
         rankGuess: true,
