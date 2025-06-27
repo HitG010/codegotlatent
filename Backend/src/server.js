@@ -24,7 +24,7 @@ const app = express();
 const server = require("http").createServer(app);
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" })); // Increase the limit to handle larger requests
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
@@ -320,6 +320,7 @@ app.post("/submitContestCode", async (req, res) => {
   });
   console.log("Contest ID hue hue hue:", contest_id);
   if (contest_id) contest_id = contest_id.contestId;
+  console.time("Fetch Testcases");
   const testcases = await prisma.TestCase.findMany({
     where: {
       problemId: problem_id,
@@ -336,9 +337,10 @@ app.post("/submitContestCode", async (req, res) => {
       max_time_limit: true, // in seconds
     },
   });
-
+  console.timeEnd("Fetch Testcases");
   const submissions = [];
   console.log("Submissions:", submissions);
+  console.time("Submission");
   testcases.forEach((testCase) => {
     const submission = {
       source_code: source_code || "// No code submitted",
@@ -372,6 +374,8 @@ app.post("/submitContestCode", async (req, res) => {
   const tokensString = resultJson.map((item) => item.token).join(",");
 
   const response = await getSubmissionStatus(tokensString);
+
+  console.timeEnd("Submission");
 
   let finalVerdict = "Accepted";
   let passedTestcasesCnt = 0;
@@ -601,7 +605,7 @@ app.post("/batchSubmitProblem", async (req, res) => {
   const body = await req.body;
   const { problem_id, language_id, source_code } = body;
 
-  const testcases = await prisma.TestCase.findMany({
+  const testcases = await prisma.testCase.findMany({
     where: {
       problemId: problem_id,
     },
@@ -1986,7 +1990,6 @@ app.get("/user/:userName", async (req, res) => {
             },
           },
         },
-
       },
     });
     const problemCount = await getUserProblemCount(user.id);
