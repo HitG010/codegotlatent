@@ -1965,6 +1965,10 @@ app.get("/user/:userName", async (req, res) => {
         id: true,
         username: true,
         email: true,
+        name: true,
+        Bio: true,
+        Location: true,
+        pfpId: true,
         rating: true,
         pastRatings: true,
         submissions: {
@@ -1982,6 +1986,7 @@ app.get("/user/:userName", async (req, res) => {
             },
           },
         },
+
       },
     });
     const problemCount = await getUserProblemCount(user.id);
