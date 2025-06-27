@@ -582,6 +582,26 @@ const updateUserDetails = async (userId, userDetails) => {
   }
 };
 
+function fetchTags() {
+  const url = `${import.meta.env.VITE_BASE_URL}/tags`;
+  console.log("URL:", url);
+  return axios
+    .get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    })
+    .then((response) => {
+      console.log("Response:", response.data);
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error fetching tags:", error);
+      throw error;
+    });
+}
+
 // function logoutUser(userId) {
 //   const url = `${import.meta.env.VITE_BASE_URL}/auth/logout/${userId}`;
 //   console.log("URL:", url);
@@ -625,5 +645,6 @@ export {
   addProblem,
   getAllTags,
   getUserDetails,
-  updateUserDetails
+  updateUserDetails,
+  fetchTags,
 };

@@ -60,7 +60,7 @@ function User() {
           <div className="flex flex-col justify-start gap-4 w-full">
             <Link to={`/settings`} className="text-black bg-white rounded-md font-medium px-3 py-2 text-center hover:bg-white/65 transition-all duration-300">Edit Profile</Link>
             <p className="text-white/65 flex items-center gap-4"><Mail className="w-5 h-5"/> {userData.email}</p>
-            <p className="text-white/65 flex items-center gap-4"> <PenToolIcon className="w-5 h-5"/> {userData.Bio} </p>
+            <p className="text-white/65 flex items-center gap-4"> <PenToolIcon className="w-5 h-5"/> {userData.Bio?.substring(0, 70)}... </p>
             <p className="text-white/65 flex items-center gap-4"><MapPin className="w-5 h-5"/> {userData.Location}</p>
 
           </div>

@@ -24,7 +24,7 @@ const app = express();
 const server = require("http").createServer(app);
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json({ limit: "10mb" })); // Increase the limit to handle larger requests
+app.use(express.json({ limit: "50mb" })); // Increase the limit to handle larger requests
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
@@ -1496,6 +1496,7 @@ app.get("/contest/:contestId/users", async (req, res) => {
           select: {
             id: true,
             username: true,
+            pfpId: true,
           },
         },
         rankGuess: true,
@@ -2156,6 +2157,18 @@ app.post("/problem/:problemId/deleteAllTestCases", async (req, res) => {
     res.status(200).json(deletedTestCases);
   } catch (error) {
     console.error("Error deleting test cases:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/tags", async (req, res) => {
+  try {
+    const allTags = await prisma.problemTags.findMany({
+      select: { id: true, tag: true },
+    });
+    res.json(allTags);
+  } catch (error) {
+    console.error("Error fetching tags:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
