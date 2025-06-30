@@ -13,9 +13,9 @@ const ProblemDescription = ({ data }) => {
         <span className="text-white/65">{data.isSolved === true ? <p className="flex gap-2 items-center"><Check className="text-green-500 h-4 w-4"/> Solved</p> : (data.isSolved === false ? "Attempted" : "")}</span>
       </p>
       </div>
-      <div className="mt-1 flex gap-2">
+      <div className="mt-1 flex gap-2 w-full items-center">
         <DifficultyTag tag={data.difficulty} />
-        <div>
+        <div className="flex gap-2 flex-wrap">
           {data.tags.map((tag) => (
             <p
               key={tag.id}

@@ -63,7 +63,7 @@ export const Testcase = ({
                 Input:
               </span>
               <div className="text-sm font-mono bg-[#2a2a2a] p-2 rounded-md">
-                {Object.entries(JSON.parse(input)).map(([key, val]) => (
+                {Object.entries(JSON.parse(input || "{}")).map(([key, val]) => (
                   <span key={key} className="text-white/65 font-bold text-md">
                     {key} = <span className="text-white">{val}</span>{" "}
                   </span>
@@ -76,7 +76,7 @@ export const Testcase = ({
                 Expected Output:
               </span>{" "}
               <div className="text-sm font-mono bg-[#2a2a2a] p-2 rounded-md">
-              <span className="text-white">{JSON.stringify(output)}</span>
+              <span className="text-white">{JSON.stringify(output || "")}</span>
               </div>
             </p>
             {testCaseStatus && testCaseStatus.stdout && (
