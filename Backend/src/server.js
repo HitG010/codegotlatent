@@ -12,10 +12,123 @@ const { withAccelerate } = require("@prisma/extension-accelerate");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
-const { exec } = require("child_process");
-const { stat } = require("fs");
+// const { exec } = require("child_process");
+// const { stat } = require("fs");
 const { Storage } = require("@google-cloud/storage");
 // const authRoutes = require("./routes/auth");
+// implementing rate limiting and throttling
+const Redis = require("ioredis");
+const redis = new Redis({
+  host: '127.0.0.1',
+  port: 6379,
+  enableOfflineQueue: false, // Optional: Fail fast if Redis is down
+});
+
+redis.on('connect', () => console.log('✅ Redis connected'));
+redis.on('error', (err) => console.error('❌ Redis error', err));
+
+const { RateLimiterRedis } = require("rate-limiter-flexible");
+
+// per user rate limiting
+const userLimiter = new RateLimiterRedis({
+  storeClient: redis,
+  keyPrefix: "user",
+  points: 10, // 10 requests
+  duration: 60, // per minute
+  execEvenlyly: true, // Execute evenly over the duration
+  execEvenlyMinDelayMs: 100, // Minimum delay between executions
+  blockDuration: 20, // Block for 20 seconds if limit is reached
+});
+
+const globalLimiter = new RateLimiterRedis({
+  storeClient: redis,
+  keyPrefix: "global",
+  points: 1000, // 1000 requests
+  duration: 60, // per minute
+  execEvenlyly: true, // Execute evenly over the duration
+  execEvenlyMinDelayMs: 50, // Minimum delay between executions
+  blockDuration: 20, // Block for 20 seconds if limit is reached
+});
+
+// Routes excluded from rate limiting
+const excludedRoutes = [
+  // Authentication routes
+  '/auth/login',
+  '/auth/signup',
+  '/auth/refresh-token',
+  '/auth/logout',
+  '/auth',
+  '/checkExistingUser',
+  
+  // Static data/read-only routes
+  '/contests',
+  '/contest/*/startTime',
+  '/contest/*/participants/*',
+  '/contest/*/participants',
+  '/allProblems/*',
+  '/problem/*/user/*',
+  '/getTestcases/*',
+  '/problem/*/acceptance',
+  '/user/*/problemCount',
+  '/user/*',
+  '/contest/*/users',
+  
+  // Submission polling routes (need frequent access)
+  '/pollSubmission/*',
+  '*/submission/*',
+  'submitContestCode',
+  
+  // Contest management routes (administrative)
+  '/contest/*/register/*',
+  '/contest/*/unregister/*',
+  '/contest/*/user/*/rank/*',
+  '/contest/*/problems/user/*',
+  '/contest/*/problem/*/user/*',
+];
+
+// Helper function to check if route should be excluded from rate limiting
+const isRouteExcluded = (path, method = 'GET') => {
+  return excludedRoutes.some(excludedRoute => {
+    // Convert route pattern to regex (replace * with .*)
+    const pattern = excludedRoute.replace(/\*/g, '[^/]*');
+    const regex = new RegExp(`^${pattern}$`);
+    return regex.test(path);
+  });
+};
+
+// rate limiting middleware
+const rateLimiterMiddleware = async (req, res, next) => {
+  try {
+    // Check user rate limit
+    const userId = req.user ? req.user.id : req.ip; // Use user ID if authenticated, else use IP address
+    const userRateLimit = await userLimiter.consume(userId);
+    console.log("User Rate Limit:", userRateLimit);
+    next();
+  } catch (err) {
+    res.set("Retry-After", Math.ceil(err.msBeforeNext / 1000));
+    res.status(429).json({
+      message: 'Too many requests. Please slow down.',
+      retryAfter: err.msBeforeNext,
+    });
+  }
+};
+
+// Conditional rate limiting wrapper
+const conditionalRateLimiter = (req, res, next) => {
+  const requestPath = req.path;
+  const requestMethod = req.method;
+  
+  // Check if route should be excluded
+  if (isRouteExcluded(requestPath, requestMethod)) {
+    console.log(`Route excluded from rate limiting: ${requestMethod} ${requestPath}`);
+    return next();
+  }
+  
+  // Apply rate limiting for non-excluded routes
+  console.log(`Applying rate limiting to: ${requestMethod} ${requestPath}`);
+  return rateLimiterMiddleware(req, res, next);
+};
+
 
 const storage = new Storage({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
@@ -40,6 +153,9 @@ app.use(
   })
 );
 app.use(cookieParser());
+
+// Apply conditional rate limiting to all routes
+app.use(conditionalRateLimiter);
 // app.route("/auth", authRoutes);
 
 // app.use("/api", submissionRoutes);
