@@ -350,7 +350,7 @@ app.post("/submitContestCode", async (req, res) => {
       max_time_limit: true, // in seconds
     },
   });
-  console.log("Submissions:", submissions);
+  // console.log("Submissions:", submissions);
   const submissions = await Promise.all(
     testcases.map(async (testCase) => {
       if (testCase.isGCS) {
