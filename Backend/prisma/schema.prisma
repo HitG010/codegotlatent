@@ -141,11 +141,12 @@ model Submission {
 model TestCase {
   id        String  @id @default(uuid())
   problemId String
-  input     String
-  stdin     String  @default("")
-  stdout    String  @default("")
-  output    String
+  input     String?
+  output    String?
+  stdin     String?  @default("") // Only if GCS is false
+  stdout    String? @default("") // Only if GCS is false
   isPublic  Boolean @default(false) // Public test cases vs. hidden ones
+  isGCS    Boolean @default(false) // Whether the test case is in the GCS bucket
 
   problem Problem @relation(fields: [problemId], references: [id])
 }

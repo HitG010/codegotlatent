@@ -14,7 +14,14 @@ const cookieParser = require("cookie-parser");
 const axios = require("axios");
 const { exec } = require("child_process");
 const { stat } = require("fs");
+const { Storage } = require("@google-cloud/storage");
 // const authRoutes = require("./routes/auth");
+
+const storage = new Storage({
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+});
+
+const BUCKET_NAME = "codegotlatent";
 
 const prisma = new PrismaClient().$extends(withAccelerate());
 
@@ -302,6 +309,12 @@ app.put("/callback", (req, res) => {
   res.status(200).send("OK");
 });
 
+async function fetchFileFromGCS(path) {
+  const file = storage.bucket(BUCKET_NAME).file(path);
+  const [contents] = await file.download();
+  return contents.toString("utf-8");
+}
+
 // Submission of any type of code for a problem ( contest or not )
 app.post("/submitContestCode", async (req, res) => {
   const body = await req.body;
@@ -341,7 +354,13 @@ app.post("/submitContestCode", async (req, res) => {
   const submissions = [];
   console.log("Submissions:", submissions);
   console.time("Submission");
-  testcases.forEach((testCase) => {
+  for (const testCase of testcases) {
+    if (testCase.isGCS) {
+      // If the test case is in GCS, fetch it
+      console.log("Fetching test case from GCS:", testCase.id);
+      testCase.stdin = await fetchFileFromGCS(testCase.stdin);
+      testCase.stdout = await fetchFileFromGCS(testCase.stdout);
+    }
     const submission = {
       source_code: source_code || "// No code submitted",
       language_id: language_id,
@@ -353,7 +372,7 @@ app.post("/submitContestCode", async (req, res) => {
       cpu_extra_time: 0, // in seconds, set to 0 for no extra time
     };
     submissions.push(submission);
-  });
+  }
   console.log("Submissions:", submissions);
 
   // long poll the server for submission status
@@ -2006,25 +2025,63 @@ app.get("/user/:userName", async (req, res) => {
   }
 });
 
+async function uploadToGCS(bucketName, filePath, contents) {
+  const bucket = storage.bucket(bucketName);
+  const file = bucket.file(filePath);
+  await file.save(contents);
+  console.log(`Saved to GCS: ${filePath}`);
+}
+
+const SIZE_LIMIT = 50 * 1024; // 50 KB
+
 app.post("/addTestCase", async (req, res) => {
   const { problemId, input, stdin, output, stdout, isPublic } = req.body;
-  console.log("Request Body:", req.body);
-  try {
-    const testCase = await prisma.testCase.create({
+  console.log("Problem ID:", problemId);
+  const inputSize = Buffer.byteLength(stdin, "utf8");
+  const outputSize = Buffer.byteLength(stdout, "utf8");
+  const totalSize = inputSize + outputSize;
+
+  console.log("Total Size:", totalSize);
+  const testcase = await prisma.testCase.create({
+    data: {
+      problemId,
+      isGCS: totalSize > SIZE_LIMIT,
+    },
+  });
+
+  const id = testcase.id;
+  if (totalSize > SIZE_LIMIT) {
+    const stdinPath = `testcases/${id}/stdin.txt`;
+    const stdoutPath = `testcases/${id}/stdout.txt`;
+
+    await uploadToGCS(BUCKET_NAME, stdinPath, stdin);
+    await uploadToGCS(BUCKET_NAME, stdoutPath, stdout);
+
+    await prisma.testCase.update({
+      where: { id: id },
       data: {
         input: JSON.stringify(input),
-        stdin: stdin,
-        output: output,
-        stdout: stdout,
-        problemId: problemId,
+        stdin: stdinPath,
+        stdout: stdoutPath,
+        output: JSON.stringify(output),
         isPublic: isPublic || false,
       },
     });
-    console.log("Test Case:", testCase);
-    res.status(200).json(testCase);
-  } catch (error) {
-    console.error("Error creating test case:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.log("Test case saved to GCS:", id);
+    res.status(201).json({ message: "Test case saved to GCS", id: id });
+  } else {
+    await prisma.testCase.update({
+      where: { id: id },
+      data: {
+        input: JSON.stringify(input),
+        stdin: stdin,
+        stdout: stdout,
+        output: JSON.stringify(output),
+        isPublic: isPublic || false,
+      },
+    });
+    console.log("Test case saved locally:", id);
+    res.status(201).json({ message: "Test case saved locally", id: id });
   }
 });
 
