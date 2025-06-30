@@ -677,30 +677,30 @@ app.get("/submission/:id", async (req, res) => {
 });
 // long polling
 
-const getSubmissionStatus = async (id) => {
-  const url = `${process.env.JUDGE0_API}/submissions/batch?tokens=${id}`;
-  console.log("URL:", url);
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
-  const data = await response.json();
-  // console.log("Response:", data);
-  let count = 0;
-  for (let i = 0; i < data.submissions.length; i++) {
-    if (data.submissions[i].status.id < 3) {
-      count++;
+const getSubmissionStatus = async (tokens, maxRetries = 10, delayMs = 1000) => {
+  const url = `${process.env.JUDGE0_API}/submissions/batch?tokens=${tokens}`;
+  let retries = 0;
+
+  while (retries < maxRetries) {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    const pending = data.submissions.filter((sub) => sub.status.id < 3);
+
+    if (pending.length === 0) {
+      return data.submissions;
     }
+
+    retries++;
+    await new Promise((r) => setTimeout(r, delayMs));
   }
-  if (count == 0) {
-    console.log(data, "Final data");
-    return data.submissions;
-  } else {
-    return await getSubmissionStatus(id);
-  }
+
+  throw new Error("Timeout: Submissions not finished after max retries.");
 };
 
 app.post("/pollSubmission/:id", async (req, res) => {
