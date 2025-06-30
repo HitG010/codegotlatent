@@ -350,29 +350,35 @@ app.post("/submitContestCode", async (req, res) => {
       max_time_limit: true, // in seconds
     },
   });
-  console.timeEnd("Fetch Testcases");
-  const submissions = [];
   console.log("Submissions:", submissions);
+  const submissions = await Promise.all(
+    testcases.map(async (testCase) => {
+      if (testCase.isGCS) {
+        console.log("Fetching test case from GCS:", testCase.id);
+        const [stdin, stdout] = await Promise.all([
+          fetchFileFromGCS(testCase.stdin),
+          fetchFileFromGCS(testCase.stdout),
+        ]);
+        testCase.stdin = stdin;
+        testCase.stdout = stdout;
+      }
+
+      return {
+        source_code: source_code || "// No code submitted",
+        language_id: language_id,
+        stdin: testCase.stdin,
+        expected_output: testCase.stdout,
+        cpu_time_limit: problem.max_time_limit,
+        memory_limit: problem.max_memory_limit,
+        cpu_extra_time: 0,
+      };
+    })
+  );
+
+  console.timeEnd("Fetch Testcases");
+
   console.time("Submission");
-  for (const testCase of testcases) {
-    if (testCase.isGCS) {
-      // If the test case is in GCS, fetch it
-      console.log("Fetching test case from GCS:", testCase.id);
-      testCase.stdin = await fetchFileFromGCS(testCase.stdin);
-      testCase.stdout = await fetchFileFromGCS(testCase.stdout);
-    }
-    const submission = {
-      source_code: source_code || "// No code submitted",
-      language_id: language_id,
-      stdin: testCase.stdin,
-      expected_output: testCase.stdout,
-      // add memory and time limits
-      cpu_time_limit: problem.max_time_limit,
-      memory_limit: problem.max_memory_limit,
-      cpu_extra_time: 0, // in seconds, set to 0 for no extra time
-    };
-    submissions.push(submission);
-  }
+
   console.log("Submissions:", submissions);
 
   // long poll the server for submission status
@@ -393,8 +399,6 @@ app.post("/submitContestCode", async (req, res) => {
   const tokensString = resultJson.map((item) => item.token).join(",");
 
   const response = await getSubmissionStatus(tokensString);
-
-  console.timeEnd("Submission");
 
   let finalVerdict = "Accepted";
   let passedTestcasesCnt = 0;
@@ -445,23 +449,22 @@ app.post("/submitContestCode", async (req, res) => {
 
     const previousIsSolved = existingEntry?.isSolved || false;
     const previousSolvedInContest = existingEntry?.solvedInContest || false;
+    const { problemScore = 0 } = await prisma.problem.findUnique({
+      where: { id: problem_id },
+      select: { problemScore: true },
+    });
 
     const updatedContestProblem = await prisma.problemUser.upsert({
       where: {
         userId_problemId: {
-          userId: userId,
+          userId,
           problemId: problem_id,
         },
       },
       update: {
         isSolved: previousIsSolved || isCorrect,
         solvedInContest: previousSolvedInContest || isCorrect,
-        score:
-          isCorrect || previousIsSolved
-            ? (
-                await prisma.problem.findUnique({ where: { id: problem_id } })
-              )?.problemScore || 0
-            : 0,
+        score: isCorrect || previousIsSolved ? problemScore : 0,
         penalty: {
           increment: isCorrect ? 0 : 1,
         },
@@ -473,15 +476,11 @@ app.post("/submitContestCode", async (req, res) => {
       },
       create: {
         problemId: problem_id,
-        userId: userId,
+        userId,
         contestId: contest_id,
         isSolved: isCorrect,
         solvedInContest: isCorrect,
-        score: isCorrect
-          ? (
-              await prisma.problem.findUnique({ where: { id: problem_id } })
-            )?.problemScore || 0
-          : 0,
+        score: isCorrect ? problemScore : 0,
         penalty: isCorrect ? 0 : 1,
         finishedAt: isCorrect ? submission.createdAt : null,
       },
@@ -534,6 +533,7 @@ app.post("/submitContestCode", async (req, res) => {
     });
   }
 
+  console.timeEnd("Submission");
   return res.send(submission);
 });
 
