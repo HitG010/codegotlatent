@@ -12,20 +12,19 @@ const { withAccelerate } = require("@prisma/extension-accelerate");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
-// const { exec } = require("child_process");
-// const { stat } = require("fs");
+const startContestSchedulers = require("./services/sockets");
 const { Storage } = require("@google-cloud/storage");
 // const authRoutes = require("./routes/auth");
 // implementing rate limiting and throttling
 const Redis = require("ioredis");
 const redis = new Redis({
-  host: '127.0.0.1',
+  host: "127.0.0.1",
   port: 6379,
   enableOfflineQueue: false, // Optional: Fail fast if Redis is down
 });
 
-redis.on('connect', () => console.log('✅ Redis connected'));
-redis.on('error', (err) => console.error('❌ Redis error', err));
+redis.on("connect", () => console.log("✅ Redis connected"));
+redis.on("error", (err) => console.error("❌ Redis error", err));
 
 const { RateLimiterRedis } = require("rate-limiter-flexible");
 
@@ -53,44 +52,44 @@ const globalLimiter = new RateLimiterRedis({
 // Routes excluded from rate limiting
 const excludedRoutes = [
   // Authentication routes
-  '/auth/login',
-  '/auth/signup',
-  '/auth/refresh-token',
-  '/auth/logout',
-  '/auth',
-  '/checkExistingUser',
-  
+  "/auth/login",
+  "/auth/signup",
+  "/auth/refresh-token",
+  "/auth/logout",
+  "/auth",
+  "/checkExistingUser",
+
   // Static data/read-only routes
-  '/contests',
-  '/contest/*/startTime',
-  '/contest/*/participants/*',
-  '/contest/*/participants',
-  '/allProblems/*',
-  '/problem/*/user/*',
-  '/getTestcases/*',
-  '/problem/*/acceptance',
-  '/user/*/problemCount',
-  '/user/*',
-  '/contest/*/users',
-  
+  "/contests",
+  "/contest/*/startTime",
+  "/contest/*/participants/*",
+  "/contest/*/participants",
+  "/allProblems/*",
+  "/problem/*/user/*",
+  "/getTestcases/*",
+  "/problem/*/acceptance",
+  "/user/*/problemCount",
+  "/user/*",
+  "/contest/*/users",
+
   // Submission polling routes (need frequent access)
-  '/pollSubmission/*',
-  '*/submission/*',
-  'submitContestCode',
-  
+  "/pollSubmission/*",
+  "*/submission/*",
+  "submitContestCode",
+
   // Contest management routes (administrative)
-  '/contest/*/register/*',
-  '/contest/*/unregister/*',
-  '/contest/*/user/*/rank/*',
-  '/contest/*/problems/user/*',
-  '/contest/*/problem/*/user/*',
+  "/contest/*/register/*",
+  "/contest/*/unregister/*",
+  "/contest/*/user/*/rank/*",
+  "/contest/*/problems/user/*",
+  "/contest/*/problem/*/user/*",
 ];
 
 // Helper function to check if route should be excluded from rate limiting
-const isRouteExcluded = (path, method = 'GET') => {
-  return excludedRoutes.some(excludedRoute => {
+const isRouteExcluded = (path, method = "GET") => {
+  return excludedRoutes.some((excludedRoute) => {
     // Convert route pattern to regex (replace * with .*)
-    const pattern = excludedRoute.replace(/\*/g, '[^/]*');
+    const pattern = excludedRoute.replace(/\*/g, "[^/]*");
     const regex = new RegExp(`^${pattern}$`);
     return regex.test(path);
   });
@@ -107,7 +106,7 @@ const rateLimiterMiddleware = async (req, res, next) => {
   } catch (err) {
     res.set("Retry-After", Math.ceil(err.msBeforeNext / 1000));
     res.status(429).json({
-      message: 'Too many requests. Please slow down.',
+      message: "Too many requests. Please slow down.",
       retryAfter: err.msBeforeNext,
     });
   }
@@ -117,18 +116,19 @@ const rateLimiterMiddleware = async (req, res, next) => {
 const conditionalRateLimiter = (req, res, next) => {
   const requestPath = req.path;
   const requestMethod = req.method;
-  
+
   // Check if route should be excluded
   if (isRouteExcluded(requestPath, requestMethod)) {
-    console.log(`Route excluded from rate limiting: ${requestMethod} ${requestPath}`);
+    console.log(
+      `Route excluded from rate limiting: ${requestMethod} ${requestPath}`
+    );
     return next();
   }
-  
+
   // Apply rate limiting for non-excluded routes
   console.log(`Applying rate limiting to: ${requestMethod} ${requestPath}`);
   return rateLimiterMiddleware(req, res, next);
 };
-
 
 const storage = new Storage({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
