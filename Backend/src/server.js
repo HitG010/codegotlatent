@@ -7,14 +7,16 @@ const bcrypt = require("bcrypt");
 const schedule = require("node-schedule");
 const cron = require("node-cron");
 const { Server } = require("socket.io");
-const { PrismaClient } = require("@prisma/client/edge");
-const { withAccelerate } = require("@prisma/extension-accelerate");
+const prisma = require("./services/prisma");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
-const startContestSchedulers = require("./services/sockets");
+const startContestSchedulers = require("./sockets");
 const { Storage } = require("@google-cloud/storage");
-// const authRoutes = require("./routes/auth");
+
+// using submission routes
+const submissionRoutes = require("./routes/submissions");
+
 // implementing rate limiting and throttling
 const Redis = require("ioredis");
 const redis = new Redis({
@@ -136,7 +138,7 @@ const storage = new Storage({
 
 const BUCKET_NAME = "codegotlatent";
 
-const prisma = new PrismaClient().$extends(withAccelerate());
+// const prisma = new PrismaClient().$extends(withAccelerate());
 
 // const submissionRoutes = require("./routes/index");
 
@@ -653,6 +655,8 @@ app.post("/submitContestCode", async (req, res) => {
   return res.send(submission);
 });
 
+// app.use("/", submissionRoutes);
+
 const updateContestUser = async (contestId, userId, contestStartTime) => {
   const response = await prisma.problemUser.aggregate({
     where: {
@@ -736,43 +740,43 @@ app.post("/batchSubmission", async (req, res) => {
   res.send(data);
 });
 
-app.post("/batchSubmitProblem", async (req, res) => {
-  const body = await req.body;
-  const { problem_id, language_id, source_code } = body;
+// app.post("/batchSubmitProblem", async (req, res) => {
+//   const body = await req.body;
+//   const { problem_id, language_id, source_code } = body;
 
-  const testcases = await prisma.testCase.findMany({
-    where: {
-      problemId: problem_id,
-    },
-  });
-  const submissions = [];
-  console.log("Submissions:", submissions);
-  testcases.forEach((testCase) => {
-    const submission = {
-      source_code: source_code,
-      language_id: language_id,
-      stdin: testCase.stdin,
-      expected_output: testCase.stdout,
-    };
-    submissions.push(submission);
-  });
-  console.log("Submissions:", submissions);
+//   const testcases = await prisma.testCase.findMany({
+//     where: {
+//       problemId: problem_id,
+//     },
+//   });
+//   const submissions = [];
+//   console.log("Submissions:", submissions);
+//   testcases.forEach((testCase) => {
+//     const submission = {
+//       source_code: source_code,
+//       language_id: language_id,
+//       stdin: testCase.stdin,
+//       expected_output: testCase.stdout,
+//     };
+//     submissions.push(submission);
+//   });
+//   console.log("Submissions:", submissions);
 
-  const url = `${process.env.JUDGE0_API}/submissions/batch`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-    body: JSON.stringify({ submissions: submissions }),
-  });
-  const data = await response.json();
-  console.log("Response:", data);
+//   const url = `${process.env.JUDGE0_API}/submissions/batch`;
+//   const response = await fetch(url, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       "Access-Control-Allow-Origin": "*",
+//     },
+//     body: JSON.stringify({ submissions: submissions }),
+//   });
+//   const data = await response.json();
+//   console.log("Response:", data);
 
-  // res.status(200).send("OK");
-  res.send(data);
-});
+//   // res.status(200).send("OK");
+//   res.send(data);
+// });
 // long polling
 app.get("/submission/:id", async (req, res) => {
   console.log(req.params);
@@ -863,59 +867,35 @@ app.post("/pollSubmission/:id", async (req, res) => {
   res.send(response);
 });
 
-app.post("/populateDatabase", async (req, res) => {
-  async function main() {
-    const user = await prisma.User.create({
-      data: {
-        username: "Alice",
-        email: "abc@gmail.com",
-        password: "123456",
-      },
-    });
-    console.log(user);
-  }
-
-  main()
-    .then(async () => {
-      await prisma.$disconnect();
-    })
-    .catch(async (e) => {
-      console.error(e);
-      await prisma.$disconnect();
-      process.exit(1);
-    });
-  res.send("Database populated");
-});
-
-app.post("/submitProblem", async (req, res) => {
-  // title       String
-  // description String
-  // difficulty  String    // "Easy", "Medium", "Hard"
-  // max_time_limit Int    @default(2)
-  // max_memory_limit Int  @default(262144) // 256MB in kBs
-  // testCases   TestCase[]
-  const { title, description, difficulty, max_time_limit, max_memory_limit } =
-    req.body;
-  console.log("Request Body:", req.body);
-  // body = JSON.parse(body);
-  // console.log("Parsed Body:", body);
-  try {
-    const problem = await prisma.Problem.create({
-      data: {
-        title,
-        description,
-        difficulty,
-        max_time_limit,
-        max_memory_limit,
-      },
-    });
-    console.log(problem);
-    res.status(200).json(problem);
-  } catch (error) {
-    console.error("Error creating problem:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+// app.post("/submitProblem", async (req, res) => {
+//   // title       String
+//   // description String
+//   // difficulty  String    // "Easy", "Medium", "Hard"
+//   // max_time_limit Int    @default(2)
+//   // max_memory_limit Int  @default(262144) // 256MB in kBs
+//   // testCases   TestCase[]
+//   const { title, description, difficulty, max_time_limit, max_memory_limit } =
+//     req.body;
+//   console.log("Request Body:", req.body);
+//   // body = JSON.parse(body);
+//   // console.log("Parsed Body:", body);
+//   try {
+//     const problem = await prisma.Problem.create({
+//       data: {
+//         title,
+//         description,
+//         difficulty,
+//         max_time_limit,
+//         max_memory_limit,
+//       },
+//     });
+//     console.log(problem);
+//     res.status(200).json(problem);
+//   } catch (error) {
+//     console.error("Error creating problem:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 app.get("/allProblems/:userId", async (req, res) => {
   const userId = req.params.userId;
@@ -1047,26 +1027,26 @@ app.get("/getTestcases/:problemId", async (req, res) => {
   res.status(200).json(testCases);
 });
 
-app.post("/submitTestCases/:probId", async (req, res) => {
-  const { probId } = req.params;
-  const testCases = req.body;
-  console.log("Request Body:", testCases);
-  try {
-    const Testcases = testCases.map((testCase) => ({
-      input: JSON.stringify(testCase.input),
-      output: JSON.stringify(testCase.output),
-      problemId: probId,
-    }));
-    const result = await prisma.TestCase.createMany({
-      data: Testcases,
-    });
-    console.log("Test Cases:", result);
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("Error creating problem:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+// app.post("/submitTestCases/:probId", async (req, res) => {
+//   const { probId } = req.params;
+//   const testCases = req.body;
+//   console.log("Request Body:", testCases);
+//   try {
+//     const Testcases = testCases.map((testCase) => ({
+//       input: JSON.stringify(testCase.input),
+//       output: JSON.stringify(testCase.output),
+//       problemId: probId,
+//     }));
+//     const result = await prisma.TestCase.createMany({
+//       data: Testcases,
+//     });
+//     console.log("Test Cases:", result);
+//     res.status(200).json(result);
+//   } catch (error) {
+//     console.error("Error creating problem:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 app.post("/auth", async (req, res) => {
   const { email, displayName } = req.body;
@@ -1600,6 +1580,7 @@ app.post("/auth/logout", async (req, res) => {
   }
 });
 
+// ranking page data fetching
 app.get("/contest/:contestId/users", async (req, res) => {
   const { contestId } = req.params;
   console.log("Contest ID:", contestId);
@@ -2148,8 +2129,9 @@ async function uploadToGCS(bucketName, filePath, contents) {
   console.log(`Saved to GCS: ${filePath}`);
 }
 
-const SIZE_LIMIT = 50 * 1024; // 50 KB
+// const SIZE_LIMIT = 50 * 1024; // 50 KB
 
+// admin routes
 app.post("/addTestCase", async (req, res) => {
   const { problemId, input, stdin, output, stdout, isPublic } = req.body;
   console.log("Problem ID:", problemId);
@@ -2334,14 +2316,14 @@ app.post("/problem/:problemId/deleteAllTestCases", async (req, res) => {
   }
 });
 
-app.get("/tags", async (req, res) => {
-  try {
-    const allTags = await prisma.problemTags.findMany({
-      select: { id: true, tag: true },
-    });
-    res.json(allTags);
-  } catch (error) {
-    console.error("Error fetching tags:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+// app.get("/tags", async (req, res) => {
+//   try {
+//     const allTags = await prisma.problemTags.findMany({
+//       select: { id: true, tag: true },
+//     });
+//     res.json(allTags);
+//   } catch (error) {
+//     console.error("Error fetching tags:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
