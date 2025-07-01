@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "../App.css";
-import { fetchProblem, fetchTestcases } from "../api/api";
+import { fetchProblem } from "../api/api";
 import { executeCode, pollSubmissionStatus, submitProblem } from "../api/api";
 // import CodeEditor from "../pages/codeeditor";
 import TestCases from "../components/Testcases";
@@ -49,17 +49,17 @@ function Problem() {
   const minTileWidth = 200;
   const minTileHeight = 100;
 
-  const fetchTestCases = async () => {
-    try {
-      const response = await fetchTestcases(id);
-      setTestCases([...response]);
-      console.log("Test Cases:", response);
-    } catch (err) {
-      setTestCaseError(err);
-    } finally {
-      setTestCaseLoading(false);
-    }
-  };
+  // const fetchTestCases = async () => {
+  //   try {
+  //     const response = await fetchTestcases(id);
+  //     setTestCases([...response]);
+  //     console.log("Test Cases:", response);
+  //   } catch (err) {
+  //     setTestCaseError(err);
+  //   } finally {
+  //     setTestCaseLoading(false);
+  //   }
+  // };
 
   const fetchData = async () => {
     setLoading(true);
