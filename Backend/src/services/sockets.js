@@ -52,7 +52,7 @@ async function scheduleUpcomingContests() {
   });
 }
 
-async function scheduleRankGuessContests() {
+async function scheduleRankGuessContests({ io, prisma }) {
   const contests = await prisma.Contest.findMany({
     where: {
       status: "Rank Guess Phase",
@@ -89,7 +89,7 @@ async function scheduleRankGuessContests() {
   });
 }
 
-async function scheduleOngoingContests() {
+async function scheduleOngoingContests({ io, prisma }) {
   const contests = await prisma.Contest.findMany({
     where: {
       status: "Ongoing",
@@ -131,7 +131,7 @@ async function scheduleOngoingContests() {
   });
 }
 
-async function scheduleRatingPendingContests() {
+async function scheduleRatingPendingContests({ io, prisma }) {
   const contests = await prisma.Contest.findMany({
     where: {
       status: "Rating Update Pending",
@@ -173,14 +173,14 @@ async function scheduleRatingPendingContests() {
   });
 }
 
-function startContestSchedulers() {
+function startContestSchedulers({ io, prisma, submitContest }) {
   cron.schedule("*/1 * * * *", async () => {
     console.log("Scheduling contests");
     // status -> upcoming, rank guess, ongoing, rating pending, ended
-    await scheduleUpcomingContests();
-    await scheduleRankGuessContests();
-    await scheduleOngoingContests();
-    await scheduleRatingPendingContests();
+    await scheduleUpcomingContests({ io, prisma });
+    await scheduleRankGuessContests({ io, prisma });
+    await scheduleOngoingContests({ io, prisma });
+    await scheduleRatingPendingContests({ io, prisma });
   });
 }
 
