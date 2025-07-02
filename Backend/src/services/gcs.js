@@ -11,3 +11,15 @@ async function fetchFileFromGCS(path) {
   const [contents] = await file.download();
   return contents.toString("utf-8");
 }
+
+async function uploadToGCS(bucketName, filePath, contents) {
+  const bucket = storage.bucket(bucketName);
+  const file = bucket.file(filePath);
+  await file.save(contents);
+  console.log(`Saved to GCS: ${filePath}`);
+}
+
+module.exports = {
+  fetchFileFromGCS,
+  uploadToGCS,
+};

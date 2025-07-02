@@ -1,8 +1,8 @@
-const primsa = require("../services/prisma");
+const prisma = require("../services/prisma");
 
 async function allProblems(req, res) {
   const userId = req.params.userId;
-  const submissionCount = await primsa.submission.groupBy({
+  const submissionCount = await prisma.submission.groupBy({
     by: ["problemId"],
     select: {
       problemId: true,
@@ -91,7 +91,7 @@ async function getProblem(req, res) {
       contest: true,
     },
   });
-  const isSolved = await primsa.problemUser.findFirst({
+  const isSolved = await prisma.problemUser.findFirst({
     where: {
       problemId: problemId,
       userId: userId,
@@ -125,7 +125,67 @@ async function getProblem(req, res) {
   });
 }
 
+async function acceptanceRate (req, res) {
+  const { problemId } = req.params;
+  console.log("Problem ID:", problemId);
+  const totalSubmisionCount = await prisma.Submission.count({
+    where: {
+      problemId: problemId,
+    },
+  });
+  const acceptedSubmissionCount = await prisma.Submission.count({
+    where: {
+      problemId: problemId,
+      verdict: "Accepted",
+    },
+  });
+  const acceptanceRate = totalSubmisionCount
+    ? (acceptedSubmissionCount / totalSubmisionCount) * 100
+    : 0;
+  console.log("Total Submissions:", totalSubmisionCount);
+  console.log("Accepted Submissions:", acceptedSubmissionCount);
+  console.log("Acceptance Rate:", acceptanceRate);
+  return res.status(200).json({
+    totalSubmissions: totalSubmisionCount,
+    acceptedSubmissions: acceptedSubmissionCount,
+    acceptanceRate: acceptanceRate.toFixed(2) + "%",
+  });
+}
+
+async function getAllTags(req, res) {
+  try {
+    const allTags = await prisma.problemTags.findMany({
+      select: { id: true, tag: true },
+    });
+    return res.json(allTags);
+  } catch (error) {
+    console.error("Error fetching tags:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+async function deleteAllTestcases (req, res) {
+  const { problemId } = req.params;
+  console.log("Problem ID:", problemId);
+  try {
+    const deletedTestCases = await prisma.testCase.deleteMany({
+      where: {
+        problemId: problemId,
+      },
+    });
+    console.log("Deleted Test Cases:", deletedTestCases);
+    res.status(200).json(deletedTestCases);
+  } catch (error) {
+    console.error("Error deleting test cases:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   allProblems,
   getProblem,
+  acceptanceRate,
+  getAllTags,
+  deleteAllTestcases
+
 };

@@ -329,10 +329,29 @@ async function submitPredictedRank(req, res) {
   return res.status(200).json(updatedUser);
 }
 
+async function getParticipantsCount (req, res) {
+  // get the number of participants in the contest
+  const { contestId } = req.params;
+  console.log("Contest ID:", contestId);
+  try {
+    const participantsCount = await prisma.contestUser.count({
+      where: {
+        contestId: contestId,
+      },
+    });
+    console.log("Participants Count:", participantsCount);
+    return res.status(200).json({ participantsCount });
+  } catch (error) {
+    console.error("Error fetching participants count:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   getAllContests,
   getContestById,
   getContestProblems,
+  getParticipantsCount,
   isContestRegistered,
   registerContest,
   unregisterContest,

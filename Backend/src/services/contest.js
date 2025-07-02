@@ -232,6 +232,7 @@ async function submitContest(contestId) {
   }
 }
 
+
 module.exports = {
   updateContestUser,
   checkIsRegistered,

@@ -1,9 +1,12 @@
 // /allProblems, /problem/:pId/user/:uId
 const express = require("express");
 const router = express.Router();
-const { allProblems, getProblem } = require("../controllers/problemController");
+const { allProblems, getProblem, acceptanceRate, getAllTags, deleteAllTestcases } = require("../controllers/problemController");
 
 router.get("/allProblems", allProblems);
 router.get("/problem/:pId/user/:uId", getProblem);
+router.get("/problem/:problemId/acceptance", acceptanceRate);
+router.get("/tags", getAllTags);
+router.post("/problem/:problemId/deleteAllTestCases", deleteAllTestcases);
 
 module.exports = router;
