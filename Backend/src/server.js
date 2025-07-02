@@ -14,8 +14,12 @@ const axios = require("axios");
 const startContestSchedulers = require("./sockets");
 // const { Storage } = require("@google-cloud/storage");
 
-// using submission routes
-const submissionRoutes = require("./routes/submissions");
+const problemRouter = require("./routes/problems");
+const submissionRouter = require("./routes/submissions");
+const userRouter = require("./routes/user");
+const adminRouter = require("./routes/admin");
+const contestRouter = require("./routes/contests");
+
 
 // implementing rate limiting and throttling
 const Redis = require("ioredis");
