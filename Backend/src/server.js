@@ -12,7 +12,7 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
 const startContestSchedulers = require("./sockets");
-const { Storage } = require("@google-cloud/storage");
+// const { Storage } = require("@google-cloud/storage");
 
 // using submission routes
 const submissionRoutes = require("./routes/submissions");
@@ -132,11 +132,11 @@ const conditionalRateLimiter = (req, res, next) => {
   return rateLimiterMiddleware(req, res, next);
 };
 
-const storage = new Storage({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-});
+// const storage = new Storage({
+//   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+// });
 
-const BUCKET_NAME = "codegotlatent";
+// const BUCKET_NAME = "codegotlatent";
 
 // const prisma = new PrismaClient().$extends(withAccelerate());
 
@@ -179,7 +179,7 @@ const io = new Server(server, {
 
 // console.log(io, "io");
 
-startContestSchedulers();
+// startContestSchedulers();
 
 // When a user connects, log the connection
 io.on("connection", (socket) => {
@@ -429,11 +429,11 @@ app.put("/callback", (req, res) => {
   res.status(200).send("OK");
 });
 
-async function fetchFileFromGCS(path) {
-  const file = storage.bucket(BUCKET_NAME).file(path);
-  const [contents] = await file.download();
-  return contents.toString("utf-8");
-}
+// async function fetchFileFromGCS(path) {
+//   const file = storage.bucket(BUCKET_NAME).file(path);
+//   const [contents] = await file.download();
+//   return contents.toString("utf-8");
+// }
 
 // Submission of any type of code for a problem ( contest or not )
 app.post("/submitContestCode", async (req, res) => {
@@ -1135,18 +1135,9 @@ app.get("/contest/:id", async (req, res) => {
 app.get("/contest/:contestId/participants/:userId", async (req, res) => {
   const { contestId, userId } = req.params;
 
-  const result = await prisma.contestUser.findFirst({
-    where: {
-      contestId: contestId,
-      userId: userId,
-    },
+  res.status(200).json({
+    isRegistered: await checkIsRegistered(contestId, userId),
   });
-  console.log("Result:", result);
-  if (result) {
-    res.status(200).json({ isRegistered: true });
-  } else {
-    res.status(200).json({ isRegistered: false });
-  }
 });
 
 app.post("/contest/:contestId/register/:userId", async (req, res) => {
@@ -1177,6 +1168,7 @@ app.post("/contest/:contestId/register/:userId", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 app.post("/contest/:contestId/unregister/:userId", async (req, res) => {
   const { contestId, userId } = req.params;
   console.log("Contest ID:", contestId);
