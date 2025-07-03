@@ -7,9 +7,10 @@ const {
   pollSubmission,
   getUserSubmission,
 } = require("../controllers/submissionController");
+const rateLimiterMiddleware = require("../middlewares/rateLimiter");
 
-router.post("/submitContestCode", submitCode);
-router.post("/batchSubmission", batchSubmission);
+router.post("/submitContestCode", rateLimiterMiddleware, submitCode);
+router.post("/batchSubmission", rateLimiterMiddleware, batchSubmission);
 router.get("/submission/:id", getSubmission);
 router.post("/pollSubmission/:id", pollSubmission);
 router.get("/submission/:submissionId/user/:userId", getUserSubmission);
