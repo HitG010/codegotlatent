@@ -22,6 +22,8 @@ import ContestRanking from "./pages/ContestRanking";
 import User from "./pages/User";
 import Admin from "./pages/Admin";
 import Settings from "./pages/Settings";
+import Login2 from "./pages/login2";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const App = () => {
   const location = useLocation();
@@ -46,9 +48,10 @@ const App = () => {
 
   return (
     // <UserProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
     <Routes location={location} key={location.pathname}>
       <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<Login2 />} />
       <Route path="/signup" element={<Register />} />
       <Route path="/setusername" element={<Setusername />} />
       <Route
@@ -114,7 +117,7 @@ const App = () => {
       <Route path="/settings" element={<Settings />} />
       {/* Add more routes as needed */}
     </Routes>
-    // </UserProvider>
+    </GoogleOAuthProvider>
   );
 };
 
