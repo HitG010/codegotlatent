@@ -1,4 +1,3 @@
-const { get } = require("http");
 const prisma = require("../services/prisma");
 
 const updateContestUser = async (contestId, userId, contestStartTime) => {

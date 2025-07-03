@@ -32,6 +32,6 @@ router.post(
   "/contest/:contestId/user/:userId/rank/:predictedrank",
   submitPredictedRank
 );
-app.get("/contest/:contestId/participants", getParticipantsCount);
+router.get("/contest/:contestId/participants", getParticipantsCount);
 
 module.exports = router;

@@ -1,3 +1,6 @@
+const prisma = require("../services/prisma");
+const { getUserProblemCount } = require("../services/user");
+
 async function getProblemCount (req, res) {
   const { userId } = req.params;
   console.log("User ID:", userId);

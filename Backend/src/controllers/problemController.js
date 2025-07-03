@@ -67,11 +67,7 @@ async function allProblems(req, res) {
     delete problem._count; // Remove the _count object to clean up the response
   });
   console.log(problems);
-  return res.json({
-    success: true,
-    message: "All problems fetched successfully",
-    data: problems,
-  });
+  return res.json(problems);
 }
 
 async function getProblem(req, res) {
@@ -118,11 +114,7 @@ async function getProblem(req, res) {
       .json({ error: "Problem is part of an ongoing contest" });
   }
   console.log(problem);
-  return res.json({
-    success: true,
-    message: "Problem fetched successfully",
-    data: problem,
-  });
+  return res.json(problem);
 }
 
 async function acceptanceRate (req, res) {

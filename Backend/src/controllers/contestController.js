@@ -1,4 +1,5 @@
-const primsa = require("../prisma");
+const prisma = require("../services/prisma");
+
 const {
   checkIsRegistered,
   getContestStartTime,
@@ -12,11 +13,7 @@ async function getAllContests(req, res) {
       },
     });
     console.log("Contests:", contests);
-    return res.json({
-      success: true,
-      message: "All contests fetched successfully",
-      data: contests,
-    });
+    return res.json(contests);
   } catch (error) {
     console.error("Error fetching contests:", error);
     return res.status(500).json({
@@ -44,7 +41,7 @@ async function getContestById(req, res) {
   }
 }
 
-async function isContestRegistered(req) {
+async function isContestRegistered(req, res) {
   const { contestId, userId } = req.params;
 
   res.status(200).json({
@@ -295,7 +292,7 @@ async function getStartTime(req, res) {
     if (!startTime) {
       return res.status(404).json({ error: "Contest not found" });
     }
-    return res.status(200).json({ startTime });
+    return res.status(200).json(startTime);
   } catch (error) {
     console.error("Error fetching contest start time:", error);
     return res.status(500).json({ error: "Internal server error" });
