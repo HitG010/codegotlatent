@@ -15,6 +15,7 @@ export const useUserInit = () => {
         api.post("/refresh-token", {
          }) // Replace { key: "value" } with your actual request body
             .then((response) => {
+                console.log("Response from refresh-token:", response.data);
                 const { accessToken, user } = response.data;
                 console.log("User data:", user);
                 console.log("Access Token:", accessToken);

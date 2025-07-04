@@ -12,6 +12,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.4",
     "@monaco-editor/react": "^4.7.0",
+    "@react-oauth/google": "^0.12.2",
     "@tailwindcss/postcss": "^4.0.17",
     "autoprefixer": "^10.4.21",
     "axios": "^1.8.4",

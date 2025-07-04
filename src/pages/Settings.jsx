@@ -61,7 +61,7 @@ const handleLogout = () => {
         .then(() => {
             clearUser(); // Clear user state in the store
             window.location.href = '/login'; // Adjust the path as needed
-            alert('Logged out!');
+            // alert('Logged out!');
         })
         .catch((error) => {
             console.error('Error logging out:', error);
