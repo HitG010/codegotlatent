@@ -13,7 +13,8 @@ export const useUserInit = () => {
 
     useEffect(() => {
         api.post("/refresh-token", {
-         }) // Replace { key: "value" } with your actual request body
+            withCredentials: true,
+        })
             .then((response) => {
                 console.log("Response from refresh-token:", response.data);
                 const { accessToken, user } = response.data;
