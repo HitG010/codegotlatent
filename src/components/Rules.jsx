@@ -1,5 +1,5 @@
-import cglMeme1 from '../assets/cglMeme1.png';
-import cglMeme2 from '../assets/cglMeme2.png';
+import cglMeme1 from '../assets/cglmeme1.png';
+import cglMeme2 from '../assets/cglmeme2.png';
 export default function Rules() {
   return (
     <div className="text-md text-white min-h-screen px-2 py-10">
