@@ -9,7 +9,7 @@ const prisma = require("./services/prisma");
 const redis = require("./services/redis");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
-const {scheduler} = require("./sockets");
+const { scheduler } = require("./sockets");
 
 const problemRouter = require("./routes/problems");
 const submissionRouter = require("./routes/submissions");
@@ -95,7 +95,6 @@ scheduler(io);
 //   }
 // });
 
-
 // const generateAccessToken = async (user) => {
 //   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "60m" });
 // };
@@ -112,21 +111,21 @@ scheduler(io);
 //     .status(400)
 //     .json({ message: "Email and password are required." });
 //   }
-  
+
 //   try {
 //     const user = await prisma.User.findUnique({
 //       where: { email },
 //     });
-    
+
 //     if (!user) {
 //       return res.status(401).json({ message: "Invalid email or password." });
 //     }
-    
+
 //     const isPasswordValid = await bcrypt.compare(password, user.password);
 //     if (!isPasswordValid) {
 //       return res.status(401).json({ message: "Invalid email or password." });
 //     }
-    
+
 //     const accessToken = await generateAccessToken({
 //       id: user.id,
 //       email: user.email,
@@ -135,9 +134,9 @@ scheduler(io);
 //       id: user.id,
 //       email: user.email,
 //     });
-    
+
 //     console.log("Refresh Token:", refreshToken);
-    
+
 //     const updatedUser = await prisma.UserRefreshToken.update({
 //       where: { userId: user.id },
 //       data: { refreshToken },
@@ -148,7 +147,7 @@ scheduler(io);
 //       .status(500)
 //       .json({ message: "Error updating user with refresh token." });
 //     }
-    
+
 //     res
 //     .cookie("refreshToken", refreshToken, {
 //       httpOnly: true,
@@ -170,14 +169,14 @@ scheduler(io);
 //     .status(400)
 //     .json({ message: "Email and password are required." });
 //   }
-  
+
 //   try {
 //     const existingUser = await prisma.User.findFirst({
 //       where: {
 //         OR: [{ email }, { username }],
 //       },
 //     });
-    
+
 //     if (existingUser) {
 //       return res.status(409).json({ message: "Email already exists." });
 //     }
@@ -185,7 +184,7 @@ scheduler(io);
 //     console.error("Error checking existing user:", error);
 //     return res.status(500).json({ message: "Internal server error." });
 //   }
-  
+
 //   try {
 //     const hashedPassword = await bcrypt.hash(password, 10);
 //     const newUser = await prisma.User.create({
@@ -195,7 +194,7 @@ scheduler(io);
 //         username,
 //       },
 //     });
-    
+
 //     const accessToken = await generateAccessToken({
 //       id: newUser.id,
 //       email: newUser.email,
@@ -204,9 +203,9 @@ scheduler(io);
 //       id: newUser.id,
 //       email: newUser.email,
 //     });
-    
+
 //     console.log("Refresh Token:", refreshToken);
-    
+
 //     const updatedUser = await prisma.userRefreshToken.create({
 //       data: {
 //         userId: newUser.id,
@@ -218,7 +217,7 @@ scheduler(io);
 //       .status(500)
 //       .json({ message: "Error updating user with refresh token." });
 //     } else console.log("User updated with refresh token:", updatedUser);
-    
+
 //     res
 //     .cookie("refreshToken", refreshToken, {
 //       httpOnly: true,
@@ -250,7 +249,7 @@ scheduler(io);
 //     console.error("Error checking refresh token:", error);
 //     return res.status(500).json({ message: "Internal server error." });
 //   }
-  
+
 //   jwt.verify(
 //     refreshToken,
 //     process.env.REFRESH_TOKEN_SECRET,
@@ -258,7 +257,7 @@ scheduler(io);
 //       if (err) {
 //         return res.status(403).json({ message: "Invalid refresh token." });
 //       }
-      
+
 //       const accessToken = await generateAccessToken({
 //         id: user.id,
 //         email: user.email,
@@ -277,7 +276,7 @@ scheduler(io);
 //   if (!refreshToken) {
 //     return res.status(401).json({ message: "Refresh token not found." });
 //   }
-  
+
 //   try {
 //     await prisma.UserRefreshToken.update({
 //       where: { refreshToken },
