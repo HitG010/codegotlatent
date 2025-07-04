@@ -17,8 +17,10 @@ import "../App.css";
 const Home = () => {
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.accessToken);
+  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
   console.log(user, "User in Home");
   console.log(token, "Access Token in Home");
+  console.log(isAuthenticated, "Is Authenticated in Home");
   const pathname = window.location.pathname;
   // alert("Home Page");
   return (

@@ -11,7 +11,8 @@ const Login2 = () => {
   const isAuthenticated = useUserStore((state) => state.isAuthenticated);
   
   if (isAuthenticated) {
-    return <Navigate to="/home" />;
+    // return <Navigate to="/home" />;
+    window.location.href = '/home'; // Redirect to home if already authenticated
   }
 
   const handleSuccess = async (credentialResponse) => {
