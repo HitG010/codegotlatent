@@ -28,7 +28,7 @@ app.use(
     origin: [
       process.env.CLIENT_URL,
       `${process.env.CLIENT_URL}/auth`,
-      "https://www.codegotlatent.com",
+      "https://www.codegotlatent.com/",
     ],
     credentials: true,
   })
