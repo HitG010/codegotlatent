@@ -7,7 +7,7 @@ export default function AuthRoute({ children }) {
     const isAuthenticated = useUserStore((state) => state.isAuthenticated);
     console.log("isAuthenticated:", isAuthenticated);
 
-    return isAuthenticated ? children : <Navigate to="/login" />;
+    return isAuthenticated ? children : window.location.href = "/login";
 }
 
 AuthRoute.propTypes = {
