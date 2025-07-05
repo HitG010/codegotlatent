@@ -66,9 +66,10 @@ router.post("/auth/google", async (req, res) => {
     }
     console.log("Setting cookie with refresh token:", refreshToken);
     res.cookie("refreshToken", refreshToken, {
-        // httpOnly: true,
+        httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
+        sameSite: 'none',
+        domain: 'codegotlatent.onrender.com',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json({ accessToken, user: { id: user.id, email: user.email } });
