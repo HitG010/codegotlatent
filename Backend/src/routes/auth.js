@@ -64,7 +64,7 @@ router.post("/auth/google", async (req, res) => {
         },
       });
     }
-
+    console.log("Setting cookie with refresh token:", refreshToken);
     res
       .cookie("refreshToken", refreshToken, {
         // httpOnly: true,
