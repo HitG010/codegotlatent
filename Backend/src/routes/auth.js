@@ -67,7 +67,7 @@ router.post("/auth/google", async (req, res) => {
 
     res
       .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
+        // httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "Strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
