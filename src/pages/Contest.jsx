@@ -180,11 +180,11 @@ export default function Contest() {
   return (
     <div className="flex flex-row rounded-lg text-white max-w-280 my-auto p-6 mx-auto gap-12">
       {/* <h1>Contest</h1> */}
-      <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border border-[#ffffff10] w-full">
+      <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border-[#ffffff10] w-full">
         <img src={cglContest} alt="CGL Contest" className="rounded-lg mb-4" />
         <div className="flex flex-row items-center gap-4 mb-2">
           <h2 className="text-4xl font-semibold">{contest.name}</h2>
-          <h3 className="rounded-full bg-white/5 text-white/65 border border-1 border-[#ffffff15] text-sm px-3 py-1">
+          <h3 className="rounded-full bg-white/5 text-white/65 border-1 border-[#ffffff15] text-sm px-3 py-1">
             {contestStatus}
           </h3>
         </div>
@@ -314,7 +314,7 @@ export default function Contest() {
           </div>
         )}
         {isRegistered && contest.status !== "Rank Guess Phase" && (
-          <div className="border border-1 border-yellow-500/45 rounded-lg p-4 bg-[#ffffff10] mt-2">
+          <div className="border-1 border-yellow-500/45 rounded-lg p-4 bg-[#ffffff10] mt-2">
             <h2 className="text-lg font-semibold">Guess Your Rank</h2>
             {/* Contest is starting in <CountdownTimer startTime={contest.startTime + 2*60*100}></CountdownTimer> */}
             <form className="flex flex-col gap-2 w-full">
@@ -343,7 +343,7 @@ export default function Contest() {
                   value={predictedRank}
                   disabled={true}
                   // onChange={(e) => setPredictedRank(e.target.value)}
-                  className="disabled:cursor-not-allowed border border-1 border-[#ffffff25] rounded px-2 py-1 w-full block bg-[#ffffff10] text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200"
+                  className="disabled:cursor-not-allowed border-1 border-[#ffffff25] rounded px-2 py-1 w-full block bg-[#ffffff10] text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200"
                 />
               </label>
               <button
@@ -377,7 +377,7 @@ export default function Contest() {
                 <div key={problem.id}>
                   <Link
                     to={`/contest/${contestId}/problem/${problem.id}`}
-                    className="text-lg font-semibold text-white hover:text-yellow-500 transition duration-200 bg-[#ffffff05] rounded-md px-4 py-2 mb-2 hover:bg-[#ffffff10] border border-1 border-[#ffffff15] flex justify-between items-center w-full"
+                    className="text-lg font-semibold text-white hover:text-yellow-500 transition duration-200 bg-[#ffffff05] rounded-md px-4 py-2 mb-2 hover:bg-[#ffffff10] border-1 border-[#ffffff15] flex justify-between items-center w-full"
                   >
                     <div className="flex items-center justify-between gap-4 w-full">
                       <div className="flex items-center gap-2">
@@ -415,7 +415,7 @@ export default function Contest() {
           {contest.status === "Ended" && (
             <div
               className="bg-[#ffffff05] rounded-lg p-4 mt-4
-            border border-1 border-[#ffffff10]"
+            border-1 border-[#ffffff10]"
             >
               <h2 className="text-2xl font-semibold mb-2">Contest Rankings</h2>
               <p className="text-white/65">

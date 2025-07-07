@@ -269,7 +269,7 @@ function Problem() {
         {/* Left column */}
         <div className="flex flex-col" style={{ width: tile1Width }}>
           <div
-            className="pb-1 pl-4 pr-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar flex flex-col"
+            className="pb-1 pl-4 pr-4 rounded-xl bg-[#212121] overflow-auto border-1 border-[#ffffff25] scrollbar flex flex-col"
             style={{ height: tile1Height }}
           >
             <div className="tabs w-full flex flex-row justify-start gap-1 items-center mb-1 border-b border-[#ffffff15] pt-1 pb-0.5">
@@ -316,7 +316,7 @@ function Problem() {
           </div>
 
           <div
-            className="p-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar"
+            className="p-4 rounded-xl bg-[#212121] overflow-auto border-1 border-[#ffffff25] scrollbar"
             style={{ height: tile2Height }}
           >
             <TestCases
@@ -337,7 +337,7 @@ function Problem() {
 
         {/* Right Column: Code Editor */}
         {/* <div
-          className="p-4 rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar"
+          className="p-4 rounded-xl bg-[#212121] overflow-auto border-1 border-[#ffffff25] scrollbar"
           style={{ width: tile3Width, height: screenHeight + 8 }}
         >
           Here goes Monaco Code Editor
@@ -346,7 +346,7 @@ function Problem() {
         {/* </div> */}
         {/* Right Column: Code Editor */}
         <div
-          className="rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar"
+          className="rounded-xl bg-[#212121] overflow-auto border-1 border-[#ffffff25] scrollbar"
           style={{ width: tile3Width, height: screenHeight + 8 }}
         >
           <label for="languages" className="text-sm">

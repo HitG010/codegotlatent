@@ -47,9 +47,9 @@ function User() {
         </div>
       )}
       {!loading && (
-        <div className="flex flex-col items-center justify-start w-full h-full w-[80%] p-10 pt-10 bg-[#0F0F0F] overflow-auto scrollbar">
+        <div className="flex flex-col items-center justify-start w-full h-full p-10 pt-10 bg-[#0F0F0F] overflow-auto scrollbar">
           <div className="w-full flex gap-4">
-            <div className="bg-[#ffffff05] rounded-lg p-6 max-w-[400px] border border-1 border-[#ffffff10] flex flex-col items-start justify-start gap-8 h-fit w-full">
+            <div className="bg-[#ffffff05] rounded-lg p-6 max-w-[400px] border-1 border-[#ffffff10] flex flex-col items-start justify-start gap-8 h-fit w-full">
               <div className="flex items-center justify-start gap-8">
                 <img
                   src={avatars[userData.pfpId - 1]}
@@ -84,7 +84,7 @@ function User() {
                 </p>
               </div>
             </div>
-            <div className="bg-[#ffffff05] rounded-lg w-full border border-1 border-[#ffffff10] flex flex-col justify-center gap-8">
+            <div className="bg-[#ffffff05] rounded-lg w-full border-1 border-[#ffffff10] flex flex-col justify-center gap-8">
               {/* <h2 className="text-2xl font-semibold">Contest Ratings</h2> */}
               <div className="w-full flex flex-col justify-center items-start gap-4 ml-[-25px]">
                 <div className="flex items-center justify-between w-full">
@@ -105,17 +105,17 @@ function User() {
               </div>
             </div>
           </div>
-          <div className="mt-4 bg-[#ffffff05] rounded-lg p-6 w-full border border-1 border-[#ffffff10] flex items-center justify-between gap-4">
+          <div className="mt-4 bg-[#ffffff05] rounded-lg p-6 w-full border-1 border-[#ffffff10] flex items-center justify-between gap-4">
             <h2 className="text-2xl font-semibold">Problems Solved</h2>
             <div className="flex items-center gap-4">
-              <div className="text-white text-lg px-3 py-2 bg-white/5 rounded-lg border border-1 border-[#ffffff15] flex justify-between gap-5">
+              <div className="text-white text-lg px-3 py-2 bg-white/5 rounded-lg border-1 border-[#ffffff15] flex justify-between gap-5">
                 {" "}
                 <span className="text-green-500 font-semibold">Easy</span>{" "}
                 <span className="font-light text-2xl text-white/8">|</span>{" "}
                 {userData.problemCount.easyCount}/
                 {userData.problemCount.totalEasyCount}
               </div>
-              <div className="text-white text-lg px-3 py-2 bg-white/5 rounded-lg border border-1 border-[#ffffff15] flex justify-between gap-5">
+              <div className="text-white text-lg px-3 py-2 bg-white/5 rounded-lg border-1 border-[#ffffff15] flex justify-between gap-5">
                 {" "}
                 <span className="text-yellow-500 font-semibold">
                   Medium
@@ -124,14 +124,14 @@ function User() {
                 {userData.problemCount.mediumCount}/
                 {userData.problemCount.totalMediumCount}
               </div>
-              <div className="text-white text-lg px-3 py-2 bg-white/5 rounded-lg border border-1 border-[#ffffff15] flex justify-between gap-5">
+              <div className="text-white text-lg px-3 py-2 bg-white/5 rounded-lg border-1 border-[#ffffff15] flex justify-between gap-5">
                 {" "}
                 <span className="text-red-500 font-semibold">Hard</span>{" "}
                 <span className="font-light text-2xl text-white/8">|</span>
                 {userData.problemCount.hardCount}/
                 {userData.problemCount.totalHardCount}
               </div>
-              <div className="text-white text-lg px-3 py-2 bg-white/5 rounded-lg border border-1 border-[#ffffff15] flex justify-between gap-5">
+              <div className="text-white text-lg px-3 py-2 bg-white/5 rounded-lg border-1 border-[#ffffff15] flex justify-between gap-5">
                 {" "}
                 <span className="text-white/65 font-semibold">
                   Total Submissions
@@ -141,7 +141,7 @@ function User() {
               </div>
             </div>
           </div>
-          <div className="mt-4 bg-[#ffffff05] rounded-lg py-6 px-2 w-full border border-1 border-[#ffffff10] flex flex-col justify-start gap-2">
+          <div className="mt-4 bg-[#ffffff05] rounded-lg py-6 px-2 w-full border-1 border-[#ffffff10] flex flex-col justify-start gap-2">
             <h2 className="text-2xl font-semibold px-4 mb-2">
               Submission History
             </h2>
