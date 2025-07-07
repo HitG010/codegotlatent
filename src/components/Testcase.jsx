@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 export const Testcase = ({
   input,
   stdin,
+  stdout,
   output,
   testCaseStatus,
   index,
@@ -15,22 +16,22 @@ export const Testcase = ({
     <div className="relative flex items-start my-2 py-3 px-4 border border-white/10 rounded-xl shadow-lg bg-[#1a1a1a75]">
       <div className="flex flex-col w-full">
         <div className="flex items-center justify-between mb-2">
-        <span className="text-white/65">Testcase {index + 1}</span>
-        {testCaseStatus && (
-              <p className="text-gray-300 bg-[#1a1a1a75] rounded-b-xl">
-                {/* <span className="font-medium text-gray-400">Status:</span>{" "} */}
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                    testCaseStatus.status.id === 1
-                      ? "bg-green-600 text-white"
-                      : "bg-red-600 text-white"
-                  }`}
-                >
-                  {statusCode[testCaseStatus.status.id - 1]}
-                </span>
-              </p>
-            )}
-            </div>
+          <span className="text-white/65">Testcase {index + 1}</span>
+          {testCaseStatus && (
+            <p className="text-gray-300 bg-[#1a1a1a75] rounded-b-xl">
+              {/* <span className="font-medium text-gray-400">Status:</span>{" "} */}
+              <span
+                className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                  testCaseStatus.status.id === 1
+                    ? "bg-green-600 text-white"
+                    : "bg-red-600 text-white"
+                }`}
+              >
+                {statusCode[testCaseStatus.status.id - 1]}
+              </span>
+            </p>
+          )}
+        </div>
         {isLoading ? (
           <div className="flex items-center space-x-2 mb-2 text-white">
             {/* <svg
@@ -59,45 +60,41 @@ export const Testcase = ({
         ) : (
           <>
             <div className="mb-2 text-gray-300">
-              <span className="font-medium text-white block mb-1">
-                Input:
-              </span>
+              <span className="font-medium text-white block mb-1">Input:</span>
               <div className="text-sm font-mono bg-[#2a2a2a] p-2 rounded-md">
-                {Object.entries(JSON.parse(input || "{}")).map(([key, val]) => (
-                  <span key={key} className="text-white/65 font-bold text-md">
-                    {key} = <span className="text-white">{val}</span>{" "}
-                  </span>
-                ))}
+                <span className="text-white">
+                  <pre>{stdin || "No input for this case"}</pre>
+                </span>
               </div>
             </div>
 
             <p className="mb-2 text-white">
-              <span className="font-medium text-white">
-                Expected Output:
-              </span>{" "}
+              <span className="font-medium text-white">Expected Output:</span>{" "}
               <div className="text-sm font-mono bg-[#2a2a2a] p-2 rounded-md">
-              <span className="text-white">{JSON.stringify(output || "")}</span>
+                <span className="text-white">
+                  <pre>{stdout || "No output for this case"}</pre>
+                </span>
               </div>
             </p>
             {testCaseStatus && testCaseStatus.stdout && (
               <p className="mb-2 text-white">
-                <span className="font-medium text-white">
-                Your Output:
-              </span>{" "}
-              <div className="text-sm font-mono bg-[#2a2a2a] p-2 rounded-md">
-              <span className="text-white">{testCaseStatus.stdout}</span>
-              </div>
-            </p>
+                <span className="font-medium text-white">Your Output:</span>{" "}
+                <div className="text-sm font-mono bg-[#2a2a2a] p-2 rounded-md">
+                  <span className="text-white">
+                    <pre>{testCaseStatus.stdout}</pre>
+                  </span>
+                </div>
+              </p>
             )}
             {testCaseStatus && !testCaseStatus.stdout && (
               <p className="mb-2 text-white">
-                <span className="font-medium text-white">
-                Error:
-              </span>{" "}
-              <div className="text-sm font-mono bg-red-500/15 p-2 rounded-md">
-              <span className="text-red-500">{testCaseStatus.compile_output}</span>
-              </div>
-            </p>
+                <span className="font-medium text-white">Error:</span>{" "}
+                <div className="text-sm font-mono bg-red-500/15 p-2 rounded-md">
+                  <span className="text-red-500">
+                    <pre>{testCaseStatus.compile_output}</pre>
+                  </span>
+                </div>
+              </p>
             )}
             {/* {testCaseStatus && (
               <p className="mt-4 text-gray-300 absolute inset-0 top-0 right-0 bg-[#1a1a1a75] p-4 rounded-b-xl">

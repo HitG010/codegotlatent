@@ -26,6 +26,7 @@ const Testcases = ({ testCases, testcasesStatus, isLoading }) => {
           key={index}
           input={testCase.input}
           stdin={testCase.stdin}
+          stdout={testCase.stdout}
           output={testCase.output}
           testCaseStatus={
             testcasesStatus && testcasesStatus[index]

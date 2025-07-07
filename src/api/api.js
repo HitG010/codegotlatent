@@ -118,7 +118,6 @@ async function submitProblem(code, probId, langId, contestId = null, userId) {
 const pollSubmissionStatus = async (
   submissionId,
   problemId,
-  flag,
   sourceCode,
   langId
 ) => {
@@ -136,7 +135,6 @@ const pollSubmissionStatus = async (
     const body = {
       submissionId: submissionId,
       problemId: problemId,
-      flag: flag,
       sourceCode: sourceCode,
       languageId: langId,
     };

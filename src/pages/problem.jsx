@@ -89,7 +89,7 @@ function Problem() {
       .then(async (result) => {
         // long poll the server for submission status
         console.log("Result:", result);
-        pollSubmissionStatus(result, id, 0, code, langId)
+        pollSubmissionStatus(result, id, code, langId)
           .then((data) => {
             console.log("Polling Response:", data);
             setResult(data);
@@ -372,7 +372,12 @@ function Problem() {
               Java
             </option>
           </select>
-          <CodeEditor langId={langId} code={code} SetCode={setCode} probId={id} />
+          <CodeEditor
+            langId={langId}
+            code={code}
+            SetCode={setCode}
+            probId={id}
+          />
         </div>
       </div>
     </div>
