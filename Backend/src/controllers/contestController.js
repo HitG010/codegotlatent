@@ -115,7 +115,7 @@ async function unregisterContest(req, res) {
 
 async function getContestProblems(req, res) {
   const { contestId, userId } = req.params;
-  console.log("Contest ID:", contestId);
+  console.log("Contest ID for getting all probs:", contestId);
   try {
     const contest = await prisma.Contest.findUnique({
       where: {
@@ -326,7 +326,7 @@ async function submitPredictedRank(req, res) {
   return res.status(200).json(updatedUser);
 }
 
-async function getParticipantsCount (req, res) {
+async function getParticipantsCount(req, res) {
   // get the number of participants in the contest
   const { contestId } = req.params;
   console.log("Contest ID:", contestId);

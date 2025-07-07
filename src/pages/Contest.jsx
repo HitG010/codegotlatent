@@ -49,14 +49,13 @@ export default function Contest() {
 
   const fetchAllProblems = async () => {
     console.log("Fetching all problems for contest:", contestId);
-    if (isRegistered && contest.status !== "Upcoming") {
-      try {
-        const response = await getAllContestProblems(contestId, userId);
-        console.log("Contest Problems:", response);
-        setAllProblems(response);
-      } catch (error) {
-        console.error("Error fetching contest problems:", error);
-      }
+
+    try {
+      const response = await getAllContestProblems(contestId, userId);
+      console.log("Contest Problems:", response);
+      setAllProblems(response);
+    } catch (error) {
+      console.error("Error fetching contest problems:", error);
     }
   };
 
@@ -181,11 +180,11 @@ export default function Contest() {
   return (
     <div className="flex flex-row rounded-lg text-white max-w-280 my-auto p-6 mx-auto gap-12">
       {/* <h1>Contest</h1> */}
-      <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border border-[#ffffff10] w-full">
+      <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border-[#ffffff10] w-full">
         <img src={cglContest} alt="CGL Contest" className="rounded-lg mb-4" />
         <div className="flex flex-row items-center gap-4 mb-2">
           <h2 className="text-4xl font-semibold">{contest.name}</h2>
-          <h3 className="rounded-full bg-white/5 text-white/65 border border-1 border-[#ffffff15] text-sm px-3 py-1">
+          <h3 className="rounded-full bg-white/5 text-white/65 border-1 border-[#ffffff15] text-sm px-3 py-1">
             {contestStatus}
           </h3>
         </div>
@@ -222,37 +221,44 @@ export default function Contest() {
             {/* <Rank Guess Starts in: <CountdownTimer startTime={contest.startTime}></CountdownTimer> */}
             {contest.status === "Upcoming" && (
               <div className="flex gap-2 items-center mt-2">
-                Rank Guess Phase Starts in:{" "} <CountdownTimer startTime={contest.rankGuessStartTime}></CountdownTimer>
+                Rank Guess Phase Starts in:{" "}
+                <CountdownTimer
+                  startTime={contest.rankGuessStartTime}
+                ></CountdownTimer>
               </div>
             )}
           </div>
         )}
         {contest.status === "Rank Guess Phase" && (
           <div className="flex gap-2 items-center mt-2">
-            Contest Starts in: <CountdownTimer startTime={contest.startTime}></CountdownTimer>
+            Contest Starts in:{" "}
+            <CountdownTimer startTime={contest.startTime}></CountdownTimer>
           </div>
         )}
-        {contest.status !== "Upcoming" && contest.status !== "Rank Guess Phase" && isRegistered && (
-          <div>
-            <button
-              className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer disabled:bg-white/65 disabled:cursor-not-allowed"
-              disabled={true}
-            >
-              <Check className="w-4 h-4" /> Registered
-            </button>
-            {contest.status === "Ongoing" && (
-              <div className="flex gap-2 items-center mt-2">
-                Contest Ends in: <CountdownTimer startTime={contest.endTime}></CountdownTimer>
-              </div>
-            )}
-          </div>
-        )}
+        {contest.status !== "Upcoming" &&
+          contest.status !== "Rank Guess Phase" &&
+          isRegistered && (
+            <div>
+              <button
+                className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer disabled:bg-white/65 disabled:cursor-not-allowed"
+                disabled={true}
+              >
+                <Check className="w-4 h-4" /> Registered
+              </button>
+              {contest.status === "Ongoing" && (
+                <div className="flex gap-2 items-center mt-2">
+                  Contest Ends in:{" "}
+                  <CountdownTimer startTime={contest.endTime}></CountdownTimer>
+                </div>
+              )}
+            </div>
+          )}
         {contest.status === "Rating Update Pending" && (
           <div>
             <p>The contest has ended. Rating Update is in progress.</p>
           </div>
         )}
-        {contest.status !== "Upcoming" && contest.status !== "Rank Guess Phase" && !isRegistered && (
+        {contest.status === "Ongoing" && !isRegistered && (
           <button
             disabled={true}
             className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer"
@@ -308,33 +314,36 @@ export default function Contest() {
           </div>
         )}
         {isRegistered && contest.status !== "Rank Guess Phase" && (
-          <div className="border border-1 border-yellow-500/45 rounded-lg p-4 bg-[#ffffff10] mt-2">
+          <div className="border-1 border-yellow-500/45 rounded-lg p-4 bg-[#ffffff10] mt-2">
             <h2 className="text-lg font-semibold">Guess Your Rank</h2>
-          {/* Contest is starting in <CountdownTimer startTime={contest.startTime + 2*60*100}></CountdownTimer> */}
+            {/* Contest is starting in <CountdownTimer startTime={contest.startTime + 2*60*100}></CountdownTimer> */}
             <form className="flex flex-col gap-2 w-full">
               <label className="flex flex-col justify-center gap-2 w-full">
-              <div className="flex justify-between items-center">
-                <p>Your Predicted Rank:</p>
-                <div className="flex items-center gap-1">
-                  <div className="cursor-pointer" onMouseEnter={() => setShowInfo(true)}
-                  onMouseLeave={() => setShowInfo(false)}>
-                  <Info className="inline h-4 w-4 text-yellow-500"
-                  />
+                <div className="flex justify-between items-center">
+                  <p>Your Predicted Rank:</p>
+                  <div className="flex items-center gap-1">
+                    <div
+                      className="cursor-pointer"
+                      onMouseEnter={() => setShowInfo(true)}
+                      onMouseLeave={() => setShowInfo(false)}
+                    >
+                      <Info className="inline h-4 w-4 text-yellow-500" />
+                    </div>
+                    {showInfo && (
+                      <span className="absolute -translate-y-[40px] -translate-x-1/2 mt-2 w-64 bg-black text-white text-xs rounded-lg shadow-lg p-2 z-10">
+                        This is your predicted rank for the contest. It will be
+                        used to calculate your score.
+                      </span>
+                    )}
                   </div>
-                  {showInfo && (
-                    <span className="absolute -translate-y-[40px] -translate-x-1/2 mt-2 w-64 bg-black text-white text-xs rounded-lg shadow-lg p-2 z-10">
-                        This is your predicted rank for the contest. It will be used to calculate your score.
-                    </span>
-                  )}
                 </div>
-              </div>
                 <input
                   type="number"
                   name="predictedRank"
                   value={predictedRank}
-                disabled={true}
+                  disabled={true}
                   // onChange={(e) => setPredictedRank(e.target.value)}
-                  className="disabled:cursor-not-allowed border border-1 border-[#ffffff25] rounded px-2 py-1 w-full block bg-[#ffffff10] text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200"
+                  className="disabled:cursor-not-allowed border-1 border-[#ffffff25] rounded px-2 py-1 w-full block bg-[#ffffff10] text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200"
                 />
               </label>
               <button
@@ -350,7 +359,7 @@ export default function Contest() {
                   console.log("Response:", response);
                   // setPredictedRank(null);
                 }}
-              disabled = {true}
+                disabled={true}
                 className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer disabled:bg-white/65 disabled:cursor-not-allowed"
               >
                 Submit
@@ -359,46 +368,64 @@ export default function Contest() {
           </div>
         )}
       </div>
-      {isRegistered && (
+      {(contest.status === "Ended" || isRegistered) && (
         <div className=" flex flex-col gap-4 w-full">
           <h2 className="text-4xl font-semibold mb-2 inline-block">Problems</h2>
           <div className="flex flex-col gap-0.5 w-full">
-            {allProblems && allProblems.map((problem) => (
-            <div key={problem.id}>
-              <Link to={`/contest/${contestId}/problem/${problem.id}`}
-              className="text-lg font-semibold text-white hover:text-yellow-500 transition duration-200 bg-[#ffffff05] rounded-md px-4 py-2 mb-2 hover:bg-[#ffffff10] border border-1 border-[#ffffff15] flex justify-between items-center w-full">
-                <div className="flex items-center justify-between gap-4 w-full">
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4">
-                      {problem.solvedInContest ? <Check className="h-4 w-4 text-green-500" /> : ""}
+            {allProblems &&
+              allProblems.map((problem) => (
+                <div key={problem.id}>
+                  <Link
+                    to={`/contest/${contestId}/problem/${problem.id}`}
+                    className="text-lg font-semibold text-white hover:text-yellow-500 transition duration-200 bg-[#ffffff05] rounded-md px-4 py-2 mb-2 hover:bg-[#ffffff10] border-1 border-[#ffffff15] flex justify-between items-center w-full"
+                  >
+                    <div className="flex items-center justify-between gap-4 w-full">
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4">
+                          {problem.solvedInContest ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            ""
+                          )}
+                        </div>
+                        <h3>{problem.title}</h3>
                       </div>
-                    <h3>{problem.title}</h3>
-                  </div>
-                  {/* <DifficultyTag className="text-sm text-[#ffffff80]" tag={problem.difficulty}/> */}
-                  <span className="text-sm text-[#ffffff80] rounded-full px-3 py-0.5 bg-[#ffffff10]">{problem.problemScore}</span>
+                      {/* <DifficultyTag className="text-sm text-[#ffffff80]" tag={problem.difficulty}/> */}
+                      <span className="text-sm text-[#ffffff80] rounded-full px-3 py-0.5 bg-[#ffffff10]">
+                        {problem.problemScore}
+                      </span>
+                    </div>
+                  </Link>
                 </div>
-              </Link>
-            </div>
-          ))}
-          </div>
-        <div className="flex flex-col gap-2">
-          {/* <h2 className="text-4xl font-semibold mb-2">Contest Details</h2> */}
-          {/* <p className="text-white/65">{contest.details}</p> */}
-          <div className="flex flex-col gap-2">
-            <h3 className="text-2xl font-semibold">Contest Rules</h3>
-            <ul className="list-disc pl-5 text-white/65">
-              {contest.rules && contest.rules.map((rule, index) => (
-                <li key={index}>{rule}</li>
               ))}
-            </ul>
           </div>
+          <div className="flex flex-col gap-2">
+            {/* <h2 className="text-4xl font-semibold mb-2">Contest Details</h2> */}
+            {/* <p className="text-white/65">{contest.details}</p> */}
+            <div className="flex flex-col gap-2">
+              <h3 className="text-2xl font-semibold">Contest Rules</h3>
+              <ul className="list-disc pl-5 text-white/65">
+                {contest.rules &&
+                  contest.rules.map((rule, index) => (
+                    <li key={index}>{rule}</li>
+                  ))}
+              </ul>
+            </div>
           </div>
           {contest.status === "Ended" && (
-            <div className="bg-[#ffffff05] rounded-lg p-4 mt-4
-            border border-1 border-[#ffffff10]">
+            <div
+              className="bg-[#ffffff05] rounded-lg p-4 mt-4
+            border-1 border-[#ffffff10]"
+            >
               <h2 className="text-2xl font-semibold mb-2">Contest Rankings</h2>
-              <p className="text-white/65">The contest has ended. You can view your results and ratings by visiting the rankings page.</p>
-              <Link to={`/contest/${contestId}/ranking`} className="text-black bg-white rounded-md font-medium px-3 py-2 text-center hover:bg-white/65 transition-all duration-300 mt-2 inline-block w-full">
+              <p className="text-white/65">
+                The contest has ended. You can view your results and ratings by
+                visiting the rankings page.
+              </p>
+              <Link
+                to={`/contest/${contestId}/ranking`}
+                className="text-black bg-white rounded-md font-medium px-3 py-2 text-center hover:bg-white/65 transition-all duration-300 mt-2 inline-block w-full"
+              >
                 View Rankings
               </Link>
             </div>

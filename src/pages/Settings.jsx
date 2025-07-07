@@ -104,7 +104,7 @@ function Settings() {
             className="h-24 w-24 rounded-full bg-[#000] border border-[#ffffff35]"
           />
           <div>
-            <p className="text-white text-sm text-white/65">Username</p>
+            <p className="text-white text-sm">Username</p>
             <p className="text-white text-2xl font-semibold">
               {userDetails?.username}
             </p>
@@ -112,7 +112,7 @@ function Settings() {
                 <p className="text-white text-xl font-semibold">{userDetails?.email}</p> */}
             <Link
               to={`/user/${userDetails?.username}`}
-              className="hover:bg-white/65 mt-2 px-2 py-1 bg-white text-black font-medium text-sm flex items-center justify-center gap-2 rounded rounded-md transition-all duration-300"
+              className="hover:bg-white/65 mt-2 px-2 py-1 bg-white text-black font-medium text-sm flex items-center justify-center gap-2 rounded  transition-all duration-300"
             >
               View Profile <ExternalLink className="w-3 h-3" />
             </Link>
@@ -187,7 +187,7 @@ function Settings() {
                   alt={`Avatar ${idx + 1}`}
                   className={`h-10 w-10 rounded-full cursor-pointer ${
                     Number(userDetails?.pfpId) === idx + 1
-                      ? "border border-2 border-yellow-500"
+                      ? "border-2 border-yellow-500"
                       : ""
                   }`}
                   onClick={async () => {
