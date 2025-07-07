@@ -69,7 +69,7 @@ export default function Submission() {
         <div>
           <span className="font-medium text-white/65">Problem:</span>{" "}
           <Link
-            to={`/problems/${submission.problem.id}`}
+            to={`/problem/${submission.problem.id}`}
             className="text-blue-600 hover:underline"
           >
             {submission.problem.title} ({submission.problem.difficulty})
