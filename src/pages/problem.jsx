@@ -17,6 +17,7 @@ import CodeEditor from "../components/CodeEditor";
 import ProblemTab from "../components/ProblemTab";
 import ProblemSubmissions from "../components/ProblemSubmissions";
 import { ClockFading, File } from "lucide-react";
+import { avatars } from "../components/Avatars";
 
 function Problem() {
   const user = useUserStore((state) => state.user);
@@ -74,8 +75,8 @@ function Problem() {
   };
 
   const handleRunSubmit = async () => {
-    if (!code || !testCases || !langId) {
-      console.error("Code, test cases, or language ID is missing");
+    if (!code || !data || !data.testCases || !langId) {
+      console.error("Code, data, test cases, or language ID is missing");
       return;
     }
 
@@ -85,6 +86,7 @@ function Problem() {
 
     console.log("Submitted Code:", code);
     // Simulate an API call to execute the code
+    console.log("Executing testcases", data.testCases);
     executeCode(code, data.testCases, langId, id)
       .then(async (result) => {
         // long poll the server for submission status
@@ -98,14 +100,26 @@ function Problem() {
           })
           .catch((error) => {
             console.error("Error polling submission status:", error);
+            setTestCaseLoading(false);
+            setRunLoading(false);
           });
       })
       .catch((error) => {
         console.error("Error executing code:", error);
         setError(error);
+        setTestCaseLoading(false);
+        setRunLoading(false);
+        if(error.response.status === 429) {
+          alert("You have exceeded the rate limit. Please try again later.");
+        }
       });
   };
   const handleSubmit = async () => {
+    if (!code || !data || !langId) {
+      console.error("Code, data, or language ID is missing");
+      return;
+    }
+
     console.log("Submitted Code:", code);
     try {
       setResultLoading(true);
@@ -117,25 +131,59 @@ function Problem() {
     } catch (error) {
       console.error("Error submitting code:", error);
       setError(error);
+      setResultLoading(false);
+      if(error.response.status === 429) {
+          alert("You have exceeded the rate limit. Please try again later.");
+        }
     }
   };
 
+  // useEffect(() => {
+    
+  // }, []);
+
   useEffect(() => {
     fetchData();
-    // fetchTestCases();
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = async (event) => {
+      if (event.ctrlKey && event.key === "'") {
+        // run code
+        // event.preventDefault();
+        console.log("Ctrl + ' pressed!");
+        if(!runLoading && data && data.testCases) {
+          console.log("Running code...");
+          await handleRunSubmit();
+        }
+        // Your custom logic here
+      }
+
+      if (event.ctrlKey && event.key === "Enter") {
+        console.log("Ctrl + Enter pressed!");
+        if(!resultLoading && data) await handleSubmit();
+        // e.g., close a modal
+      }
+    };
 
     const handleResize = () => {
       setScreenHeight(window.innerHeight);
       setScreenWidth(window.innerWidth);
     };
+
+    window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [runLoading, resultLoading, data]);
 
   if (loading) {
     return <div>Loading...</div>;
   }
-  if (error) {
+  if (error && error.response.status != 429) {
     return <div>Error: {error.message}</div>;
   }
   if (!data) {
@@ -259,7 +307,14 @@ function Problem() {
           </div>
         </div>
         <div className="flex items-center">
-          <div className="rounded-full bg-white/50 text-sm text-white h-8 w-8"></div>
+          {/* <div className="rounded-full bg-white/50 text-sm text-white h-8 w-8"></div> */}
+          <Link to={`/user/${user?.username}`} className="hover:opacity-80">
+            <img
+              src={avatars[user?.pfpId - 1] || null}
+              alt=""
+              className="h-10 w-10 rounded-full mr-2 bg-black"
+            />
+          </Link>
         </div>
       </div>
       <div
