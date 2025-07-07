@@ -81,7 +81,7 @@ router.post("/auth/google", async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "none",
-        // domain: 'codegotlatent.onrender.com',
+        domain: process.env.DOMAIN,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json({ accessToken, user: { id: user.id, email: user.email } });
