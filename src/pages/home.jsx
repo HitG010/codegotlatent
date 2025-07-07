@@ -29,7 +29,7 @@ const Home = () => {
       <div className="home flex flex-col h-full w-[80%] p-10 pt-16 bg-[#0F0F0F] overflow-auto scrollbar">
         <div className="flex flex-col gap-1 justify-self-start">
           <h1 className="text-white text-4xl font-semibold">
-            Welcome, {user.email} 👋
+            Welcome, {user.username} 👋
           </h1>
           <p className="text-gray-400 text-xl">
             Start showing your "Latent" today!

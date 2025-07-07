@@ -31,11 +31,19 @@ router.post("/auth/google", async (req, res) => {
 
     if (!user) {
       // Create user if not exists
+      // Generate a more random username to prevent collisions
+      let username;
+      let isUnique = false;
+      while (!isUnique) {
+        username = "User_" + v4().replace(/-/g, "").slice(0, 12);
+        const existing = await prisma.user.findUnique({ where: { username } });
+        if (!existing) isUnique = true;
+      }
       user = await prisma.user.create({
         data: {
           email,
           name,
-          username: "User_" + v4().slice(0, 8),
+          username,
           password: bcrypt.hashSync(v4(), 10), // random password just to satisfy schema
         },
       });
@@ -72,7 +80,7 @@ router.post("/auth/google", async (req, res) => {
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        // sameSite: 'none',
+        sameSite: "none",
         // domain: 'codegotlatent.onrender.com',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
@@ -91,10 +99,10 @@ router.post("/auth/refresh-token", async (req, res) => {
     return res.status(401).json({ message: "Refresh token not found." });
   }
   try {
-    const user = await prisma.userRefreshToken.findUnique({
+    const userRefreshToken = await prisma.userRefreshToken.findUnique({
       where: { refreshToken },
     });
-    if (!user) {
+    if (!userRefreshToken) {
       return res.status(403).json({ message: "Invalid refresh token." });
     }
   } catch (error) {

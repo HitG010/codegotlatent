@@ -123,6 +123,14 @@ async function updateUserDetails (req, res) {
   const { username, name, Bio, Location, pfpId } = req.body;
   console.log("User ID:", userId);
 
+  // Check if the username already exists
+  const existingUser = await prisma.user.findUnique({
+    where: { username: username },
+  });
+  if (existingUser && existingUser.id !== userId) {
+    return res.status(400).json({ error: "Username already exists" });
+  }
+
   try {
     const updatedUser = await prisma.user.update({
       where: { id: userId },

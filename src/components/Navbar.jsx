@@ -15,20 +15,12 @@ export default function Navbar({
 }) {
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
-  const [userDetails, setUserDetails] = React.useState(null);
+  // const [user, setuser] = React.useState(user);
 
   // Fetch user details when the component mounts
-  React.useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const details = await getUserDetails(user.id);
-        setUserDetails(details);
-      } catch (error) {
-        console.error('Error fetching user details:', error);
-      }
-    };
-    fetchUserDetails();
-  }, [user.id]);
+  // React.useEffect(() => {
+  //   setuser(user);
+  // }, [user.id]);
 
   // This component renders a sidebar navigation bar with links to Home, Problems, and Contests.
   return (
@@ -58,9 +50,9 @@ export default function Navbar({
           <p className={`text-lg ${path === '/settings' ? 'text-white' : 'text-white/65'}`}>Settings</p>
         </Link>
         <div className="h-[1px] bg-white opacity-10"></div>
-        <Link to={`/user/${userDetails?.username}`} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300 ${path === `/user/${userDetails?.username}` ? 'bg-[#2A2A2A]' : ''}`}>
-          <img src={avatars[userDetails?.pfpId - 1] || null} alt="" className="h-10 w-10 rounded-full mr-2 bg-black" />
-          <p className="text-lg">{userDetails?.username}</p>
+        <Link to={`/user/${user?.username}`} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300 ${path === `/user/${user?.username}` ? 'bg-[#2A2A2A]' : ''}`}>
+          <img src={avatars[user?.pfpId - 1] || null} alt="" className="h-10 w-10 rounded-full mr-2 bg-black" />
+          <p className="text-lg">{user?.username}</p>
         </Link>
       </div>
     </div>
