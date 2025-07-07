@@ -17,6 +17,7 @@ import CodeEditor from "../components/CodeEditor";
 import ProblemTab from "../components/ProblemTab";
 import ProblemSubmissions from "../components/ProblemSubmissions";
 import { ClockFading, File } from "lucide-react";
+import { avatars } from "../components/Avatars";
 
 function Problem() {
   const user = useUserStore((state) => state.user);
@@ -259,7 +260,14 @@ function Problem() {
           </div>
         </div>
         <div className="flex items-center">
-          <div className="rounded-full bg-white/50 text-sm text-white h-8 w-8"></div>
+          {/* <div className="rounded-full bg-white/50 text-sm text-white h-8 w-8"></div> */}
+          <Link to={`/user/${user?.username}`} className="hover:opacity-80">
+            <img
+              src={avatars[user?.pfpId - 1] || null}
+              alt=""
+              className="h-10 w-10 rounded-full mr-2 bg-black"
+            />
+          </Link>
         </div>
       </div>
       <div

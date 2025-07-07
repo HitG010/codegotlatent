@@ -11,6 +11,7 @@ const getSubmissionStatus = async (tokens, maxRetries = 20, delayMs = 1000) => {
     });
 
     const data = await response.json();
+    console.log("Submission Status Data:", data);
     const pending = data.submissions.filter((sub) => sub.status.id < 3);
 
     if (pending.length === 0) {
