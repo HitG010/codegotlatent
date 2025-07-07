@@ -2,7 +2,7 @@ import axios from 'axios';
 import useUserStore from '../store/userStore';
 
 const api = axios.create({
-    baseURL: `${import.meta.env.VITE_BASE_URL}/auth`,
+    baseURL: `${import.meta.env.VITE_BASE_URL}`,
     withCredentials: true, // Include credentials (cookies) in requests
     headers: {
         'Content-Type': 'application/json',

@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 
 function Settings() {
 const user = useUserStore((state) => state.user);
+const setUser = useUserStore((state) => state.setUser);
 const clearUser = useUserStore((state) => state.clearUser);
 console.log('user in settings', user);
 const [userDetails, setUserDetails] = React.useState(null);
@@ -40,6 +41,7 @@ const handleChange = (e) => {
         ...prev,
         [name]: value,
     }));
+    // setUser(userDetails); // Update user state in the store
 };
 
 const handleUpdateUserDetails = async () => {
@@ -103,6 +105,8 @@ return (
                             if( editField.username == false) {
                                 // Logic to save the username
                                 handleUpdateUserDetails();
+                                const newUser = { ...user, username: userDetails.username };
+                                setUser(newUser);
                             }
                         }}
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
@@ -130,25 +134,6 @@ return (
                         Edit <Pencil className='w-3 h-3 inline' />
                     </button> */}
                 </div>
-                <h2 className="text-white/65 text-lg font-medium">Password</h2>
-                <div className='flex gap-2 col-span-4'>
-                    {/* <input
-                                            type="password"
-                                            name="password"
-                                            placeholder="Change Password"
-                                            className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
-                                        />
-                                        <button
-                                            onClick={() => {
-                                                // Add logic to update password
-                                                alert('Password updated!');
-                                            }}
-                                            className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
-                                        >
-                                            Change <Pencil className='w-3 h-3 inline' />
-                                        </button> */}
-                                        <Link to="/forgot-password" className="text-yellow-500 hover:underline">Click to change password</Link>
-                                    </div>
                                     <h2 className="text-white/65 text-lg font-medium">Choose Avatar</h2>
                                     <div className='flex gap-2 col-span-4'>
                                         {avatars.map((avatar, idx) => (
@@ -162,6 +147,8 @@ return (
                                                     if (Number(userDetails?.pfpId) !== idx + 1) {
                                                         const newDetails = { ...userDetails, pfpId: String(idx + 1) };
                                                         setUserDetails(newDetails);
+                                                        const newUser = { ...user, pfpId: String(idx + 1) };
+                                                        setUser(newUser);
                                                         try {
                                                             const updated = await updateUserDetails(user.id, newDetails);
                                                             setUserDetails(updated);
@@ -200,6 +187,8 @@ return (
                             if( editField.name == false) {
                                 // Logic to save the name
                                 handleUpdateUserDetails();
+                                const newUser = { ...user, name: userDetails.name };
+                                setUser(newUser);
                             }
                         }}
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
@@ -224,6 +213,8 @@ return (
                             if( editField.Bio == false) {
                                 // Logic to save the bio
                                 handleUpdateUserDetails();
+                                // const newUser = { ...user, Bio: userDetails.Bio };
+                                // setUser(newUser);
                             }
                         }}
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
@@ -248,6 +239,7 @@ return (
                             if( editField.Location == false) {
                                 // Logic to save the location
                                 handleUpdateUserDetails();
+                                // setUser((prev) => ({ ...prev, Location: userDetails.Location }));
                             }
                         }}
                         className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"

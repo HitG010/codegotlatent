@@ -12,7 +12,7 @@ export const useUserInit = () => {
     console.log("Access Token:", accessToken);
 
     useEffect(() => {
-        api.post("/refresh-token", {
+        api.post("/auth/refresh-token", {
             withCredentials: true,
         })
             .then((response) => {
