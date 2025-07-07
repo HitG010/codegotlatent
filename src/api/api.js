@@ -186,7 +186,6 @@ const fetchProblem = async (problemId, userId) => {
   }
 };
 
-
 const fetchContests = async () => {
   const url = `${import.meta.env.VITE_BASE_URL}/contests`;
   console.log("URL:", url);
