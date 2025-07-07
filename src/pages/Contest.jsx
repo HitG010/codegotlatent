@@ -368,7 +368,7 @@ export default function Contest() {
           </div>
         )}
       </div>
-      {(contest.status === "Ended" || isRegistered) && (
+      {(contest.status === "Ended" || contest.status === "Rank Guess Phase" || isRegistered) && (
         <div className=" flex flex-col gap-4 w-full">
           <h2 className="text-4xl font-semibold mb-2 inline-block">Problems</h2>
           <div className="flex flex-col gap-0.5 w-full">

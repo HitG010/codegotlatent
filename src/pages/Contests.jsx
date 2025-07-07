@@ -29,7 +29,7 @@ export default function Contests() {
   }, []);
 
 
-  const ongoingAndUpcoming = contests.filter((contest) => (contest.status === "Ongoing" || contest.status === "Upcoming"));
+  const ongoingAndUpcoming = contests.filter((contest) => (contest.status === "Ongoing" || contest.status === "Upcoming" || contest.status === "Rank Guess Phase"));
   const past = contests.filter((contest) => (contest.status) == "Ended");
 
   const pathname = window.location.pathname;
@@ -70,7 +70,7 @@ export default function Contests() {
                         <div className="flex flex-col items-center justify-center gap-0.2">
                           <div className="flex gap-3 items-center text-2xl font-semibold">{contest.name}</div>
                           <p className="text-white/65 text-md">
-                            {parseDate(contest.startTime)}
+                            {parseDate(contest.rankGuessStartTime)}
                           </p>
                         </div>
                         <div className="flex flex-col items-center justify-center gap-0.2">
@@ -78,7 +78,7 @@ export default function Contests() {
                             {contest.status == "Ongoing" ? (
                               <><span>Ends in :</span> <CountDownTimer startTime={contest.endTime} /></>
                             ) : (
-                              <><span>Starts in:</span> <CountDownTimer startTime={contest.startTime} /></>
+                              <><span>Starts in:</span> <CountDownTimer startTime={contest.rankGuessStartTime} /></>
                             )}
                             {/* <Link to={`/contest/${contest.id}`} className="text-black px-3 py-1 flex items-center justify-center bg-white rounded-md gap-1 w-fit">Enter <MoveRight className="w-4 h-4"/></Link> */}
                           </div>
