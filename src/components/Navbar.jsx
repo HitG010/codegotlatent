@@ -9,13 +9,11 @@ import { getUserDetails } from "../api/api";
 import useUserStore from "../store/userStore";
 import { avatars } from "./Avatars";
 
-export default function Navbar({
-  
-  path
-}) {
+export default function Navbar({ path }) {
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   // const [user, setuser] = React.useState(user);
+  console.log(user, "User in Navbar");
 
   // Fetch user details when the component mounts
   // React.useEffect(() => {
@@ -30,28 +28,67 @@ export default function Navbar({
           <img src={latentNavLogo} alt="Latent Logo" className="h-14 w-14" />
         </div>
         <div className="section-buttons flex flex-col gap-2">
-          <Link to={'/home'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/home' ? 'bg-[#2A2A2A]' : ''} transion-all duration-300`}>
+          <Link
+            to={"/home"}
+            className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${
+              path === "/home" ? "bg-[#2A2A2A]" : ""
+            } transion-all duration-300`}
+          >
             <GoHomeFill className="text-white text-2xl mr-2 ml-2" />
             <p className="text-lg">Home</p>
           </Link>
-          <Link to={'/problemset'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/problemset' ? 'bg-[#2A2A2A]' : ''} transion-all duration-300`}>
+          <Link
+            to={"/problemset"}
+            className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${
+              path === "/problemset" ? "bg-[#2A2A2A]" : ""
+            } transion-all duration-300`}
+          >
             <SlPuzzle className="text-white text-2xl mr-2 ml-2 " />
             <p className="text-lg">Problems</p>
           </Link>
-          <Link to={'/contests'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${path === '/contests' ? 'bg-[#2A2A2A]' : ''} transion-all duration-300`}>
+          <Link
+            to={"/contests"}
+            className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 ${
+              path === "/contests" ? "bg-[#2A2A2A]" : ""
+            } transion-all duration-300`}
+          >
             <HiMiniTrophy className="text-white text-2xl mr-2 ml-2" />
             <p className="text-lg">Contests</p>
           </Link>
         </div>
       </div>
       <div className="end-section flex flex-col gap-2">
-        <Link to={'/settings'} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300 ${path === '/settings' ? 'bg-[#2A2A2A]' : ''}`}>
-          <IoSettingsOutline className={`text-2xl mr-2 ${path === '/settings' ? 'text-white' : 'text-white/65'}`} />
-          <p className={`text-lg ${path === '/settings' ? 'text-white' : 'text-white/65'}`}>Settings</p>
+        <Link
+          to={"/settings"}
+          className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300 ${
+            path === "/settings" ? "bg-[#2A2A2A]" : ""
+          }`}
+        >
+          <IoSettingsOutline
+            className={`text-2xl mr-2 ${
+              path === "/settings" ? "text-white" : "text-white/65"
+            }`}
+          />
+          <p
+            className={`text-lg ${
+              path === "/settings" ? "text-white" : "text-white/65"
+            }`}
+          >
+            Settings
+          </p>
         </Link>
         <div className="h-[1px] bg-white opacity-10"></div>
-        <Link to={`/user/${user?.username}`} className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300 ${path === `/user/${user?.username}` ? 'bg-[#2A2A2A]' : ''}`}>
-          <img src={avatars[user?.pfpId - 1] || null} alt="" className="h-10 w-10 rounded-full mr-2 bg-black" />
+        <Link
+          to={`/user/${user?.username}`}
+          className={`flex flex-row justify-items-start items-center text-center p-1.5 text-white hover:bg-[#2A2A2A] rounded-lg cursor-pointer gap-2 transion-all duration-300 ${
+            path === `/user/${user?.username}` ? "bg-[#2A2A2A]" : ""
+          }`}
+        >
+          <img
+            src={avatars[user?.pfpId - 1] || null}
+            alt=""
+            className="h-10 w-10 rounded-full mr-2 bg-black"
+          />
           <p className="text-lg">{user?.username}</p>
         </Link>
       </div>
