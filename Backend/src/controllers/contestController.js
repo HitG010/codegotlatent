@@ -131,6 +131,11 @@ async function getContestProblems(req, res) {
         .status(404)
         .json({ error: "Contest not found or not started yet" });
     }
+    if (contest.status === "Ongoing" && !checkIsRegistered(contestId, userId)) {
+      return res
+        .status(403)
+        .json({ error: "User is not registered for this contest." });
+    }
     try {
       const problems = await prisma.Problem.findMany({
         where: {
