@@ -84,7 +84,7 @@ router.post("/auth/google", async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "none",
-        domain: ".codegotlatent.com",
+        domain: process.env.DOMAIN,
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
