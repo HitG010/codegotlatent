@@ -18,6 +18,7 @@ const updateContestUser = async (contestId, userId, contestStartTime) => {
   let totalFinishTime = contestStartTime;
   // add 5 mins for each penalty
   if (totalFinishTime != 0) totalFinishTime += totalPenalties * 5 * 60 * 1000;
+  console.log("Total Finish Time: ", totalFinishTime);
   const updatedContestUser = await prisma.contestUser.update({
     where: {
       userId_contestId: {
@@ -35,18 +36,19 @@ const updateContestUser = async (contestId, userId, contestStartTime) => {
 };
 
 const checkIsRegistered = async (contestId, userId) => {
-  const result = await prisma.contestUser.findFirst({
+  const result = await prisma.contestUser.count({
     where: {
       contestId: contestId,
       userId: userId,
     },
+    select: {
+      id: true, // Select the id to check if the user is registered
+    },
   });
-  console.log("Result:", result);
-  if (result) {
-    return true;
-  } else {
-    return false;
+  if (result.id > 0) {
+    return true; // User is registered for the contest
   }
+  return false; // User is not registered for the contest
 };
 
 const getContestStartTime = async (contestId) => {

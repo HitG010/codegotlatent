@@ -2,7 +2,9 @@ const prisma = require("../services/prisma");
 const { fetchFileFromGCS } = require("../services/gcs");
 const { getSubmissionStatus } = require("../services/submission");
 const { updateContestUser } = require("../services/contest");
+const { getContestStartTime } = require("../services/contest");
 const dotenv = require("dotenv");
+const { get } = require("http");
 dotenv.config();
 
 async function submitCode(req, res) {
@@ -176,14 +178,7 @@ async function submitCode(req, res) {
     });
 
     // Fetch contest start time
-    const contestStartTime = await prisma.contest.findUnique({
-      where: {
-        id: contest_id,
-      },
-      select: {
-        startTime: true,
-      },
-    });
+    const contestStartTime = await getContestStartTime(contest_id);
 
     const updatedContestUser = await updateContestUser(
       contest_id,
