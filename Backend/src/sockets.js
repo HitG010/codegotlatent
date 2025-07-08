@@ -3,7 +3,6 @@ const schedule = require("node-schedule");
 const prisma = require("./services/prisma");
 const { submitContest } = require("./services/contest");
 
-
 async function scheduleUpcomingContests(io) {
   const contests = await prisma.Contest.findMany({
     where: {
@@ -127,7 +126,8 @@ async function scheduleOngoingContests(io) {
         },
       });
       console.log("Contest updated:", updatedContest);
-      // call the ranking update function
+      // call the ranking update
+      console.log("Submitting contest for rating update:", contest.id);
       submitContest(contest.id);
       io.emit("contestRatingPending", {
         contestId: contest.id,
@@ -181,16 +181,16 @@ async function scheduleRatingPendingContests(io) {
   });
 }
 
-async function scheduler(io){
-    cron.schedule("*/1 * * * *", async () => {
-      console.log("Scheduling contests");
-      // status -> upcoming, rank guess, ongoing, rating pending, ended
-      await scheduleUpcomingContests(io);
-      await scheduleRankGuessContests(io);
-      await scheduleOngoingContests(io);
-      await scheduleRatingPendingContests(io);
-      console.log("Contests scheduled");
-    });
+async function scheduler(io) {
+  cron.schedule("*/1 * * * *", async () => {
+    console.log("Scheduling contests");
+    // status -> upcoming, rank guess, ongoing, rating pending, ended
+    await scheduleUpcomingContests(io);
+    await scheduleRankGuessContests(io);
+    await scheduleOngoingContests(io);
+    await scheduleRatingPendingContests(io);
+    console.log("Contests scheduled");
+  });
 }
 
 module.exports = {
@@ -198,5 +198,5 @@ module.exports = {
   scheduleRankGuessContests,
   scheduleOngoingContests,
   scheduleRatingPendingContests,
-  scheduler
+  scheduler,
 };
