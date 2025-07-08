@@ -64,7 +64,14 @@ const getContestStartTime = async (contestId) => {
   return contest.startTime;
 };
 
-function assignRanks(users) {
+function assignRanks(users, contestStartTime) {
+  // If finish time is null, set to startTime
+  users.forEach((user) => {
+    if (!user.finishTime) {
+      user.finishTime = contestStartTime; // Set to contest start time if finish time is null
+    }
+  });
+
   // Sort users by their score in descending order and then by finish time in ascending order
   users.sort((a, b) => {
     if (b.score !== a.score) {
@@ -109,7 +116,11 @@ function assignRanks(users) {
 function assignRandomGuesses(users) {
   // Assign random rank guesses to user whose predicted rank is null
   users.forEach((user) => {
-    if (user.rankGuess === null) {
+    if (
+      user.rankGuess === null ||
+      user.rankGuess === undefined ||
+      user.rankGuess === 0
+    ) {
       user.rankGuess = Math.floor(Math.random() * users.length) + 1; // Random rank between 1 and number of users
     }
   });
@@ -171,6 +182,8 @@ function calculateRatingChanges(users) {
       },
       data: {
         ratingChange: roundedDelta,
+        rankGuess: user.rankGuess,
+        finishTime: user.finishTime,
       },
     });
 
@@ -187,7 +200,7 @@ function calculateRatingChanges(users) {
     });
 
     console.log(
-      `User ${user.username} | Δ: ${roundedDelta}, New Rating: ${newRating}`
+      `User ${user.user.username} | Δ: ${roundedDelta}, New Rating: ${newRating}`
     );
   });
 
@@ -198,7 +211,7 @@ async function submitContest(contestId) {
   console.log("Contest ID:", contestId);
   try {
     // fetch all the users who participated in the contest
-    const contestUsers = await prisma.contestUser.findMany({
+    let contestUsers = await prisma.contestUser.findMany({
       relationLoadStrategy: "join",
       where: {
         contestId: contestId,
@@ -211,9 +224,9 @@ async function submitContest(contestId) {
     if (contestUsers.length === 0) {
       throw new Error("No participants found.");
     }
-
+    const contestStartTime = await getContestStartTime(contestId);
     // assign ranks to the users
-    const rankedUsers = assignRanks(contestUsers);
+    const rankedUsers = assignRanks(contestUsers, contestStartTime);
     console.log("Ranked Users:", rankedUsers);
 
     // assign random guesses to users who have not guessed their rank
@@ -230,7 +243,6 @@ async function submitContest(contestId) {
     throw error;
   }
 }
-
 
 module.exports = {
   updateContestUser,

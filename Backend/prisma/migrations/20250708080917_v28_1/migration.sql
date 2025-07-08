@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "ContestUser" ALTER COLUMN "penalty" SET DEFAULT 0,
+ALTER COLUMN "score" SET DEFAULT 0;
