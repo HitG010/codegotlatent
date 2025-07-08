@@ -3,11 +3,11 @@ const schedule = require("node-schedule");
 const prisma = require("./services/prisma");
 const { submitContest } = require("./services/contest");
 
-
 async function scheduleUpcomingContests(io) {
   const contests = await prisma.Contest.findMany({
     where: {
       status: "Upcoming",
+      isScheduled: false, // Only schedule contests that are not already scheduled
     },
     select: {
       rankGuessStartTime: true,
@@ -15,9 +15,19 @@ async function scheduleUpcomingContests(io) {
     },
   });
   console.log("Contests:", contests);
-  contests.forEach((contest) => {
+  contests.forEach(async (contest) => {
     const rankGuessStartTime = new Date(contest.rankGuessStartTime);
     console.log("Rank Guess Start Time:", rankGuessStartTime);
+
+    // Mark the contest as scheduled
+    await prisma.Contest.update({
+      where: {
+        id: contest.id,
+      },
+      data: {
+        isScheduled: true, // Set isScheduled to true to avoid rescheduling
+      },
+    });
 
     const date = rankGuessStartTime.getDate();
     const month = rankGuessStartTime.getMonth(); // 0-11
@@ -38,6 +48,7 @@ async function scheduleUpcomingContests(io) {
         },
         data: {
           status: "Rank Guess Phase",
+          isScheduled: false,
         },
       });
       console.log("Contest updated:", updatedContest);
@@ -53,6 +64,7 @@ async function scheduleRankGuessContests(io) {
   const contests = await prisma.Contest.findMany({
     where: {
       status: "Rank Guess Phase",
+      isScheduled: false, // Only schedule contests that are not already scheduled
     },
     select: {
       startTime: true,
@@ -60,9 +72,19 @@ async function scheduleRankGuessContests(io) {
     },
   });
   console.log("Contests:", contests);
-  contests.forEach((contest) => {
+  contests.forEach(async (contest) => {
     const startTime = new Date(contest.startTime);
     console.log("Start Time:", startTime);
+
+    // Mark the contest as scheduled
+    await prisma.Contest.update({
+      where: {
+        id: contest.id,
+      },
+      data: {
+        isScheduled: true, // Set isScheduled to true to avoid rescheduling
+      },
+    });
 
     const date = startTime.getDate();
     const month = startTime.getMonth(); // 0-11
@@ -83,6 +105,7 @@ async function scheduleRankGuessContests(io) {
         },
         data: {
           status: "Ongoing",
+          isScheduled: false, // Set isScheduled to false to avoid rescheduling
         },
       });
       console.log("Contest updated:", updatedContest);
@@ -95,6 +118,7 @@ async function scheduleOngoingContests(io) {
   const contests = await prisma.Contest.findMany({
     where: {
       status: "Ongoing",
+      isScheduled: false, // Only schedule contests that are not already scheduled
     },
     select: {
       endTime: true,
@@ -102,9 +126,19 @@ async function scheduleOngoingContests(io) {
     },
   });
   console.log("Contests:", contests);
-  contests.forEach((contest) => {
+  contests.forEach(async (contest) => {
     const endTime = new Date(contest.endTime);
     console.log("End Time:", endTime);
+
+    // Mark the contest as scheduled
+    await prisma.Contest.update({
+      where: {
+        id: contest.id,
+      },
+      data: {
+        isScheduled: true, // Set isScheduled to true to avoid rescheduling
+      },
+    });
     const date = endTime.getDate();
     const month = endTime.getMonth(); // 0-11
     const year = endTime.getFullYear();
@@ -124,10 +158,12 @@ async function scheduleOngoingContests(io) {
         },
         data: {
           status: "Rating Update Pending",
+          isScheduled: false, // Set isScheduled to false to avoid rescheduling
         },
       });
       console.log("Contest updated:", updatedContest);
-      // call the ranking update function
+      // call the ranking update
+      console.log("Submitting contest for rating update:", contest.id);
       submitContest(contest.id);
       io.emit("contestRatingPending", {
         contestId: contest.id,
@@ -141,6 +177,7 @@ async function scheduleRatingPendingContests(io) {
   const contests = await prisma.Contest.findMany({
     where: {
       status: "Rating Update Pending",
+      isScheduled: false, // Only schedule contests that are not already scheduled
     },
     select: {
       endTime: true,
@@ -148,9 +185,19 @@ async function scheduleRatingPendingContests(io) {
     },
   });
   console.log("Contests:", contests);
-  contests.forEach((contest) => {
+  contests.forEach(async (contest) => {
     const endTime = new Date(contest.endTime);
     console.log("End Time:", endTime);
+
+    // Mark the contest as scheduled
+    await prisma.Contest.update({
+      where: {
+        id: contest.id,
+      },
+      data: {
+        isScheduled: true, // Set isScheduled to true to avoid rescheduling
+      },
+    });
     const date = endTime.getDate();
     const month = endTime.getMonth(); // 0-11
     const year = endTime.getFullYear();
@@ -172,6 +219,7 @@ async function scheduleRatingPendingContests(io) {
           },
           data: {
             status: "Ended",
+            // isScheduled: false, // Set isScheduled to false to avoid rescheduling
           },
         });
         console.log("Contest updated:", updatedContest);
@@ -181,16 +229,16 @@ async function scheduleRatingPendingContests(io) {
   });
 }
 
-async function scheduler(io){
-    cron.schedule("*/1 * * * *", async () => {
-      console.log("Scheduling contests");
-      // status -> upcoming, rank guess, ongoing, rating pending, ended
-      await scheduleUpcomingContests(io);
-      await scheduleRankGuessContests(io);
-      await scheduleOngoingContests(io);
-      await scheduleRatingPendingContests(io);
-      console.log("Contests scheduled");
-    });
+async function scheduler(io) {
+  cron.schedule("*/1 * * * *", async () => {
+    console.log("Scheduling contests");
+    // status -> upcoming, rank guess, ongoing, rating pending, ended
+    await scheduleUpcomingContests(io);
+    await scheduleRankGuessContests(io);
+    await scheduleOngoingContests(io);
+    await scheduleRatingPendingContests(io);
+    console.log("Contests scheduled");
+  });
 }
 
 module.exports = {
@@ -198,5 +246,5 @@ module.exports = {
   scheduleRankGuessContests,
   scheduleOngoingContests,
   scheduleRatingPendingContests,
-  scheduler
+  scheduler,
 };

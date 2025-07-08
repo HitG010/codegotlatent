@@ -54,6 +54,7 @@ model Contest {
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
   status               String        @default("Upcoming") // "Upcoming", "Ongoing", "Ended"
+  isScheduled           Boolean       @default(false) // Whether the contest is scheduled
   problems            Problem[]
   submissions         Submission[]
   ProblemUsers            ProblemUser[]
