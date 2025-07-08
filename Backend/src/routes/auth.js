@@ -76,12 +76,16 @@ router.post("/auth/google", async (req, res) => {
       });
     }
     console.log("Setting cookie with refresh token:", refreshToken);
+    // clear any pre-existing cookies
+    res.clearCookie("refreshToken");
+    // set the cookie with the new refresh token
     res
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "none",
-        domain: process.env.DOMAIN,
+        domain: ".codegotlatent.com",
+        path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json({ accessToken, user: { id: user.id, email: user.email } });
