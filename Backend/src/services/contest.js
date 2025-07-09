@@ -13,8 +13,8 @@ const updateContestUser = async (contestId, userId, contestStartTime) => {
     },
   });
   console.log("Response: ", response);
-  const totalPenalties = response._sum.penalty;
-  const totalScore = response._sum.score;
+  const totalPenalties = response._sum.penalty || 0;
+  const totalScore = response._sum.score || 0;
   let totalFinishTime = contestStartTime;
   // add 5 mins for each penalty
   if (totalFinishTime != 0) totalFinishTime += totalPenalties * 5 * 60 * 1000;
