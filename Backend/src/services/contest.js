@@ -12,7 +12,7 @@ const updateContestUser = async (contestId, userId, contestStartTime) => {
       score: true,
     },
     _max: {
-      finishTime: true, // Get the maximum finish time
+      finishedAt: true, // Get the maximum finish time
     },
   });
   console.log("Response: ", response);
@@ -20,8 +20,8 @@ const updateContestUser = async (contestId, userId, contestStartTime) => {
   const totalScore = response._sum.score || 0;
   // Ensure contestStartTime is a number (timestamp in ms)
   let baseTime = 0;
-  if (response._max.finishTime) {
-    baseTime = new Date(response._max.finishTime).getTime();
+  if (response._max.finishedAt) {
+    baseTime = new Date(response._max.finishedAt).getTime();
   } else {
     baseTime = new Date(contestStartTime).getTime();
   }

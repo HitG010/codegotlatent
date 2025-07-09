@@ -233,10 +233,10 @@ async function scheduler(io) {
   cron.schedule("*/1 * * * *", async () => {
     console.log("Scheduling contests");
     // status -> upcoming, rank guess, ongoing, rating pending, ended
-    await scheduleUpcomingContests(io);
-    await scheduleRankGuessContests(io);
-    await scheduleOngoingContests(io);
-    await scheduleRatingPendingContests(io);
+    // await scheduleUpcomingContests(io);
+    // await scheduleRankGuessContests(io);
+    // await scheduleOngoingContests(io);
+    // await scheduleRatingPendingContests(io);
     console.log("Contests scheduled");
   });
 }

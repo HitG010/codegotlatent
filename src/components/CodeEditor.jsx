@@ -1,22 +1,61 @@
 import Editor from "@monaco-editor/react";
 import { langIdToName } from "../data/langIdToName";
+import { useRef } from "react";
 
-const CodeEditor = ({ langId, code, SetCode, probId }) => {
-  // console.log("Code Editor Lang ID:", langId);
-  // console.log(langIdtoLangName[langId]);
+const CodeEditor = ({ langId, code, SetCode, probId, handleRunSubmit, handleSubmit }) => {
+  const editorRef = useRef(null);
 
   const handleEditorChange = (val) => {
     SetCode(val);
-    localStorage.setItem(`code${probId}`, val);
+    if (probId) {
+      localStorage.setItem(`code${probId}`, val);
+    }
+  };
+
+  const handleEditorDidMount = (editor, monaco) => {
+    editorRef.current = editor;
+
+    // Bind Ctrl + Enter to submit
+    if (handleSubmit) {
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+        console.log("Monaco: Ctrl + Enter pressed - Submit");
+        const currentCode = editor.getValue();
+        console.log("Current Code:", currentCode);
+        // Update state and localStorage
+        SetCode(currentCode);
+        if (probId) {
+          localStorage.setItem(`code${probId}`, currentCode);
+        }
+        // Pass the current code directly to the handler
+        handleSubmit(currentCode);
+      });
+    }
+
+    // Bind Ctrl + ' to run
+    if (handleRunSubmit) {
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Backquote, () => {
+        console.log("Monaco: Ctrl + ' pressed - Run");
+        const currentCode = editor.getValue();
+        console.log("Current Code:", currentCode);
+        // Update state and localStorage
+        SetCode(currentCode);
+        if (probId) {
+          localStorage.setItem(`code${probId}`, currentCode);
+        }
+        // Pass the current code directly to the handler
+        handleRunSubmit(currentCode);
+      });
+    }
   };
 
   return (
     <Editor
+      onMount={handleEditorDidMount}
       onChange={handleEditorChange}
       height="100%"
       width="100%"
       defaultLanguage="cpp"
-      language={langIdToName[langId]}
+      language={langIdToName[langId] || "cpp"}
       value={code}
       theme="vs-dark"
       options={{
@@ -25,54 +64,22 @@ const CodeEditor = ({ langId, code, SetCode, probId }) => {
         scrollBeyondLastLine: false,
         automaticLayout: true,
         wordWrap: "on",
-        wrappingIndent: "indent",
         lineNumbers: "on",
-        lineNumbersMinChars: 3,
-        renderLineHighlight: "all",
         contextmenu: true,
         tabSize: 2,
-        acceptSuggestionOnEnter: "on",
-        suggestOnTriggerCharacters: true,
-        quickSuggestions: true,
-        quickSuggestionsDelay: 10,
-        parameterHints: true,
-        formatOnType: true,
-        formatOnPaste: true,
-        folding: true,
-        foldingStrategy: "auto",
-        foldingHighlight: true,
         autoClosingBrackets: "always",
         autoClosingQuotes: "always",
         autoIndent: "full",
-        suggestSelection: "first",
-        snippetSuggestions: "inline",
-        renderWhitespace: "none",
-        renderControlCharacters: false,
-        renderIndentGuides: true,
-        overviewRulerLanes: 3,
-        overviewRulerBorder: true,
+        formatOnType: true,
+        formatOnPaste: true,
+        folding: true,
+        quickSuggestions: true,
+        parameterHints: true,
         scrollbar: {
-          alwaysConsumeMouseWheel: false,
           vertical: "auto",
           horizontal: "auto",
-          useShadows: true,
-          verticalHasArrows: false,
-          horizontalHasArrows: false,
-          arrowSize: 11,
-          handleMouseWheel: true,
-          horizontalScrollbarSize: 10,
           verticalScrollbarSize: 10,
-          mouseWheelScrollSensitivity: 1,
-          mouseWheelZoom: false,
-          scrollByPage: false,
-          smoothScrolling: true,
-          useShadows: true,
-          horizontalHasArrows: false,
-          verticalHasArrows: false,
           horizontalScrollbarSize: 10,
-          verticalScrollbarSize: 10,
-          horizontalSliderSize: 10,
-          verticalSliderSize: 10,
         },
       }}
     />
