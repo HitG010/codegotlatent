@@ -11,13 +11,21 @@ const updateContestUser = async (contestId, userId, contestStartTime) => {
       penalty: true,
       score: true,
     },
+    _max: {
+      finishTime: true, // Get the maximum finish time
+    },
   });
   console.log("Response: ", response);
   const totalPenalties = response._sum.penalty || 0;
   const totalScore = response._sum.score || 0;
-  let totalFinishTime = contestStartTime;
-  // add 5 mins for each penalty
-  if (totalFinishTime != 0) totalFinishTime += totalPenalties * 5 * 60 * 1000;
+  // Ensure contestStartTime is a number (timestamp in ms)
+  let baseTime = 0;
+  if (response._max.finishTime) {
+    baseTime = new Date(response._max.finishTime).getTime();
+  } else {
+    baseTime = new Date(contestStartTime).getTime();
+  }
+  const totalFinishTime = baseTime + totalPenalties * 5 * 60 * 1000;
   console.log("Total Finish Time: ", totalFinishTime);
   const updatedContestUser = await prisma.contestUser.update({
     where: {
