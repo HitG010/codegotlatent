@@ -183,7 +183,7 @@ async function submitCode(req, res) {
     const updatedContestUser = await updateContestUser(
       contest_id,
       userId,
-      contestStartTime.startTime
+      contestStartTime
     );
   } else {
     // For non-contest submissions, do only isSolved update with OR
