@@ -18,11 +18,15 @@ import ProblemTab from "../components/ProblemTab";
 import ProblemSubmissions from "../components/ProblemSubmissions";
 import { ClockFading, File } from "lucide-react";
 import { fetchContestProblem } from "../api/api";
+import { avatars } from "../components/Avatars";
 
 function ContestProblem() {
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.accessToken);
-  const [code, setCode] = useState("// Write your code here...");
+  const { contestId, id } = useParams();
+  let savedCode = localStorage.getItem(`code${id}`);
+  let savedLangId = localStorage.getItem(`langId${id}`);
+  const [code, setCode] = useState(savedCode || "// Write your code here\n\n");
   const [result, setResult] = useState([]);
   const [submissionResult, setSubmissionResult] = useState([]);
   const [data, setData] = useState(null);
@@ -31,8 +35,7 @@ function ContestProblem() {
   const [testCases, setTestCases] = useState([]);
   const [testCaseLoading, setTestCaseLoading] = useState(false);
   const [testCaseError, setTestCaseError] = useState(null);
-  const [langId, setLangId] = useState(54);
-  const { contestId, id } = useParams();
+  const [langId, setLangId] = useState(savedLangId ? parseInt(savedLangId) : 54);
   const [screenHeight, setScreenHeight] = useState(window.innerHeight - 75);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [tile1Height, setTile1Height] = useState((window.innerHeight - 75) / 2);
@@ -73,23 +76,31 @@ function ContestProblem() {
     }
   };
 
-  const handleRunSubmit = async () => {
-    if (!code || !data.testCases || !langId) {
-      console.error("Code, test cases, or language ID is missing");
+  const handleRunSubmit = useCallback(async (currentCode = null) => {
+    // Use passed code or fallback to state/localStorage
+    const codeToUse = currentCode || code || localStorage.getItem(`code${id}`) || "";
+    
+    if (!codeToUse || !data || !data.testCases || !langId) {
+      console.error("Code, data, test cases, or language ID is missing");
       return;
+    }
+
+    // Update state with the current code if passed
+    if (currentCode) {
+      setCode(currentCode);
     }
 
     setTestCaseLoading(true);
     setRunLoading(true);
     setResult([]);
 
-    console.log("Submitted Code:", code);
+    console.log("Submitted Code:", codeToUse);
     // Simulate an API call to execute the code
-    executeCode(code, data.testCases, langId, id)
+    executeCode(codeToUse, data.testCases, langId, id)
       .then(async (result) => {
         // long poll the server for submission status
         console.log("Result:", result);
-        pollSubmissionStatus(result, id, 0, code, langId)
+        pollSubmissionStatus(result, id, 0, codeToUse, langId)
           .then((data) => {
             console.log("Polling Response:", data);
             setResult(data);
@@ -98,18 +109,39 @@ function ContestProblem() {
           })
           .catch((error) => {
             console.error("Error polling submission status:", error);
+            setTestCaseLoading(false);
+            setRunLoading(false);
           });
       })
       .catch((error) => {
         console.error("Error executing code:", error);
         setError(error);
+        setTestCaseLoading(false);
+        setRunLoading(false);
+        if(error.response && error.response.status === 429) {
+          alert("You have exceeded the rate limit. Please try again later.");
+        }
       });
-  };
-  const handleSubmit = async () => {
-    console.log("Submitted Code:", code);
+  }, [code, data, langId, id]);
+
+  const handleSubmit = useCallback(async (currentCode = null) => {
+    // Use passed code or fallback to state/localStorage
+    const codeToUse = currentCode || code || localStorage.getItem(`code${id}`) || "";
+    
+    if (!codeToUse || !data || !langId) {
+      console.error("Code, data, or language ID is missing");
+      return;
+    }
+
+    // Update state with the current code if passed
+    if (currentCode) {
+      setCode(currentCode);
+    }
+
+    console.log("Submitted Code:", codeToUse);
     try {
       setResultLoading(true);
-      const result = await submitProblem(code, id, langId, null, user.id);
+      const result = await submitProblem(codeToUse, id, langId, null, user.id);
       console.log("Result:", result);
       setSubmissionResult(result);
       setResultLoading(false);
@@ -117,25 +149,65 @@ function ContestProblem() {
     } catch (error) {
       console.error("Error submitting code:", error);
       setError(error);
+      setResultLoading(false);
+      if(error.response && error.response.status === 429) {
+        alert("You have exceeded the rate limit. Please try again later.");
+      }
     }
-  };
+  }, [code, data, langId, id, user.id]);
 
   useEffect(() => {
     fetchData();
-    // fetchTestCases();
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = async (event) => {
+      
+      if (event.ctrlKey && event.key === "'") {
+        // run code
+        event.preventDefault();
+        console.log("Ctrl + ' pressed!");
+        if(!runLoading && data && data.testCases) {
+          console.log("Running code...");
+          // Get the current code from localStorage or state
+          const currentCode = localStorage.getItem(`code${id}`) || code;
+          await handleRunSubmit(currentCode);
+        }
+        // Your custom logic here
+      }
+
+      if (event.ctrlKey && event.key === "Enter") {
+        event.preventDefault();
+        console.log("Ctrl + Enter pressed!");
+        if(!resultLoading && data) {
+          console.log("Submitting code...");
+          // Get the current code from localStorage or state
+          const currentCode = localStorage.getItem(`code${id}`) || code;
+          await handleSubmit(currentCode);
+        }
+        // e.g., close a modal
+      }
+    };
 
     const handleResize = () => {
       setScreenHeight(window.innerHeight);
       setScreenWidth(window.innerWidth);
     };
+
+    document.addEventListener("keydown", handleKeyDown);
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [runLoading, resultLoading, data, code, handleRunSubmit, handleSubmit]);
+
 
   if (loading) {
     return <div>Loading...</div>;
   }
-  if (error) {
+ if (error && error.response.status != 429) {
     return <div>Error: {error.message}</div>;
   }
   if (!data) {
@@ -259,7 +331,14 @@ function ContestProblem() {
           </div>
         </div>
         <div className="flex items-center">
-          <div className="rounded-full bg-white/50 text-sm text-white h-8 w-8"></div>
+          {/* <div className="rounded-full bg-white/50 text-sm text-white h-8 w-8"></div> */}
+          <Link to={`/user/${user?.username}`} className="hover:opacity-80">
+            <img
+              src={avatars[user?.pfpId - 1] || null}
+              alt=""
+              className="h-10 w-10 rounded-full mr-2 bg-black"
+            />
+          </Link>
         </div>
       </div>
       <div
@@ -349,15 +428,19 @@ function ContestProblem() {
           className="rounded-xl bg-[#212121] overflow-auto border border-1 border-[#ffffff25] scrollbar"
           style={{ width: tile3Width, height: screenHeight + 8 }}
         >
-          <label for="languages" className="text-sm">
+          <label htmlFor="languages" className="text-sm text-white p-4">
             Choose a Language:
           </label>
           <select
             id="languages"
             name="languages"
-            className="bg-[#ffffff15] text-white py-1 ml-2 rounded-md text-sm my-1"
+            className="bg-[#ffffff15] text-white py-1 ml-2 rounded-md text-sm my-1 border border-[#ffffff25] focus:outline-none focus:border-[#ffffff50]"
             value={langId}
-            onChange={(e) => setLangId(parseInt(e.target.value))}
+            onChange={(e) => {
+              const newLangId = parseInt(e.target.value);
+              setLangId(newLangId);
+              localStorage.setItem(`langId${id}`, newLangId.toString());
+            }}
           >
             <option value={54} className="bg-[#ffffff15] text-black">
               C++
@@ -372,7 +455,14 @@ function ContestProblem() {
               Java
             </option>
           </select>
-          <CodeEditor langId={langId} code={code} SetCode={setCode} />
+          <CodeEditor 
+            langId={langId} 
+            code={code} 
+            SetCode={setCode}
+            probId={id}
+            handleRunSubmit={handleRunSubmit}
+            handleSubmit={handleSubmit}
+          />
         </div>
       </div>
     </div>

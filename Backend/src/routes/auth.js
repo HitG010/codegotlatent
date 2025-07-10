@@ -83,7 +83,7 @@ router.post("/auth/google", async (req, res) => {
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: "Strict", // Use Strict to prevent CSRF attacks
         domain: process.env.DOMAIN,
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
