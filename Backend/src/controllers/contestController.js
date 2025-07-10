@@ -1,4 +1,11 @@
 const prisma = require("../services/prisma");
+// const { io } = require("../server");
+const {
+  scheduleUpcomingContest,
+  scheduleOngoingContest,
+  scheduleRankGuessContest,
+  scheduleRatingPendingContest,
+} = require("../sockets");
 
 const {
   checkIsRegistered,

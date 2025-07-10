@@ -581,20 +581,45 @@ function fetchTags() {
     });
 }
 
-// function logoutUser(userId) {
-//   const url = `${import.meta.env.VITE_BASE_URL}/auth/logout/${userId}`;
-//   console.log("URL:", url);
-//   return axios
-//     .post(url, {}, { headers: { "Content-Type": "application/json" } })
-//     .then((response) => {
-//       console.log("Logout Response:", response.data);
-//       return response.data;
-//     })
-//     .catch((error) => {
-//       console.error("Error logging out user:", error);
-//       throw error;
-//     });
-// }
+function addContest(contestData) {
+  const url = `${import.meta.env.VITE_BASE_URL}/contests/new`;
+  console.log("URL:", url);
+  return axios
+    .post(url, contestData, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    })
+    .then((response) => {
+      console.log("Response:", response.data);
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error adding contest:", error);
+      throw error;
+    });
+}
+
+function editContest(contestId, contestData) {
+  const url = `${import.meta.env.VITE_BASE_URL}/contests/edit/${contestId}`;
+  console.log("URL:", url);
+  return axios
+    .put(url, contestData, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    })
+    .then((response) => {
+      console.log("Response:", response.data);
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error editing contest:", error);
+      throw error;
+    });
+}
 
 function getUserRankGuess(contestId, userId) {
   const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/user/${userId}/rankGuess`;
@@ -644,5 +669,7 @@ export {
   getUserDetails,
   updateUserDetails,
   fetchTags,
+  addContest,
+  editContest,
   getUserRankGuess,
 };

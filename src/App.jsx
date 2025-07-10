@@ -24,6 +24,7 @@ import Admin from "./pages/Admin";
 import Settings from "./pages/Settings";
 import Login2 from "./pages/login2";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import ContestForm from "./pages/ContestForm";
 
 const App = () => {
   const location = useLocation();
@@ -49,74 +50,80 @@ const App = () => {
   return (
     // <UserProvider>
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-    <Routes location={location} key={location.pathname}>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login2 />} />
-      <Route path="/signup" element={<Register />} />
-      <Route path="/setusername" element={<Setusername />} />
-      <Route
-        path="/home"
-        element={
-          <AuthRoute>
-            <Home />
-          </AuthRoute>
-        }
-      />
-      <Route
-        path="/problemSet"
-        element={
-          <AuthRoute>
-            <ProblemSet />
-          </AuthRoute>
-        }
-      />
-      <Route
-        path="/problem/:id"
-        element={
-          <AuthRoute>
-            <Problem />
-          </AuthRoute>
-        }
-      />
-      <Route
-        path="/contests"
-        element={
-          <AuthRoute>
-            <Contests />
-          </AuthRoute>
-        }
-      />
-      <Route
-        path="/contest/:contestId"
-        element={
-          <AuthRoute>
-            <Contest />
-          </AuthRoute>
-        }
-      />
-      <Route
-        path="/contest/:contestId/problem/:id"
-        element={
-          <AuthRoute>
-            <ContestProblem />
-          </AuthRoute>
-        }
-      />
-      <Route
-        path="/submission/:submissionId"
-        element={
-          <AuthRoute>
-            <Submission />
-          </AuthRoute>
-        }
-      />
-      <Route path="/contest/:contestId/ranking" element={<ContestRanking />} />
-      <Route path="/user/:userName" element={<User />} />
-      <Route path="/admin" element={<Admin />} />
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login2 />} />
+        <Route path="/signup" element={<Register />} />
+        <Route path="/setusername" element={<Setusername />} />
+        <Route
+          path="/home"
+          element={
+            <AuthRoute>
+              <Home />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/problemSet"
+          element={
+            <AuthRoute>
+              <ProblemSet />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/problem/:id"
+          element={
+            <AuthRoute>
+              <Problem />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/contests"
+          element={
+            <AuthRoute>
+              <Contests />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/contest/:contestId"
+          element={
+            <AuthRoute>
+              <Contest />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/contest/:contestId/problem/:id"
+          element={
+            <AuthRoute>
+              <ContestProblem />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/submission/:submissionId"
+          element={
+            <AuthRoute>
+              <Submission />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/contest/:contestId/ranking"
+          element={<ContestRanking />}
+        />
+        <Route path="/user/:userName" element={<User />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/contest/new" element={<ContestForm />} />
+        <Route path="/admin/contest/:id" element={<ContestForm />} />
+        {/* Add more routes as needed */}
 
-      <Route path="/settings" element={<Settings />} />
-      {/* Add more routes as needed */}
-    </Routes>
+        <Route path="/settings" element={<Settings />} />
+        {/* Add more routes as needed */}
+      </Routes>
     </GoogleOAuthProvider>
   );
 };
