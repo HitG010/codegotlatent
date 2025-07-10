@@ -5,7 +5,14 @@ dotenv.config();
 const { Server } = require("socket.io");
 const redis = require("./services/redis");
 const cookieParser = require("cookie-parser");
+const prisma = require("./services/prisma");
 const { scheduler } = require("./sockets");
+const {
+  scheduleUpcomingContest,
+  scheduleOngoingContest,
+  scheduleRankGuessContest,
+  scheduleRatingPendingContest,
+} = require("./sockets");
 
 const problemRouter = require("./routes/problems");
 const submissionRouter = require("./routes/submissions");
@@ -46,7 +53,7 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("A user connected", socket.id);
 });
-scheduler(io);
+// scheduler(io);
 
 app.use("/", userRouter);
 app.use("/", contestRouter);
@@ -54,6 +61,86 @@ app.use("/", problemRouter);
 app.use("/", submissionRouter);
 app.use("/", adminRouter);
 app.use("/", authRouter);
+
+app.post("/contests/new", async (req, res) => {
+  const { name, description, startTime, endTime, rankGuessStartTime, status } =
+    req.body;
+  try {
+    const contest = await prisma.Contest.create({
+      data: {
+        name,
+        description,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        rankGuessStartTime: new Date(rankGuessStartTime),
+        status,
+      },
+    });
+    console.log("Contest created:", contest);
+    // Schedule the contest based on its status
+    await scheduleContest(id);
+    return res.status(201).json(contest);
+  } catch (error) {
+    console.error("Error creating contest:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.put("/contests/edit/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, description, startTime, endTime, rankGuessStartTime, status } =
+    req.body;
+  try {
+    const contest = await prisma.Contest.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        rankGuessStartTime: new Date(rankGuessStartTime),
+        status,
+      },
+    });
+    console.log("Contest updated:", contest);
+    // Schedule the contest based on its status
+    await scheduleContest(id);
+    return res.status(200).json(contest);
+  } catch (error) {
+    console.error("Error updating contest:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+async function scheduleContest(contestId) {
+  const contest = await prisma.contest.findUnique({
+    where: { id: contestId, isScheduled: false },
+    select: {
+      status: true,
+    },
+  });
+  if (!contest) {
+    throw new Error("Contest not found");
+  }
+  switch (contest.status) {
+    case "Upcoming":
+      scheduleUpcomingContest(io, contestId);
+      break;
+    case "Ongoing":
+      scheduleOngoingContest(io, contestId);
+      break;
+    case "Rank Guess Phase":
+      scheduleRankGuessContest(io, contestId);
+      break;
+    case "Rating Pending":
+      scheduleRatingPendingContest(io, contestId);
+      break;
+    default:
+      throw new Error("Unknown contest status");
+  }
+}
+
+// module.exports = { io };
 
 server.listen(PORT, () => {
   console.log(`Socket server is running on port ${PORT}`);

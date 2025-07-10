@@ -1,4 +1,11 @@
 const prisma = require("../services/prisma");
+// const { io } = require("../server");
+const {
+  scheduleUpcomingContest,
+  scheduleOngoingContest,
+  scheduleRankGuessContest,
+  scheduleRatingPendingContest,
+} = require("../sockets");
 
 const {
   checkIsRegistered,
@@ -349,6 +356,84 @@ async function getParticipantsCount(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+// async function addContest(req, res) {
+//   const { name, description, startTime, endTime, rankGuessStartTime, status } =
+//     req.body;
+//   try {
+//     const contest = await prisma.Contest.create({
+//       data: {
+//         name,
+//         description,
+//         startTime: new Date(startTime),
+//         endTime: new Date(endTime),
+//         rankGuessStartTime: new Date(rankGuessStartTime),
+//         status,
+//       },
+//     });
+//     console.log("Contest created:", contest);
+//     // Schedule the contest based on its status
+//     await scheduleContest(contest.id);
+//     return res.status(201).json(contest);
+//   } catch (error) {
+//     console.error("Error creating contest:", error);
+//     return res.status(500).json({ error: "Internal server error" });
+//   }
+// }
+
+// async function editContest(req, res) {
+//   const { id } = req.params;
+//   const { name, description, startTime, endTime, rankGuessStartTime, status } =
+//     req.body;
+//   try {
+//     const contest = await prisma.Contest.update({
+//       where: { id },
+//       data: {
+//         name,
+//         description,
+//         startTime: new Date(startTime),
+//         endTime: new Date(endTime),
+//         rankGuessStartTime: new Date(rankGuessStartTime),
+//         status,
+//       },
+//     });
+//     console.log("Contest updated:", contest);
+//     // Schedule the contest based on its status
+//     await scheduleContest(contest.id);
+//     return res.status(200).json(contest);
+//   } catch (error) {
+//     console.error("Error updating contest:", error);
+//     return res.status(500).json({ error: "Internal server error" });
+//   }
+// }
+
+// async function scheduleContest(contestId) {
+//   const contest = await prisma.contest.findUnique({
+//     where: { id: contestId, isScheduled: false },
+//     select: {
+//       status: true,
+//     },
+//   });
+//   if (!contest) {
+//     throw new Error("Contest not found");
+//   }
+//   switch (contest.status) {
+//     case "Upcoming":
+//       scheduleUpcomingContest(contestId);
+//       break;
+//     case "Ongoing":
+//       scheduleOngoingContest(contestId);
+//       break;
+//     case "Rank Guess Phase":
+//       scheduleRankGuessContest(contestId);
+//       break;
+//     case "Rating Pending":
+//       scheduleRatingPendingContest(contestId);
+//       break;
+//     default:
+//       throw new Error("Unknown contest status");
+//   }
+// }
 
 module.exports = {
   getAllContests,
