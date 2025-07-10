@@ -124,16 +124,16 @@ async function scheduleContest(contestId) {
   }
   switch (contest.status) {
     case "Upcoming":
-      scheduleUpcomingContest(io, contestId);
+      await scheduleUpcomingContest(io, contestId);
       break;
     case "Ongoing":
-      scheduleOngoingContest(io, contestId);
+      await scheduleOngoingContest(io, contestId);
       break;
     case "Rank Guess Phase":
-      scheduleRankGuessContest(io, contestId);
+      await scheduleRankGuessContest(io, contestId);
       break;
-    case "Rating Pending":
-      scheduleRatingPendingContest(io, contestId);
+    case "Rating Update Pending":
+      await scheduleRatingPendingContest(io, contestId);
       break;
     default:
       throw new Error("Unknown contest status");
