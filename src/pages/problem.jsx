@@ -308,7 +308,7 @@ function Problem() {
             ) : (
               <button
                 className="py-2 px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer"
-                onClick={handleRunSubmit}
+                onClick={() => handleRunSubmit(code)}
               >
                 Run <Play className="h-3 w-3 inline-block ml-1 fill-white/65" />
               </button>
@@ -320,7 +320,7 @@ function Problem() {
             ) : (
               <button
                 className="py-2 px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer text-green-500"
-                onClick={handleSubmit}
+                onClick={() => handleSubmit(code)}
               >
                 Submit <UploadCloud className="h-4 w-4 inline-block ml-1" />
               </button>
