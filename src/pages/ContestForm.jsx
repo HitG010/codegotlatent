@@ -170,7 +170,7 @@ const ContestForm = () => {
             <option>Rank Guess Phase</option>
             <option>Ongoing</option>
             <option>Rating Update Pending</option>
-            <option>Finished</option>
+            <option>Ended</option>
           </select>
         </div>
 
