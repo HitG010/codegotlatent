@@ -100,6 +100,7 @@ app.put("/contests/edit/:id", async (req, res) => {
         endTime: new Date(endTime),
         rankGuessStartTime: new Date(rankGuessStartTime),
         status,
+        isScheduled: false, // Reset scheduling status on update
       },
     });
     console.log("Contest updated:", contest);
