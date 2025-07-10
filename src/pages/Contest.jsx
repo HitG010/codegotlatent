@@ -8,6 +8,7 @@ import {
   getAllContestProblems,
   submitRank,
   getContestParticipants,
+  getUserRankGuess
 } from "../api/api";
 import { parseDate, calculateDuration } from "../utils/date";
 import CountdownTimer from "../components/CountdownTimer";
@@ -111,6 +112,16 @@ export default function Contest() {
     setIsRegistered(response.isRegistered);
   };
 
+  const fetchUserRankGuess = async () => {
+    try {
+      const response = await getUserRankGuess(contestId, userId);
+      console.log("User Rank Guess:", response);
+      setPredictedRank(response.rankGuess == null ? 0 : response.rankGuess);
+    } catch (error) {
+      console.error("Error fetching user rank guess:", error);
+    }
+  };
+
   // webhook listeners for contest events
   // Contest Rank Guess Phase Started Webhook
   socket.on(
@@ -171,6 +182,7 @@ export default function Contest() {
     fetchContest();
     fetchAllProblems();
     isUserRegistered();
+    fetchUserRankGuess();
   }, [contestStatus]);
 
   if (loading) {
@@ -399,6 +411,10 @@ export default function Contest() {
                 </div>
               ))}
           </div>
+          {allProblems && <div className="flex items-center justify-start gap-4 mt-4">
+            <p className="text-white/65">Total Score: <span className="px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white">{allProblems.reduce((acc, problem) => acc + problem.score, 0)}</span></p>
+            <p className="text-white/65">Total Penalties: <span className="px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white">{allProblems.reduce((acc, problem) => acc + (problem.solvedInContest ? 0 : problem.penalty), 0)}</span></p>
+          </div>}
           <div className="flex flex-col gap-2">
             {/* <h2 className="text-4xl font-semibold mb-2">Contest Details</h2> */}
             {/* <p className="text-white/65">{contest.details}</p> */}

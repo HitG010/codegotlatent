@@ -160,6 +160,8 @@ async function getContestProblems(req, res) {
             },
             select: {
               solvedInContest: true,
+              score: true,
+              penalty: true,
             },
           },
         },
@@ -350,6 +352,75 @@ async function getParticipantsCount(req, res) {
   }
 }
 
+async function getUserRankGuess(req, res) {
+  const { contestId, userId } = req.params;
+  console.log("Contest ID:", contestId);
+  console.log("User ID:", userId);
+  try {
+    const user = await prisma.contestUser.findUnique({
+      where: {
+        userId_contestId: {
+          userId: userId,
+          contestId: contestId,
+        },
+      },
+    });
+    if (!user) {
+      return res.status(404).json({ error: "User not found in contest" });
+    }
+    return res.status(200).json({ rankGuess: user.rankGuess });
+  } catch (error) {
+    console.error("Error fetching user rank guess:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// async function getUserContestStats(req, res) {
+//   const { contestId, userId } = req.params;
+//   console.log("Contest ID:", contestId);
+//   console.log("User ID:", userId);
+//   try {
+//     const user = await prisma.contestUser.findUnique({
+//       where: {
+//         userId_contestId: {
+//           userId: userId,
+//           contestId: contestId,
+//         },
+//       },
+//       select: {
+//         rankGuess: true,
+//         problems: {
+//           select: {
+//             problemId: true,
+//             solvedInContest: true,
+//             score: true,
+//             penalty: true,
+//           },
+//         },
+//       },
+//     });
+//     if (!user) {
+//       return res.status(404).json({ error: "User not found in contest" });
+//     }
+
+//     const totalScore = user.problems.reduce((acc, problem) => {
+//       return acc + (problem.solvedInContest ? problem.score : 0);
+//     }, 0);
+//     const totalPenalty = user.problems.reduce((acc, problem) => {
+//       return acc + (problem.solvedInContest ? problem.penalty : 0);
+//     }, 0);
+//     return res.status(200).json({
+//       rankGuess: user.rankGuess,
+//       problems: user.problems,
+//       totalScore,
+//       totalPenalty,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching user contest stats:", error);
+//     return res.status(500).json({ error: "Internal server error" });
+//   }
+// }
+
 module.exports = {
   getAllContests,
   getContestById,
@@ -362,4 +433,5 @@ module.exports = {
   getRankings,
   getStartTime,
   submitPredictedRank,
+  getUserRankGuess,
 };

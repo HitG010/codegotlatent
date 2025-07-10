@@ -596,6 +596,26 @@ function fetchTags() {
 //     });
 // }
 
+function getUserRankGuess(contestId, userId) {
+  const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/user/${userId}/rankGuess`;
+  console.log("URL:", url);
+  return axios
+    .get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    })
+    .then((response) => {
+      console.log("Response:", response.data);
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error fetching user rank guess:", error);
+      throw error;
+    });
+}
+
 export {
   api,
   executeCode,
@@ -624,4 +644,5 @@ export {
   getUserDetails,
   updateUserDetails,
   fetchTags,
+  getUserRankGuess,
 };
