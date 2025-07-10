@@ -285,23 +285,37 @@ export default function Contest() {
           <p className="rounded-md px-2 py-0.5 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white font-semibold">
             {totalParticipants}
           </p>
-        </div>
+          </div>
         {isRegistered && contest.status === "Rank Guess Phase" && (
-          <div>
-            {/* <h2 className="text-lg font-semibold">
-              Contest is starting in <CountdownTimer startTime={contest.startTime + 2*60*100}></CountdownTimer>
-            </h2> */}
-            <p className="text-lg font-semibold">
-              Please submit your predicted rank for the contest
-            </p>
-            <form>
-              <label>
-                Predicted Rank:
+          <div className="border-1 border-yellow-500/45 rounded-lg p-4 bg-[#ffffff10] mt-2">
+            <h2 className="text-lg font-semibold">Guess Your Rank</h2>
+            {/* Contest is starting in <CountdownTimer startTime={contest.startTime + 2*60*100}></CountdownTimer> */}
+            <form className="flex flex-col gap-2 w-full">
+              <label className="flex flex-col justify-center gap-2 w-full">
+                <div className="flex justify-between items-center">
+                  <p>Your Predicted Rank:</p>
+                  <div className="flex items-center gap-1">
+                    <div
+                      className="cursor-pointer"
+                      onMouseEnter={() => setShowInfo(true)}
+                      onMouseLeave={() => setShowInfo(false)}
+                    >
+                      <Info className="inline h-4 w-4 text-yellow-500" />
+                    </div>
+                    {showInfo && (
+                      <span className="absolute -translate-y-[40px] -translate-x-1/2 mt-2 w-64 bg-black text-white text-xs rounded-lg shadow-lg p-2 z-10">
+                        This is your predicted rank for the contest. It will be
+                        used to calculate your score.
+                      </span>
+                    )}
+                  </div>
+                </div>
                 <input
                   type="number"
                   name="predictedRank"
                   value={predictedRank}
                   onChange={(e) => setPredictedRank(e.target.value)}
+                  className="border-1 border-[#ffffff25] rounded px-2 py-1 w-full block bg-[#ffffff10] text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200"
                 />
               </label>
               <button
@@ -318,7 +332,7 @@ export default function Contest() {
                   console.log("Response:", response);
                   // setPredictedRank(null);
                 }}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"
+                className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer"
               >
                 Submit
               </button>
