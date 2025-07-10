@@ -35,7 +35,9 @@ function ContestProblem() {
   const [testCases, setTestCases] = useState([]);
   const [testCaseLoading, setTestCaseLoading] = useState(false);
   const [testCaseError, setTestCaseError] = useState(null);
-  const [langId, setLangId] = useState(savedLangId ? parseInt(savedLangId) : 54);
+  const [langId, setLangId] = useState(
+    savedLangId ? parseInt(savedLangId) : 54
+  );
   const [screenHeight, setScreenHeight] = useState(window.innerHeight - 75);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [tile1Height, setTile1Height] = useState((window.innerHeight - 75) / 2);
@@ -76,85 +78,106 @@ function ContestProblem() {
     }
   };
 
-  const handleRunSubmit = useCallback(async (currentCode = null) => {
-    // Use passed code or fallback to state/localStorage
-    const codeToUse = currentCode || code || localStorage.getItem(`code${id}`) || "";
-    
-    if (!codeToUse || !data || !data.testCases || !langId) {
-      console.error("Code, data, test cases, or language ID is missing");
-      return;
-    }
+  const handleRunSubmit = useCallback(
+    async (currentCode = null) => {
+      // Use passed code or fallback to state/localStorage
+      const codeToUse =
+        currentCode || code || localStorage.getItem(`code${id}`) || "";
 
-    // Update state with the current code if passed
-    if (currentCode) {
-      setCode(currentCode);
-    }
+      if (!codeToUse || !data || !data.testCases || !langId) {
+        console.error("Code, data, test cases, or language ID is missing");
+        return;
+      }
 
-    setTestCaseLoading(true);
-    setRunLoading(true);
-    setResult([]);
+      // Update state with the current code if passed
+      if (currentCode) {
+        setCode(currentCode);
+      }
 
-    console.log("Submitted Code:", codeToUse);
-    // Simulate an API call to execute the code
-    executeCode(codeToUse, data.testCases, langId, id)
-      .then(async (result) => {
-        // long poll the server for submission status
-        console.log("Result:", result);
-        pollSubmissionStatus(result, id, 0, codeToUse, langId)
-          .then((data) => {
-            console.log("Polling Response:", data);
-            setResult(data);
-            setTestCaseLoading(false);
-            setRunLoading(false);
-          })
-          .catch((error) => {
-            console.error("Error polling submission status:", error);
-            setTestCaseLoading(false);
-            setRunLoading(false);
-          });
-      })
-      .catch((error) => {
-        console.error("Error executing code:", error);
-        setError(error);
+      setTestCaseLoading(true);
+      setRunLoading(true);
+      setResult([]);
+
+      if (data.testCases.length === 0) {
+        alert("No public test cases available for this problem");
         setTestCaseLoading(false);
         setRunLoading(false);
-        if(error.response && error.response.status === 429) {
+        return;
+      }
+
+      console.log("Submitted Code:", codeToUse);
+      // Simulate an API call to execute the code
+      executeCode(codeToUse, data.testCases, langId, id)
+        .then(async (result) => {
+          // long poll the server for submission status
+          console.log("Result:", result);
+          pollSubmissionStatus(result, id, 0, codeToUse, langId)
+            .then((data) => {
+              console.log("Polling Response:", data);
+              setResult(data);
+              setTestCaseLoading(false);
+              setRunLoading(false);
+            })
+            .catch((error) => {
+              console.error("Error polling submission status:", error);
+              setTestCaseLoading(false);
+              setRunLoading(false);
+            });
+        })
+        .catch((error) => {
+          console.error("Error executing code:", error);
+          setError(error);
+          setTestCaseLoading(false);
+          setRunLoading(false);
+          if (error.response && error.response.status === 429) {
+            alert("You have exceeded the rate limit. Please try again later.");
+          }
+        });
+    },
+    [code, data, langId, id]
+  );
+
+  const handleSubmit = useCallback(
+    async (currentCode = null) => {
+      // Use passed code or fallback to state/localStorage
+      const codeToUse =
+        currentCode || code || localStorage.getItem(`code${id}`) || "";
+
+      if (!codeToUse || !data || !langId) {
+        console.error("Code, data, or language ID is missing");
+        return;
+      }
+
+      // Update state with the current code if passed
+      if (currentCode) {
+        setCode(currentCode);
+      }
+
+      console.log("Submitted Code:", codeToUse);
+      try {
+        setResultLoading(true);
+        const result = await submitProblem(
+          codeToUse,
+          id,
+          langId,
+          null,
+          user.id
+        );
+        console.log("Result:", result);
+        setSubmissionResult(result);
+        setResultLoading(false);
+        setDialogOpen(true);
+      } catch (error) {
+        console.error("Error submitting code:", error);
+        setError(error);
+        setResultLoading(false);
+        if (error.response && error.response.status === 429) {
           alert("You have exceeded the rate limit. Please try again later.");
         }
-      });
-  }, [code, data, langId, id]);
-
-  const handleSubmit = useCallback(async (currentCode = null) => {
-    // Use passed code or fallback to state/localStorage
-    const codeToUse = currentCode || code || localStorage.getItem(`code${id}`) || "";
-    
-    if (!codeToUse || !data || !langId) {
-      console.error("Code, data, or language ID is missing");
-      return;
-    }
-
-    // Update state with the current code if passed
-    if (currentCode) {
-      setCode(currentCode);
-    }
-
-    console.log("Submitted Code:", codeToUse);
-    try {
-      setResultLoading(true);
-      const result = await submitProblem(codeToUse, id, langId, null, user.id);
-      console.log("Result:", result);
-      setSubmissionResult(result);
-      setResultLoading(false);
-      setDialogOpen(true);
-    } catch (error) {
-      console.error("Error submitting code:", error);
-      setError(error);
-      setResultLoading(false);
-      if(error.response && error.response.status === 429) {
-        alert("You have exceeded the rate limit. Please try again later.");
       }
-    }
-  }, [code, data, langId, id, user.id]);
+    },
+    [code, data, langId, id, user.id]
+  );
 
   useEffect(() => {
     fetchData();
@@ -162,12 +185,11 @@ function ContestProblem() {
 
   useEffect(() => {
     const handleKeyDown = async (event) => {
-      
       if (event.ctrlKey && event.key === "'") {
         // run code
         event.preventDefault();
         console.log("Ctrl + ' pressed!");
-        if(!runLoading && data && data.testCases) {
+        if (!runLoading && data && data.testCases) {
           console.log("Running code...");
           // Get the current code from localStorage or state
           const currentCode = localStorage.getItem(`code${id}`) || code;
@@ -179,7 +201,7 @@ function ContestProblem() {
       if (event.ctrlKey && event.key === "Enter") {
         event.preventDefault();
         console.log("Ctrl + Enter pressed!");
-        if(!resultLoading && data) {
+        if (!resultLoading && data) {
           console.log("Submitting code...");
           // Get the current code from localStorage or state
           const currentCode = localStorage.getItem(`code${id}`) || code;
@@ -203,11 +225,10 @@ function ContestProblem() {
     };
   }, [runLoading, resultLoading, data, code, handleRunSubmit, handleSubmit]);
 
-
   if (loading) {
     return <div>Loading...</div>;
   }
- if (error && error.response.status != 429) {
+  if (error && error.response.status != 429) {
     return <div>Error: {error.message}</div>;
   }
   if (!data) {
@@ -455,9 +476,9 @@ function ContestProblem() {
               Java
             </option>
           </select>
-          <CodeEditor 
-            langId={langId} 
-            code={code} 
+          <CodeEditor
+            langId={langId}
+            code={code}
             SetCode={setCode}
             probId={id}
             handleRunSubmit={handleRunSubmit}
