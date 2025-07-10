@@ -104,6 +104,7 @@ export default function Contest() {
       setLoading(false);
     }
   };
+  // fetchContest(); // initial fetch of contest data
 
   const isUserRegistered = async () => {
     // Check if the user is registered for the contest
@@ -126,12 +127,12 @@ export default function Contest() {
   // Contest Rank Guess Phase Started Webhook
   socket.on(
     "contestRankGuessPhaseStarted",
-    ({ contestId: startedContestId, updatedContest }) => {
+    async ({ contestId: startedContestId, updatedContest }) => {
       console.log("Contest started:", startedContestId);
       if (contestId === startedContestId) {
         setContestStatus("Rank Guess Phase");
         setContest(updatedContest);
-        fetchTotalParticipants();
+        await fetchTotalParticipants();
         // fetchAllProblems();
         // ask for their predicted rank for the contest for the starting 2 minutes
         // setIsStarting2min(true);
@@ -151,11 +152,11 @@ export default function Contest() {
   );
 
   // Rank Guess Phase Ended Webhook
-  socket.on("contestStarted", ({ contestId: startedContestId }) => {
+  socket.on("contestStarted", async ({ contestId: startedContestId, updatedContest }) => {
     if (contestId === startedContestId) {
       // setContestStatus("Ongoing");
       // setContest(updatedContest);
-      fetchAllProblems();
+      await fetchAllProblems();
       // isStarting2min = false;
       // setIsStarting2min(false);
       setContestStatus("Ongoing");
@@ -180,6 +181,7 @@ export default function Contest() {
   useEffect(() => {
     console.log("Contest ID:", contestId);
     fetchContest();
+    // setContestStatus(contest.status);
     fetchAllProblems();
     isUserRegistered();
     fetchUserRankGuess();
@@ -195,23 +197,23 @@ export default function Contest() {
       <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border-[#ffffff10] w-full">
         <img src={cglContest} alt="CGL Contest" className="rounded-lg mb-4" />
         <div className="flex flex-row items-center gap-4 mb-2">
-          <h2 className="text-4xl font-semibold">{contest.name}</h2>
+          <h2 className="text-4xl font-semibold">{contest?.name}</h2>
           <h3 className="rounded-full bg-white/5 text-white/65 border-1 border-[#ffffff15] text-sm px-3 py-1">
             {contestStatus}
           </h3>
         </div>
-        <p className="text-white/65 mb-2">{contest.description}</p>
+        <p className="text-white/65 mb-2">{contest?.description}</p>
         <div className="flex flex-row items-center gap-2 mb-2">
           <p className="rounded-md px-4 py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65">
-            <Clock className="h-4 w-4" /> {parseDate(contest.startTime)}
+            <Clock className="h-4 w-4" /> {parseDate(contest?.startTime)}
           </p>
           {/* <p>End Time: {parseDate(contest.endTime)}</p> */}
           <p className="rounded-md px-4 py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65">
             <GoStopwatch />{" "}
-            {calculateDuration(contest.startTime, contest.endTime)}
+            {calculateDuration(contest?.startTime, contest?.endTime)}
           </p>
         </div>
-        {contest.status === "Upcoming" && !isRegistered && (
+        {contest?.status === "Upcoming" && !isRegistered && (
           <button
             onClick={handleClickRegister}
             className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer"
@@ -219,7 +221,7 @@ export default function Contest() {
             Register
           </button>
         )}
-        {contest.status === "Upcoming" && isRegistered && (
+        {contest?.status === "Upcoming" && isRegistered && (
           <div>
             <button
               onClick={handleClickUnregister}
@@ -231,24 +233,24 @@ export default function Contest() {
               <Check /> Registered
             </button> */}
             {/* <Rank Guess Starts in: <CountdownTimer startTime={contest.startTime}></CountdownTimer> */}
-            {contest.status === "Upcoming" && (
+            {contest?.status === "Upcoming" && (
               <div className="flex gap-2 items-center mt-2">
                 Rank Guess Phase Starts in:{" "}
                 <CountdownTimer
-                  startTime={contest.rankGuessStartTime}
+                  startTime={contest?.rankGuessStartTime}
                 ></CountdownTimer>
               </div>
             )}
           </div>
         )}
-        {contest.status === "Rank Guess Phase" && (
+        {contest?.status === "Rank Guess Phase" && (
           <div className="flex gap-2 items-center mt-2">
             Contest Starts in:{" "}
-            <CountdownTimer startTime={contest.startTime}></CountdownTimer>
+            <CountdownTimer startTime={contest?.startTime}></CountdownTimer>
           </div>
         )}
-        {contest.status !== "Upcoming" &&
-          contest.status !== "Rank Guess Phase" &&
+        {contest?.status !== "Upcoming" &&
+          contest?.status !== "Rank Guess Phase" &&
           isRegistered && (
             <div>
               <button
@@ -257,20 +259,20 @@ export default function Contest() {
               >
                 <Check className="w-4 h-4" /> Registered
               </button>
-              {contest.status === "Ongoing" && (
+              {contest?.status === "Ongoing" && (
                 <div className="flex gap-2 items-center mt-2">
                   Contest Ends in:{" "}
-                  <CountdownTimer startTime={contest.endTime}></CountdownTimer>
+                  <CountdownTimer startTime={contest?.endTime}></CountdownTimer>
                 </div>
               )}
             </div>
           )}
-        {contest.status === "Rating Update Pending" && (
+        {contest?.status === "Rating Update Pending" && (
           <div>
             <p>The contest has ended. Rating Update is in progress.</p>
           </div>
         )}
-        {contest.status === "Ongoing" && !isRegistered && (
+        {contest?.status === "Ongoing" && !isRegistered && (
           <button
             disabled={true}
             className="flex justify-center items-center w-full gap-2 bg-white text-black hover:bg-white/90 rounded-md px-2 py-1.5 font-medium cursor-pointer"
@@ -286,7 +288,7 @@ export default function Contest() {
             {totalParticipants}
           </p>
           </div>
-        {isRegistered && contest.status === "Rank Guess Phase" && (
+        {isRegistered && contest?.status === "Rank Guess Phase" && (
           <div className="border-1 border-yellow-500/45 rounded-lg p-4 bg-[#ffffff10] mt-2">
             <h2 className="text-lg font-semibold">Guess Your Rank</h2>
             {/* Contest is starting in <CountdownTimer startTime={contest.startTime + 2*60*100}></CountdownTimer> */}
@@ -339,7 +341,7 @@ export default function Contest() {
             </form>
           </div>
         )}
-        {isRegistered && contest.status !== "Rank Guess Phase" && (
+        {isRegistered && contest?.status !== "Rank Guess Phase" && (
           <div className="border-1 border-yellow-500/45 rounded-lg p-4 bg-[#ffffff10] mt-2">
             <h2 className="text-lg font-semibold">Guess Your Rank</h2>
             {/* Contest is starting in <CountdownTimer startTime={contest.startTime + 2*60*100}></CountdownTimer> */}
@@ -394,7 +396,7 @@ export default function Contest() {
           </div>
         )}
       </div>
-      {(contest.status === "Ended" || contest.status === "Rank Guess Phase" || isRegistered) && (
+      {(contest?.status === "Ended" || contest?.status === "Rank Guess Phase" || isRegistered) && (
         <div className=" flex flex-col gap-4 w-full">
           <h2 className="text-4xl font-semibold mb-2 inline-block">Problems</h2>
           <div className="flex flex-col gap-0.5 w-full">
@@ -426,7 +428,7 @@ export default function Contest() {
               ))}
           </div>
           {allProblems && <div className="flex items-center justify-start gap-4 mt-4">
-            <p className="text-white/65">Total Score: <span className="px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white">{allProblems.reduce((acc, problem) => acc + problem.score, 0)}</span></p>
+            <p className="text-white/65">Total Score: <span className="px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white">{allProblems.reduce((acc, problem) => acc + problem.problemScore, 0)}</span></p>
             <p className="text-white/65">Total Penalties: <span className="px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white">{allProblems.reduce((acc, problem) => acc + (problem.solvedInContest ? 0 : problem.penalty), 0)}</span></p>
           </div>}
           <div className="flex flex-col gap-2">
@@ -435,14 +437,14 @@ export default function Contest() {
             <div className="flex flex-col gap-2">
               <h3 className="text-2xl font-semibold">Contest Rules</h3>
               <ul className="list-disc pl-5 text-white/65">
-                {contest.rules &&
-                  contest.rules.map((rule, index) => (
+                {contest?.rules &&
+                  contest?.rules.map((rule, index) => (
                     <li key={index}>{rule}</li>
                   ))}
               </ul>
             </div>
           </div>
-          {contest.status === "Ended" && (
+          {contest?.status === "Ended" && (
             <div
               className="bg-[#ffffff05] rounded-lg p-4 mt-4
             border-1 border-[#ffffff10]"

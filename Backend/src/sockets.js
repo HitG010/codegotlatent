@@ -79,6 +79,16 @@ async function scheduleUpcomingContest(io, contestId) {
     return;
   }
 
+  // Mark the contest as scheduled
+  await prisma.Contest.update({
+    where: {
+      id: contestId,
+    },
+    data: {
+      isScheduled: true, // Set isScheduled to true to avoid rescheduling
+    },
+  });
+
   const rankGuessStartTime = new Date(contest.rankGuessStartTime);
   console.log("Rank Guess Start Time:", rankGuessStartTime);
 
@@ -95,7 +105,7 @@ async function scheduleUpcomingContest(io, contestId) {
     });
     console.log("Contest updated:", updatedContest);
     console.log("Contest Rank Guess phase started:", contestId);
-    io.emit("contestRankGuessPhaseStarted", { contestId });
+    io.emit("contestRankGuessPhaseStarted", { contestId: contestId, updatedContest: updatedContest });
     await scheduleRankGuessContest(io, contestId);
   });
 }
@@ -168,6 +178,17 @@ async function scheduleRankGuessContest(io, contestId) {
     console.error("Contest not found:", contestId);
     return;
   }
+
+   // Mark the contest as scheduled
+  await prisma.Contest.update({
+    where: {
+      id: contestId,
+    },
+    data: {
+      isScheduled: true, // Set isScheduled to true to avoid rescheduling
+    },
+  });
+
   const startTime = new Date(contest.startTime);
   console.log("Start Time:", startTime);
   schedule.scheduleJob(startTime, async () => {
@@ -182,7 +203,7 @@ async function scheduleRankGuessContest(io, contestId) {
       },
     });
     console.log("Contest started:", contestId);
-    io.emit("contestStarted", { contestId });
+    io.emit("contestStarted", { contestId: contestId, updatedContest: updatedContest });
     await scheduleOngoingContest(io, contestId);
   });
 }
@@ -260,6 +281,17 @@ async function scheduleOngoingContest(io, contestId) {
     console.error("Contest not found:", contestId);
     return;
   }
+
+   // Mark the contest as scheduled
+  await prisma.Contest.update({
+    where: {
+      id: contestId,
+    },
+    data: {
+      isScheduled: true, // Set isScheduled to true to avoid rescheduling
+    },
+  });
+
   const endTime = new Date(contest.endTime);
   console.log("End Time:", endTime);
   schedule.scheduleJob(endTime, async () => {
@@ -278,7 +310,7 @@ async function scheduleOngoingContest(io, contestId) {
     // call the ranking update
     console.log("Submitting contest for rating update:", contestId);
     submitContest(contestId);
-    io.emit("contestRatingPending", { contestId });
+    io.emit("contestRatingPending", { contestId: contestId, updatedContest: updatedContest });
     await scheduleRatingPendingContest(io, contestId);
   });
 }
@@ -353,6 +385,17 @@ async function scheduleRatingPendingContest(io, contestId) {
     console.error("Contest not found:", contestId);
     return;
   }
+
+   // Mark the contest as scheduled
+  await prisma.Contest.update({
+    where: {
+      id: contestId,
+    },
+    data: {
+      isScheduled: true, // Set isScheduled to true to avoid rescheduling
+    },
+  });
+
   const endTime = new Date(contest.endTime);
   console.log("End Time:", endTime);
   schedule.scheduleJob(
@@ -370,7 +413,7 @@ async function scheduleRatingPendingContest(io, contestId) {
         },
       });
       console.log("Contest updated:", updatedContest);
-      io.emit("contestEnded", { contestId });
+      io.emit("contestEnded", { contestId: contestId, updatedContest: updatedContest });
     }
   );
 }
