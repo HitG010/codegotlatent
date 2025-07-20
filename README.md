@@ -20,7 +20,7 @@ Welcome to **CodeGotLatent**, a competitive programming platform that merges *sk
 
 ## 🏗️ System Architecture
 
-![System Architecture](/codegotlatent/CGLArchitecture2.png)
+![System Architecture](CGLArchitecture2.png)
 
 ---
 
