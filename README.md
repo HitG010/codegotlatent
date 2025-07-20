@@ -20,7 +20,7 @@ Welcome to **CodeGotLatent**, a competitive programming platform that merges *sk
 
 ## 🏗️ System Architecture
 
-
+![System Architecture](/codegotlatent/CGLArchitecture2.png)
 
 ---
 
@@ -59,27 +59,6 @@ Welcome to **CodeGotLatent**, a competitive programming platform that merges *sk
 | 🏆 Leaderboard         | Sorted by intuition, consistency, and coding skill                 |
 | 📈 Profile Dashboard   | Track rating, guess accuracy, problem stats, and streaks           |
 
----
-
-## 🧪 How to Run Locally
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/yourusername/codegotlatent.git && cd codegotlatent
-
-# 2. Install dependencies
-npm install
-
-# 3. Set up env variables
-cp .env.example .env
-# Add DB credentials, Judge0 API key, JWT secret etc.
-
-# 4. Run the dev server
-npm run dev
-
-# 5. Run migrations (if using Prisma)
-npx prisma migrate dev --name init
-```
 
 ---
 
