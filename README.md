@@ -4,6 +4,8 @@
 
 Welcome to **CodeGotLatent**, a competitive programming platform that merges *skill*, *intuition*, and *fun*. Contestants solve curated coding challenges and then **guess their rank** based on performance. If the guess is close, their **rating spikes**. If not... better luck next time!
 
+![CodeGotLatent Logo](codegotlatent_logo.png)
+
 ---
 
 ## 🎯 Why CodeGotLatent?
