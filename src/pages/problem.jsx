@@ -464,6 +464,13 @@ function Problem() {
               const newLangId = parseInt(e.target.value);
               setLangId(newLangId);
               localStorage.setItem(`langId${id}`, newLangId.toString());
+              // Update code editor language and code
+              // if (code) {
+              //   localStorage.setItem(`code${id}${newLangId}`, code);
+              // }
+              setCode(localStorage.getItem(`code${id}${newLangId}`) || "");
+              console.log("Language changed to:", newLangId);
+
             }}
           >
             <option value={54} className="bg-[#ffffff15] text-black">

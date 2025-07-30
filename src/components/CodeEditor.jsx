@@ -8,12 +8,28 @@ const CodeEditor = ({ langId, code, SetCode, probId, handleRunSubmit, handleSubm
   const handleEditorChange = (val) => {
     SetCode(val);
     if (probId) {
-      localStorage.setItem(`code${probId}`, val);
+      localStorage.setItem(`code${probId}${langId}`, val);
     }
   };
 
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
+    // set the language from the localstorage if available
+    if (probId) {
+      const savedCode = localStorage.getItem(`code${probId}${langId}`);
+      if (savedCode) {
+      editor.setValue(savedCode);
+      }
+      const savedLangId = localStorage.getItem(`langId${probId}`);
+      if (savedLangId) {
+        // editor.setModelLanguage(editor.getModel(), langIdToName[savedLangId] || "cpp");
+        langId = savedLangId;
+      }
+    }
+
+    // set the correct language in the monaco editor
+    const language = langIdToName[langId] || "cpp";
+    monaco.editor.setModelLanguage(editor.getModel(), language);
 
     // Bind Ctrl + Enter to submit
     if (handleSubmit) {
