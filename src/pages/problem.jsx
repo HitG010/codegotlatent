@@ -31,11 +31,11 @@ function Problem() {
   const [testCaseLoading, setTestCaseLoading] = useState(false);
   const [testCaseError, setTestCaseError] = useState(null);
   const { id } = useParams();
-  let savedCode = localStorage.getItem(`code${id}`);
   let savedLangId = localStorage.getItem(`langId${id}`);
   const [langId, setLangId] = useState(
     savedLangId ? parseInt(savedLangId) : 54
   );
+  let savedCode = localStorage.getItem(`code${id}${langId}`);
   const [code, setCode] = useState(savedCode || "// Write your code here\n\n");
   const [screenHeight, setScreenHeight] = useState(window.innerHeight - 75);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
@@ -81,7 +81,7 @@ function Problem() {
     async (currentCode = null) => {
       // Use passed code or fallback to state/localStorage
       const codeToUse =
-        currentCode || code || localStorage.getItem(`code${id}`) || "";
+        currentCode || code || localStorage.getItem(`code${id}${langId}`) || "";
 
       if (!codeToUse || !data || !data.testCases || !langId) {
         console.error("Code, data, test cases, or language ID is missing");
@@ -140,7 +140,7 @@ function Problem() {
     async (currentCode = null) => {
       // Use passed code or fallback to state/localStorage
       const codeToUse =
-        currentCode || code || localStorage.getItem(`code${id}`) || "";
+        currentCode || code || localStorage.getItem(`code${id}${langId}`) || "";
 
       if (!codeToUse || !data || !langId) {
         console.error("Code, data, or language ID is missing");
@@ -195,7 +195,7 @@ function Problem() {
         if (!runLoading && data && data.testCases) {
           console.log("Running code...");
           // Get the current code from localStorage or state
-          const currentCode = localStorage.getItem(`code${id}`) || code;
+          const currentCode = localStorage.getItem(`code${id}${langId}`) || code;
           await handleRunSubmit(currentCode);
         }
         // Your custom logic here
@@ -207,7 +207,7 @@ function Problem() {
         if (!resultLoading && data) {
           console.log("Submitting code...");
           // Get the current code from localStorage or state
-          const currentCode = localStorage.getItem(`code${id}`) || code;
+          const currentCode = localStorage.getItem(`code${id}${langId}`) || code;
           await handleSubmit(currentCode);
         }
         // e.g., close a modal
@@ -488,6 +488,7 @@ function Problem() {
           </select>
           <CodeEditor
             langId={langId}
+            setLangId={setLangId}
             code={code}
             SetCode={setCode}
             probId={id}

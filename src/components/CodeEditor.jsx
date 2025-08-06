@@ -2,7 +2,7 @@ import Editor from "@monaco-editor/react";
 import { langIdToName } from "../data/langIdToName";
 import { useRef } from "react";
 
-const CodeEditor = ({ langId, code, SetCode, probId, handleRunSubmit, handleSubmit }) => {
+const CodeEditor = ({ langId, setLangId, code, SetCode, probId, handleRunSubmit, handleSubmit }) => {
   const editorRef = useRef(null);
 
   const handleEditorChange = (val) => {
@@ -23,7 +23,9 @@ const CodeEditor = ({ langId, code, SetCode, probId, handleRunSubmit, handleSubm
       const savedLangId = localStorage.getItem(`langId${probId}`);
       if (savedLangId) {
         // editor.setModelLanguage(editor.getModel(), langIdToName[savedLangId] || "cpp");
-        langId = savedLangId;
+        // langId = savedLangId;
+        setLangId(parseInt(savedLangId));
+        console.log("Monaco: Loaded saved language ID:", savedLangId);
       }
     }
 
@@ -40,7 +42,7 @@ const CodeEditor = ({ langId, code, SetCode, probId, handleRunSubmit, handleSubm
         // Update state and localStorage
         SetCode(currentCode);
         if (probId) {
-          localStorage.setItem(`code${probId}`, currentCode);
+          localStorage.setItem(`code${probId}${langId}`, currentCode);
         }
         // Pass the current code directly to the handler
         handleSubmit(currentCode);
@@ -56,7 +58,7 @@ const CodeEditor = ({ langId, code, SetCode, probId, handleRunSubmit, handleSubm
         // Update state and localStorage
         SetCode(currentCode);
         if (probId) {
-          localStorage.setItem(`code${probId}`, currentCode);
+          localStorage.setItem(`code${probId}${langId}`, currentCode);
         }
         // Pass the current code directly to the handler
         handleRunSubmit(currentCode);
