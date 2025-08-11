@@ -24,52 +24,52 @@ const Home = () => {
   const pathname = window.location.pathname;
   // alert("Home Page");
   return (
-    <div className="h-screen w-100vh flex flex-row justify-between bg-[#0F0F0F] overflow-hidden scrollbar">
+    <div className="h-screen w-full flex flex-col lg:flex-row justify-between bg-[#0F0F0F] overflow-hidden scrollbar">
       <Navbar path={pathname} />
-      <div className="home flex flex-col h-full w-[80%] p-10 pt-16 bg-[#0F0F0F] overflow-auto scrollbar">
+      <div className="home flex flex-col h-full w-full lg:w-[80%] p-4 lg:p-10 pt-6 lg:pt-16 pb-20 lg:pb-10 bg-[#0F0F0F] overflow-auto scrollbar">
         <div className="flex flex-col gap-1 justify-self-start">
-          <h1 className="text-white text-4xl font-semibold">
+          <h1 className="text-white text-2xl lg:text-4xl font-semibold">
             Welcome, {user.username} 👋
           </h1>
-          <p className="text-gray-400 text-xl">
+          <p className="text-gray-400 text-lg lg:text-xl">
             Start showing your "Latent" today!
           </p>
         </div>
-        <div className="explore flex flex-row gap-4 mt-8">
+        <div className="explore flex flex-col lg:flex-row gap-4 mt-6 lg:mt-8">
           <Link
             to={"/problemset"}
-            className="problem-button flex-1 pt-5 pl-5 pb-5 flex flex-row items-center border-1 border-[#F4DD6A20] rounded-3xl hover:inset-shadow-xs hover:inset-shadow-[#F4DD6A45] hover:cursor-pointer transition-all duration-300 hover:bg-[#F4DD6A10]"
+            className="problem-button flex-1 pt-4 lg:pt-5 pl-4 lg:pl-5 pb-4 lg:pb-5 flex flex-col lg:flex-row items-center border-1 border-[#F4DD6A20] rounded-2xl lg:rounded-3xl hover:inset-shadow-xs hover:inset-shadow-[#F4DD6A45] hover:cursor-pointer transition-all duration-300 hover:bg-[#F4DD6A10]"
             style={{
               boxShadow:
                 "inset 0 0 30px rgba(244, 221, 106, 0.15), inset 0 0 10px rgba(244, 221, 106, 0.08), inset 0 1px 2px rgba(244, 221, 106, 0.27)",
             }}
           >
-            <div className="flex flex-col p-2">
-              <div className="flex flex-row gap-3 items-center justify-items-start mb-3 hover:gap-4 transition-all duration-300">
-                <h1 className="text-3xl font-semibold">Problems</h1>
-                <FaArrowRightLong className="h-5 w-5" />
+            <div className="flex flex-col p-2 order-2 lg:order-1">
+              <div className="flex flex-row gap-3 items-center justify-center lg:justify-items-start mb-3 hover:gap-4 transition-all duration-300">
+                <h1 className="text-2xl lg:text-3xl font-semibold">Problems</h1>
+                <FaArrowRightLong className="h-4 lg:h-5 w-4 lg:w-5" />
               </div>
-              <p className="text-[#ffffff65]">
-                Tackle a curated set of questions and strenghten your Data
+              <p className="text-[#ffffff65] text-center lg:text-left text-sm lg:text-base">
+                Tackle a curated set of questions and strengthen your Data
                 Structures and Algorithms skills!
               </p>
             </div>
-            <img src={language} alt="Contest Trophy" className="h-35 w-35" />
+            <img src={language} alt="Contest Trophy" className="h-24 w-24 lg:h-35 lg:w-35 order-1 lg:order-2" />
           </Link>
           <Link
             to={"/contests"}
-            className="problem-button flex-1 pt-5 pl-5 pb-5 flex flex-row items-center border-1 border-[#1267D020] rounded-3xl hover:inset-shadow-xs hover:inset-shadow-[#F4DD6A45] hover:cursor-pointer transition-all duration-300 hover:bg-[#1267D010]"
+            className="problem-button flex-1 pt-4 lg:pt-5 pl-4 lg:pl-5 pb-4 lg:pb-5 flex flex-col lg:flex-row items-center border-1 border-[#1267D020] rounded-2xl lg:rounded-3xl hover:inset-shadow-xs hover:inset-shadow-[#F4DD6A45] hover:cursor-pointer transition-all duration-300 hover:bg-[#1267D010]"
             style={{
               boxShadow:
                 "inset 0 0 30px rgba(17, 112, 228, 0.15), inset 0 0 10px rgba(17, 112, 228, 0.08), inset 0 1px 2px rgba(17, 112, 228, 0.27)",
             }}
           >
-            <div className="flex flex-col p-2">
-              <div className="flex flex-row gap-3 items-center justify-items-start mb-3 hover:gap-4 transition-all duration-300">
-                <h1 className="text-3xl font-semibold">Contests</h1>
-                <FaArrowRightLong className="h-5 w-5" />
+            <div className="flex flex-col p-2 order-2 lg:order-1">
+              <div className="flex flex-row gap-3 items-center justify-center lg:justify-items-start mb-3 hover:gap-4 transition-all duration-300">
+                <h1 className="text-2xl lg:text-3xl font-semibold">Contests</h1>
+                <FaArrowRightLong className="h-4 lg:h-5 w-4 lg:w-5" />
               </div>
-              <p className="text-[#ffffff65]">
+              <p className="text-[#ffffff65] text-center lg:text-left text-sm lg:text-base">
                 Show your coding skills in Rated Contests with a Twist in
                 Ratings. Attempt a Contest Now!
               </p>
@@ -77,7 +77,7 @@ const Home = () => {
             <img
               src={contestTrophy}
               alt="Contest Trophy"
-              className="h-25 w-25 mr-5"
+              className="h-20 w-20 lg:h-25 lg:w-25 lg:mr-5 order-1 lg:order-2"
             />
           </Link>
         </div>

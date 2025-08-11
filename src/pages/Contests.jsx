@@ -28,26 +28,25 @@ export default function Contests() {
     fetchAllContests();
   }, []);
 
-
   const ongoingAndUpcoming = contests.filter((contest) => (contest.status === "Ongoing" || contest.status === "Upcoming" || contest.status === "Rank Guess Phase"));
   const past = contests.filter((contest) => (contest.status) == "Ended");
 
   const pathname = window.location.pathname;
 
   return (
-    <div className="h-screen flex flex-row justify-between bg-[#0F0F0F]">
+    <div className="h-screen flex flex-col lg:flex-row justify-between bg-[#0F0F0F]">
       <Navbar path={pathname} />
-      <div className="w-[80%] h-full flex flex-col gap-4 mx-12 py-8 overflow-y-auto">
+      <div className="w-full lg:w-[80%] h-full flex flex-col gap-4 mx-4 lg:mx-12 py-4 lg:py-8 pb-20 lg:pb-8 overflow-y-auto">
         <div className="flex flex-col mb-1">
-        <h1 className="text-4xl font-semibold mb-0.2">Contests</h1>
-        <h6 className="text-lg text-white/65 mb-4">Contest every week. Compete and showcase your “Latent”!</h6>
+          <h1 className="text-2xl lg:text-4xl font-semibold mb-0.2">Contests</h1>
+          <h6 className="text-base lg:text-lg text-white/65 mb-4">Contest every week. Compete and showcase your "Latent"!</h6>
         </div>
         {loading ? (
-          <div className="text-lg text-white/65"><Loader2 className="animate-spin" /> Loading...</div>
+          <div className="text-base lg:text-lg text-white/65 flex items-center gap-2"><Loader2 className="animate-spin" /> Loading...</div>
         ) : (
           <>
             <section>
-              <h2 className="text-xl font-semibold mb-2">Ongoing & Upcoming</h2>
+              <h2 className="text-lg lg:text-xl font-semibold mb-2">Ongoing & Upcoming</h2>
               {ongoingAndUpcoming.length === 0 ? (
                 <div className="text-white/65">No ongoing or upcoming contests.</div>
               ) : (
@@ -56,31 +55,23 @@ export default function Contests() {
                     <Link
                       key={contest.id}
                       to={`/contest/${contest.id}`}
-                      className="flex flex-col justify-between px-4 bg-[#181818] rounded-lg p-4 hover:bg-[#232323] transition-all duration-300 w-fit"
+                      className="flex flex-col justify-between px-3 lg:px-4 bg-[#181818] rounded-lg p-3 lg:p-4 hover:bg-[#232323] transition-all duration-300 w-full lg:w-fit"
                     >
-                      {/* <div className="relative right-2 top-2">
-                      {contest.status === "Ongoing" ? (
-                        <div className="text-green-500 text-lg font-semibold mb-2">Ongoing</div>
-                      ) : (
-                        <div className="text-yellow-500 text-lg font-semibold mb-2">Upcoming</div>
-                      )}
-                      </div> */}
-                      <img src={cglContest} alt="Contest" className="w-100 h-50 object-cover rounded-lg mb-2" />
-                      <div className="flex flex-row items-center justify-between">
-                        <div className="flex flex-col items-center justify-center gap-0.2">
-                          <div className="flex gap-3 items-center text-2xl font-semibold">{contest.name}</div>
-                          <p className="text-white/65 text-md">
+                      <img src={cglContest} alt="Contest" className="w-full h-32 lg:h-50 object-cover rounded-lg mb-2" />
+                      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-0">
+                        <div className="flex flex-col items-start lg:items-center justify-center gap-0.2">
+                          <div className="flex gap-3 items-center text-xl lg:text-2xl font-semibold">{contest.name}</div>
+                          <p className="text-white/65 text-sm lg:text-md">
                             {parseDate(contest.rankGuessStartTime)}
                           </p>
                         </div>
-                        <div className="flex flex-col items-center justify-center gap-0.2">
-                          <div className="text-white/65 text-md flex flex-col items-end justify-center gap-0.2">
+                        <div className="flex flex-col items-start lg:items-center justify-center gap-0.2">
+                          <div className="text-white/65 text-sm lg:text-md flex flex-col items-start lg:items-end justify-center gap-0.2">
                             {contest.status == "Ongoing" ? (
                               <><span>Ends in :</span> <CountDownTimer startTime={contest.endTime} /></>
                             ) : (
                               <><span>Starts in:</span> <CountDownTimer startTime={contest.rankGuessStartTime} /></>
                             )}
-                            {/* <Link to={`/contest/${contest.id}`} className="text-black px-3 py-1 flex items-center justify-center bg-white rounded-md gap-1 w-fit">Enter <MoveRight className="w-4 h-4"/></Link> */}
                           </div>
                         </div>
                       </div>
@@ -90,7 +81,7 @@ export default function Contests() {
               )}
             </section>
             <section>
-              <h2 className="text-xl font-semibold mt-8 mb-2">Past Contests</h2>
+              <h2 className="text-lg lg:text-xl font-semibold mt-6 lg:mt-8 mb-2">Past Contests</h2>
               {past.length === 0 ? (
                 <div className="text-white/65">No past contests.</div>
               ) : (
@@ -99,17 +90,15 @@ export default function Contests() {
                     <Link
                       key={contest.id}
                       to={`/contest/${contest.id}`}
-                      className="flex flex-row justify-between items-center px-4 bg-[#181818] rounded-lg p-4 hover:bg-[#232323] transition"
+                      className="flex flex-col lg:flex-row justify-between items-start lg:items-center px-3 lg:px-4 bg-[#181818] rounded-lg p-3 lg:p-4 hover:bg-[#232323] transition gap-2 lg:gap-0"
                     >
-                      <div className="flex gap-3 items-center text-lg font-semibold"><HiMiniTrophy className="w-6 h-6"/> {contest.name}</div>
-                      {/* <p className="text-white/65">{contest.description}</p> */}
-                      <div className="flex flex-row items-center justify-center gap-2">
-                        <p className="text-white/65 text-sm">
+                      <div className="flex gap-3 items-center text-base lg:text-lg font-semibold"><HiMiniTrophy className="w-5 h-5 lg:w-6 lg:h-6"/> {contest.name}</div>
+                      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-center gap-2">
+                        <p className="text-white/65 text-xs lg:text-sm">
                           {parseDate(contest.startTime)}
                         </p>
                         <p className="text-white/65 rounded-full bg-[#ffffff05] px-1 py-1 flex items-center gap-1">
-                          {/* Duration: {calculateDuration(contest.startTime, contest.endTime)} */}
-                          <ChevronRight className="w-5 h-5" />
+                          <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5" />
                         </p>
                       </div>
                     </Link>

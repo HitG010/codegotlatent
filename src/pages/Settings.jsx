@@ -89,11 +89,11 @@ function Settings() {
   };
 
   return (
-    <div className="h-screen w-100vh flex flex-row justify-between bg-[#0F0F0F] overflow-hidden scrollbar">
+    <div className="h-screen w-100vh flex flex-col lg:flex-row justify-between bg-[#0F0F0F] overflow-hidden scrollbar">
       <Navbar path={pathname} />
-      <div className="home flex flex-col h-full w-[80%] p-10 pt-16 bg-[#0F0F0F] overflow-auto scrollbar">
-        <h2 className="text-white text-4xl font-semibold">Settings</h2>
-        <div className="mt-8 flex gap-16">
+      <div className="home flex flex-col h-full w-full lg:w-[80%] p-4 lg:p-10 pt-4 lg:pt-16 bg-[#0F0F0F] overflow-auto scrollbar pb-20 lg:pb-10">
+        <h2 className="text-white text-2xl lg:text-4xl font-semibold">Settings</h2>
+        <div className="mt-4 lg:mt-8 flex flex-col lg:flex-row gap-4 lg:gap-16 items-center lg:items-start">
           <img
             src={
               userDetails?.pfpId
@@ -101,36 +101,36 @@ function Settings() {
                 : fallbackAvatar()
             }
             alt=""
-            className="h-24 w-24 rounded-full bg-[#000] border border-[#ffffff35]"
+            className="h-20 w-20 lg:h-24 lg:w-24 rounded-full bg-[#000] border border-[#ffffff35]"
           />
-          <div>
+          <div className="text-center lg:text-left">
             <p className="text-white text-sm">Username</p>
-            <p className="text-white text-2xl font-semibold">
+            <p className="text-white text-xl lg:text-2xl font-semibold">
               {userDetails?.username}
             </p>
             {/* <p className="text-white text-sm text-white/65">Email</p>
                 <p className="text-white text-xl font-semibold">{userDetails?.email}</p> */}
             <Link
               to={`/user/${userDetails?.username}`}
-              className="hover:bg-white/65 mt-2 px-2 py-1 bg-white text-black font-medium text-sm flex items-center justify-center gap-2 rounded  transition-all duration-300"
+              className="hover:bg-white/65 mt-2 px-2 py-1 bg-white text-black font-medium text-sm flex items-center justify-center gap-2 rounded  transition-all duration-300 w-fit mx-auto lg:mx-0"
             >
               View Profile <ExternalLink className="w-3 h-3" />
             </Link>
           </div>
         </div>
-        <div className="mt-8 flex flex-col gap-3 px-8 py-6 bg-[#1a1a1a] rounded-lg border border-[#ffffff15]">
-          <h2 className="text-white text-2xl font-medium">
+        <div className="mt-4 lg:mt-8 flex flex-col gap-3 px-4 lg:px-8 py-4 lg:py-6 bg-[#1a1a1a] rounded-lg border border-[#ffffff15]">
+          <h2 className="text-white text-xl lg:text-2xl font-medium">
             Account Information
           </h2>
-          <div className="grid grid-cols-5 gap-1 items-center">
-            <h2 className="text-white/65 text-lg font-medium">Username</h2>
-            <div className="flex gap-2 col-span-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-1 lg:gap-1 items-start lg:items-center">
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">Username</h2>
+            <div className="flex flex-col sm:flex-row gap-2 col-span-1 lg:col-span-4">
               <input
                 type="text"
                 name="username"
                 value={userDetails?.username || ""}
                 onChange={handleChange}
-                className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
+                className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20] bg-transparent"
                 disabled={editField.username} // Disable input for username
               />
               <button
@@ -145,7 +145,7 @@ function Settings() {
                     handleUpdateUserDetails();
                   }
                 }}
-                className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+                className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 {editField.username == false ? (
                   <>
@@ -158,14 +158,14 @@ function Settings() {
                 )}
               </button>
             </div>
-            <h2 className="text-white/65 text-lg font-medium">Email</h2>
-            <div className="flex gap-2 col-span-4">
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">Email</h2>
+            <div className="flex flex-col sm:flex-row gap-2 col-span-1 lg:col-span-4">
               <input
                 type="email"
                 name="email"
                 value={userDetails?.email || ""}
                 onChange={handleChange}
-                className="py-1 px-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
+                className="py-1 px-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20] bg-transparent"
                 disabled
               />
               {/* <button
@@ -178,8 +178,8 @@ function Settings() {
                         Edit <Pencil className='w-3 h-3 inline' />
                     </button> */}
             </div>
-            <h2 className="text-white/65 text-lg font-medium">Choose Avatar</h2>
-            <div className="flex gap-2 col-span-4">
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">Choose Avatar</h2>
+            <div className="flex flex-wrap gap-2 col-span-1 lg:col-span-4">
               {avatars.map((avatar, idx) => (
                 <img
                   key={idx}
@@ -220,17 +220,17 @@ function Settings() {
             </div>
           </div>
 
-          <h2 className="text-2xl font-medium mt-4">Basic Information</h2>
-          <div className="grid grid-cols-5 gap-1 items-center">
-            <h2 className="text-white/65 text-lg font-medium">Full Name</h2>
-            <div className="flex gap-2 col-span-4">
+          <h2 className="text-xl lg:text-2xl font-medium mt-4">Basic Information</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-1 lg:gap-1 items-start lg:items-center">
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">Full Name</h2>
+            <div className="flex flex-col sm:flex-row gap-2 col-span-1 lg:col-span-4">
               <input
                 type="text"
                 name="name"
                 value={userDetails?.name || ""}
                 onChange={handleChange}
                 className={
-                  "p-2 w-full focus:bg-[#ffffff10] rounded border border-[#ffffff20]"
+                  "p-2 w-full focus:bg-[#ffffff10] rounded border border-[#ffffff20] bg-transparent text-white"
                 }
                 placeholder={userDetails?.name ? "" : "No name set"}
                 disabled={editField.name}
@@ -245,7 +245,7 @@ function Settings() {
                     setUser(newUser);
                   }
                 }}
-                className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+                className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 {editField.name == false ? (
                   <>
@@ -258,13 +258,13 @@ function Settings() {
                 )}
               </button>
             </div>
-            <h2 className="text-white/65 text-lg font-medium">Bio</h2>
-            <div className="flex gap-2 col-span-4 items-start">
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">Bio</h2>
+            <div className="flex flex-col sm:flex-row gap-2 col-span-1 lg:col-span-4 items-start">
               <textarea
                 name="Bio"
                 value={userDetails?.Bio || ""}
                 onChange={handleChange}
-                className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
+                className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20] bg-transparent"
                 rows="3"
                 disabled={editField.Bio}
                 placeholder={userDetails?.Bio ? "" : "No bio set"}
@@ -279,7 +279,7 @@ function Settings() {
                     // setUser(newUser);
                   }
                 }}
-                className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+                className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 {editField.Bio == false ? (
                   <>
@@ -292,15 +292,15 @@ function Settings() {
                 )}
               </button>
             </div>
-            <h2 className="text-white/65 text-lg font-medium">Location</h2>
-            <div className="flex gap-2 col-span-4">
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">Location</h2>
+            <div className="flex flex-col sm:flex-row gap-2 col-span-1 lg:col-span-4">
               <input
                 type="text"
                 name="Location"
                 value={userDetails?.Location || ""}
                 placeholder={userDetails?.Location ? "" : "No location set"}
                 onChange={handleChange}
-                className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20]"
+                className="p-2 w-full focus:bg-[#ffffff10] text-white rounded border border-[#ffffff20] bg-transparent"
                 disabled={editField.Location}
               />
               <button
@@ -315,7 +315,7 @@ function Settings() {
                     // setUser((prev) => ({ ...prev, Location: userDetails.Location }));
                   }
                 }}
-                className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+                className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 {editField.Location == false ? (
                   <>
@@ -349,14 +349,14 @@ function Settings() {
                 </div> */}
           </div>
 
-          <h2 className="text-white text-2xl font-medium mt-4">
+          <h2 className="text-white text-xl lg:text-2xl font-medium mt-4">
             Additional Settings
           </h2>
-          <div className="grid grid-cols-5 gap-1 items-center ">
-            <h2 className="text-white/65 text-lg font-medium col-span-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-1 items-start lg:items-center">
+            <h2 className="text-white/65 text-base lg:text-lg font-medium col-span-1 lg:col-span-4">
               Allow Email Notifications for Upcoming Contests
             </h2>
-            <div className="flex gap-2 col-span-1">
+            <div className="flex gap-2 col-span-1 lg:col-span-1">
               <input
                 type="checkbox"
                 name="emailNotifications"
@@ -372,13 +372,13 @@ function Settings() {
                 className="w-5 h-5"
               />
             </div>
-            <h2 className="text-white/65 text-lg font-medium col-span-4">
+            <h2 className="text-white/65 text-base lg:text-lg font-medium col-span-1 lg:col-span-4">
               Logout
             </h2>
-            <div className="flex gap-2 col-span-1">
+            <div className="flex gap-2 col-span-1 lg:col-span-1">
               <button
                 onClick={handleLogout}
-                className="mt-8 bg-red-500 text-white py-2 px-4 rounded w-fit"
+                className="mt-0 lg:mt-8 bg-red-500 text-white py-2 px-4 rounded w-fit"
               >
                 Logout
               </button>

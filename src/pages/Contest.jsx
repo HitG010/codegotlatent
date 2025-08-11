@@ -192,24 +192,22 @@ export default function Contest() {
   }
 
   return (
-    <div className="flex flex-row rounded-lg text-white max-w-280 my-auto p-6 mx-auto gap-12">
-      {/* <h1>Contest</h1> */}
-      <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border-[#ffffff10] w-full">
+    <div className="flex flex-col lg:flex-row rounded-lg text-white max-w-full lg:max-w-280 my-auto p-4 lg:p-6 mx-auto gap-6 lg:gap-12">
+      <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border-[#ffffff10] w-full lg:flex-1">
         <img src={cglContest} alt="CGL Contest" className="rounded-lg mb-4" />
-        <div className="flex flex-row items-center gap-4 mb-2">
-          <h2 className="text-4xl font-semibold">{contest?.name}</h2>
-          <h3 className="rounded-full bg-white/5 text-white/65 border-1 border-[#ffffff15] text-sm px-3 py-1">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-4 mb-2">
+          <h2 className="text-2xl lg:text-4xl font-semibold">{contest?.name}</h2>
+          <h3 className="rounded-full bg-white/5 text-white/65 border-1 border-[#ffffff15] text-sm px-3 py-1 w-fit">
             {contestStatus}
           </h3>
         </div>
-        <p className="text-white/65 mb-2">{contest?.description}</p>
-        <div className="flex flex-row items-center gap-2 mb-2">
-          <p className="rounded-md px-4 py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65">
-            <Clock className="h-4 w-4" /> {parseDate(contest?.startTime)}
+        <p className="text-white/65 mb-2 text-sm lg:text-base">{contest?.description}</p>
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 mb-2">
+          <p className="rounded-md px-3 lg:px-4 py-1.5 lg:py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65 text-sm lg:text-base">
+            <Clock className="h-3 w-3 lg:h-4 lg:w-4" /> {parseDate(contest?.startTime)}
           </p>
-          {/* <p>End Time: {parseDate(contest.endTime)}</p> */}
-          <p className="rounded-md px-4 py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65">
-            <GoStopwatch />{" "}
+          <p className="rounded-md px-3 lg:px-4 py-1.5 lg:py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65 text-sm lg:text-base">
+            <GoStopwatch className="h-3 w-3 lg:h-4 lg:w-4" />{" "}
             {calculateDuration(contest?.startTime, contest?.endTime)}
           </p>
         </div>
@@ -397,29 +395,28 @@ export default function Contest() {
         )}
       </div>
       {(contest?.status === "Ended" || contest?.status === "Rank Guess Phase" || isRegistered) && (
-        <div className=" flex flex-col gap-4 w-full">
-          <h2 className="text-4xl font-semibold mb-2 inline-block">Problems</h2>
+        <div className="flex flex-col gap-4 w-full lg:flex-1">
+          <h2 className="text-2xl lg:text-4xl font-semibold mb-2 inline-block">Problems</h2>
           <div className="flex flex-col gap-0.5 w-full">
             {allProblems &&
               allProblems.map((problem) => (
                 <div key={problem.id}>
                   <Link
                     to={`/contest/${contestId}/problem/${problem.id}`}
-                    className="text-lg font-semibold text-white hover:text-yellow-500 transition duration-200 bg-[#ffffff05] rounded-md px-4 py-2 mb-2 hover:bg-[#ffffff10] border-1 border-[#ffffff15] flex justify-between items-center w-full"
+                    className="text-base lg:text-lg font-semibold text-white hover:text-yellow-500 transition duration-200 bg-[#ffffff05] rounded-md px-3 lg:px-4 py-2 mb-2 hover:bg-[#ffffff10] border-1 border-[#ffffff15] flex justify-between items-center w-full"
                   >
-                    <div className="flex items-center justify-between gap-4 w-full">
-                      <div className="flex items-center gap-2">
-                        <div className="h-4 w-4">
+                    <div className="flex items-center justify-between gap-2 lg:gap-4 w-full">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="h-4 w-4 flex-shrink-0">
                           {problem.solvedInContest ? (
                             <Check className="h-4 w-4 text-green-500" />
                           ) : (
                             ""
                           )}
                         </div>
-                        <h3>{problem.title}</h3>
+                        <h3 className="truncate">{problem.title}</h3>
                       </div>
-                      {/* <DifficultyTag className="text-sm text-[#ffffff80]" tag={problem.difficulty}/> */}
-                      <span className="text-sm text-[#ffffff80] rounded-full px-3 py-0.5 bg-[#ffffff10]">
+                      <span className="text-xs lg:text-sm text-[#ffffff80] rounded-full px-2 lg:px-3 py-0.5 bg-[#ffffff10] flex-shrink-0">
                         {problem.problemScore}
                       </span>
                     </div>
@@ -427,16 +424,26 @@ export default function Contest() {
                 </div>
               ))}
           </div>
-          {allProblems && <div className="flex items-center justify-start gap-4 mt-4">
-            <p className="text-white/65">Total Score: <span className="px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white">{allProblems.reduce((acc, problem) => acc + problem.problemScore, 0)}</span></p>
-            <p className="text-white/65">Total Penalties: <span className="px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white">{allProblems.reduce((acc, problem) => acc + (problem.solvedInContest ? 0 : problem.penalty), 0)}</span></p>
-          </div>}
+          {allProblems && (
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-start gap-2 lg:gap-4 mt-4">
+              <p className="text-white/65 text-sm lg:text-base">
+                Total Score:{" "}
+                <span className="px-2 lg:px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white ml-1">
+                  {allProblems.reduce((acc, problem) => acc + problem.problemScore, 0)}
+                </span>
+              </p>
+              <p className="text-white/65 text-sm lg:text-base">
+                Total Penalties:{" "}
+                <span className="px-2 lg:px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white ml-1">
+                  {allProblems.reduce((acc, problem) => acc + (problem.solvedInContest ? 0 : problem.penalty), 0)}
+                </span>
+              </p>
+            </div>
+          )}
           <div className="flex flex-col gap-2">
-            {/* <h2 className="text-4xl font-semibold mb-2">Contest Details</h2> */}
-            {/* <p className="text-white/65">{contest.details}</p> */}
             <div className="flex flex-col gap-2">
-              <h3 className="text-2xl font-semibold">Contest Rules</h3>
-              <ul className="list-disc pl-5 text-white/65">
+              <h3 className="text-xl lg:text-2xl font-semibold">Contest Rules</h3>
+              <ul className="list-disc pl-5 text-white/65 text-sm lg:text-base">
                 {contest?.rules &&
                   contest?.rules.map((rule, index) => (
                     <li key={index}>{rule}</li>
@@ -445,18 +452,15 @@ export default function Contest() {
             </div>
           </div>
           {contest?.status === "Ended" && (
-            <div
-              className="bg-[#ffffff05] rounded-lg p-4 mt-4
-            border-1 border-[#ffffff10]"
-            >
-              <h2 className="text-2xl font-semibold mb-2">Contest Rankings</h2>
-              <p className="text-white/65">
+            <div className="bg-[#ffffff05] rounded-lg p-4 mt-4 border-1 border-[#ffffff10]">
+              <h2 className="text-xl lg:text-2xl font-semibold mb-2">Contest Rankings</h2>
+              <p className="text-white/65 text-sm lg:text-base">
                 The contest has ended. You can view your results and ratings by
                 visiting the rankings page.
               </p>
               <Link
                 to={`/contest/${contestId}/ranking`}
-                className="text-black bg-white rounded-md font-medium px-3 py-2 text-center hover:bg-white/65 transition-all duration-300 mt-2 inline-block w-full"
+                className="text-black bg-white rounded-md font-medium px-3 py-2 text-center hover:bg-white/65 transition-all duration-300 mt-2 inline-block w-full text-sm lg:text-base"
               >
                 View Rankings
               </Link>
