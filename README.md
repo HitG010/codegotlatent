@@ -70,7 +70,7 @@ This project was built by passionate developers who wanted to turn coding contes
 Let’s make coding *fun* again.
 
 Join us in this adventure and help shape the future of competitive programming!
-Follow us on [GitHub](https://github.com/yourusername/codegotlatent) and leave a star if you like what you see! ⭐
+Follow us on [GitHub](https://github.com/HitG010/codegotlatent) and leave a star if you like what you see! ⭐
 
 Github handles of developers:
 - **Hitesh Gupta** – [GitHub](https://github.com/hitg010)
