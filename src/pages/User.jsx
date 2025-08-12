@@ -77,7 +77,11 @@ function User() {
                 <p className="text-white/65 flex items-center gap-2 lg:gap-4 text-sm lg:text-base">
                   {" "}
                   <PenToolIcon className="w-4 h-4 lg:w-5 lg:h-5" />{" "}
-                  {userData.Bio?.substring(0, 70)}...{" "}
+                  {userData.Bio
+                    ? userData.Bio.length > 100
+                      ? userData.Bio.substring(0, 100) + "..."
+                      : userData.Bio
+                    : ""}
                 </p>
                 <p className="text-white/65 flex items-center gap-2 lg:gap-4 text-sm lg:text-base">
                   <MapPin className="w-4 h-4 lg:w-5 lg:h-5" /> {userData.Location}
@@ -105,39 +109,47 @@ function User() {
               </div>
             </div>
           </div>
-          <div className="mt-4 bg-[#ffffff05] rounded-lg p-4 lg:p-6 w-full border-1 border-[#ffffff10] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <h2 className="text-xl lg:text-2xl font-semibold">Problems Solved</h2>
-            <div className="flex flex-col sm:flex-row lg:flex-row items-start sm:items-center lg:items-center gap-4 w-full lg:w-auto">
-              <div className="text-white text-sm lg:text-lg px-3 py-2 bg-white/5 rounded-lg border-1 border-[#ffffff15] flex justify-between gap-3 lg:gap-5 w-full sm:w-auto">
-                {" "}
-                <span className="text-green-500 font-semibold">Easy</span>{" "}
-                <span className="font-light text-xl lg:text-2xl text-white/8">|</span>{" "}
-                {userData.problemCount.easyCount}/
-                {userData.problemCount.totalEasyCount}
+          <div className="mt-4 bg-[#ffffff08] rounded-lg p-2 lg:p-8 w-full border border-[#ffffff15]">
+            <h2 className="text-xl lg:text-2xl font-semibold mb-2">Problems Solved</h2>
+            <div className="grid grid-cols-4 gap-1 lg:gap-4">
+              <div className="bg-[#ffffff05] border border-[#ffffff10] rounded-lg p-1 lg:p-4 text-center">
+                <div className="text-green-400 font-semibold text-xs lg:text-sm mb-1">Easy</div>
+                <div className="text-white text-sm lg:text-2xl font-bold mb-1">
+                  {userData.problemCount.easyCount}
+                </div>
+                <div className="text-white/60 text-xs lg:text-sm">
+                  of {userData.problemCount.totalEasyCount}
+                </div>
               </div>
-              <div className="text-white text-sm lg:text-lg px-3 py-2 bg-white/5 rounded-lg border-1 border-[#ffffff15] flex justify-between gap-3 lg:gap-5 w-full sm:w-auto">
-                {" "}
-                <span className="text-yellow-500 font-semibold">
-                  Medium
-                </span>{" "}
-                <span className="font-light text-xl lg:text-2xl text-white/8">|</span>
-                {userData.problemCount.mediumCount}/
-                {userData.problemCount.totalMediumCount}
+              
+              <div className="bg-[#ffffff05] border border-[#ffffff10] rounded-lg p-1 lg:p-4 text-center">
+                <div className="text-yellow-400 font-semibold text-xs lg:text-sm mb-1">Medium</div>
+                <div className="text-white text-sm lg:text-2xl font-bold mb-1">
+                  {userData.problemCount.mediumCount}
+                </div>
+                <div className="text-white/60 text-xs lg:text-sm">
+                  of {userData.problemCount.totalMediumCount}
+                </div>
               </div>
-              <div className="text-white text-sm lg:text-lg px-3 py-2 bg-white/5 rounded-lg border-1 border-[#ffffff15] flex justify-between gap-3 lg:gap-5 w-full sm:w-auto">
-                {" "}
-                <span className="text-red-500 font-semibold">Hard</span>{" "}
-                <span className="font-light text-xl lg:text-2xl text-white/8">|</span>
-                {userData.problemCount.hardCount}/
-                {userData.problemCount.totalHardCount}
+              
+              <div className="bg-[#ffffff05] border border-[#ffffff10] rounded-lg p-1 lg:p-4 text-center">
+                <div className="text-red-400 font-semibold text-xs lg:text-sm mb-1">Hard</div>
+                <div className="text-white text-sm lg:text-2xl font-bold mb-1">
+                  {userData.problemCount.hardCount}
+                </div>
+                <div className="text-white/60 text-xs lg:text-sm">
+                  of {userData.problemCount.totalHardCount}
+                </div>
               </div>
-              <div className="text-white text-sm lg:text-lg px-3 py-2 bg-white/5 rounded-lg border-1 border-[#ffffff15] flex justify-between gap-3 lg:gap-5 w-full sm:w-auto">
-                {" "}
-                <span className="text-white/65 font-semibold">
-                  Total Submissions
-                </span>{" "}
-                <span className="font-light text-xl lg:text-2xl text-white/8">|</span>
-                {userData.submissions.length}
+              
+              <div className="bg-[#ffffff05] border border-[#ffffff10] rounded-lg p-1 lg:p-4 text-center">
+                <div className="text-blue-400 font-semibold text-xs lg:text-sm mb-1">Submissions</div>
+                <div className="text-white text-sm lg:text-2xl font-bold mb-1">
+                  {userData.submissions.length}
+                </div>
+                <div className="text-white/60 text-xs lg:text-sm">
+                  Total attempts
+                </div>
               </div>
             </div>
           </div>
@@ -154,7 +166,7 @@ function User() {
                   target="_blank"
                 >
                   <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2 lg:gap-0">
-                    <span className="text-base lg:text-lg font-semibold">
+                    <span className="text-sm lg:text-lg font-semibold truncate max-w-[200px] lg:max-w-none">
                       {submission.problem.title}
                     </span>
                     <span
@@ -162,12 +174,12 @@ function User() {
                         submission.verdict === "Accepted"
                           ? "green-500 bg-green-500/10"
                           : "red-500 bg-red-500/10"
-                      } rounded-full px-2 py-1 text-xs lg:text-sm`}
+                      } rounded-full px-2 py-1 text-xs lg:text-sm flex-shrink-0`}
                     >
                       {submission.verdict}
                     </span>
                   </div>
-                  <p className="text-xs lg:text-sm">
+                  <p className="text-xs lg:text-sm truncate">
                     Submitted at:{" "}
                     {new Date(submission.createdAt).toLocaleString()}
                   </p>

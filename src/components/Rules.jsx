@@ -166,16 +166,16 @@ export default function Rules() {
           </ul>
         </section>
 
-        <section className="flex gap-8 mt-3 justify-center scale-80">
+        <section className="flex flex-col lg:flex-row gap-8 justify-center scale-80">
           <img
             src={cglMeme1}
             alt="Rules Image1"
-            className="w-1/2 h-auto rounded-lg shadow-lg"
+            className="rounded-lg shadow-lg mb-2 lg:w-1/2 lg:mb-0 lg:h-auto lg:scale-100"
           />
           <img
             src={cglMeme2}
             alt="Rules Image2"
-            className="w-1/2 h-auto rounded-lg shadow-lg"
+            className="rounded-lg shadow-lg mb-10 lg:w-1/2 lg:mb-0 lg:h-auto lg:scale-100"
           />
         </section>
       </div>

@@ -36,7 +36,7 @@ export default function Contests() {
   return (
     <div className="h-screen flex flex-col lg:flex-row justify-between bg-[#0F0F0F]">
       <Navbar path={pathname} />
-      <div className="w-full lg:w-[80%] h-full flex flex-col gap-4 mx-4 lg:mx-12 py-4 lg:py-8 pb-20 lg:pb-8 overflow-y-auto">
+      <div className="w-full lg:w-[80%] h-full flex flex-col gap-4 p-4 lg:pl-10 pt-6 lg:pt-16 pb-24 lg:pb-8 overflow-y-auto">
         <div className="flex flex-col mb-1">
           <h1 className="text-2xl lg:text-4xl font-semibold mb-0.2">Contests</h1>
           <h6 className="text-base lg:text-lg text-white/65 mb-4">Contest every week. Compete and showcase your "Latent"!</h6>
@@ -90,16 +90,19 @@ export default function Contests() {
                     <Link
                       key={contest.id}
                       to={`/contest/${contest.id}`}
-                      className="flex flex-col lg:flex-row justify-between items-start lg:items-center px-3 lg:px-4 bg-[#181818] rounded-lg p-3 lg:p-4 hover:bg-[#232323] transition gap-2 lg:gap-0"
+                      className="flex flex-row justify-between items-center px-3 lg:px-4 bg-[#181818] rounded-lg p-3 lg:p-4 hover:bg-[#232323] transition gap-2"
                     >
-                      <div className="flex gap-3 items-center text-base lg:text-lg font-semibold"><HiMiniTrophy className="w-5 h-5 lg:w-6 lg:h-6"/> {contest.name}</div>
-                      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-center gap-2">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex gap-3 items-center text-base lg:text-lg font-semibold">
+                          <HiMiniTrophy className="w-5 h-5 lg:w-6 lg:h-6"/> 
+                          {contest.name}
+                        </div>
                         <p className="text-white/65 text-xs lg:text-sm">
                           {parseDate(contest.startTime)}
                         </p>
-                        <p className="text-white/65 rounded-full bg-[#ffffff05] px-1 py-1 flex items-center gap-1">
-                          <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5" />
-                        </p>
+                      </div>
+                      <div className="text-white/65 rounded-full bg-[#ffffff05] px-1 py-1 flex items-center gap-1 flex-shrink-0">
+                        <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5" />
                       </div>
                     </Link>
                   ))}

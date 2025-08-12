@@ -279,7 +279,7 @@ function Settings() {
                     // setUser(newUser);
                   }
                 }}
-                className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+                className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap w-full sm:w-auto"
               >
                 {editField.Bio == false ? (
                   <>
@@ -353,24 +353,22 @@ function Settings() {
             Additional Settings
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-1 items-start lg:items-center">
-            <h2 className="text-white/65 text-base lg:text-lg font-medium col-span-1 lg:col-span-4">
-              Allow Email Notifications for Upcoming Contests
-            </h2>
+            <div className="text-white/65 text-base lg:text-lg font-medium col-span-1 lg:col-span-4 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <span>Allow Email Notifications for Upcoming Contests</span>
+              <span className="text-xs bg-yellow-600/20 text-yellow-400 px-2 py-1 rounded-full">Coming Soon</span>
+            </div>
             <div className="flex gap-2 col-span-1 lg:col-span-1">
-              <input
-                type="checkbox"
-                name="emailNotifications"
-                checked={userDetails?.emailNotifications || false}
-                onChange={(e) => {
-                  setUserDetails((prev) => ({
-                    ...prev,
-                    emailNotifications: e.target.checked,
-                  }));
-                  // Add logic to update email notifications preference
-                  alert("Email Notifications preference updated!");
-                }}
-                className="w-5 h-5"
-              />
+              <div className="relative inline-block w-10 h-5">
+                <input
+                  type="checkbox"
+                  name="emailNotifications"
+                  checked={false}
+                  disabled={true}
+                  className="sr-only"
+                />
+                <div className="block bg-gray-600 w-10 h-5 rounded-full opacity-50 cursor-not-allowed"></div>
+                <div className="absolute left-1 top-0.5 bg-white w-4 h-4 rounded-full transition-transform opacity-50"></div>
+              </div>
             </div>
             <h2 className="text-white/65 text-base lg:text-lg font-medium col-span-1 lg:col-span-4">
               Logout
