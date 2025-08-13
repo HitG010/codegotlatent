@@ -10,4 +10,8 @@ router.post("/addProblem", async (req, res) => {
   await addProblem(req, res);
 });
 
+router.put("/editProblem/:id", async (req, res) => {
+  await editProblem(req, res);
+});
+
 module.exports = router;

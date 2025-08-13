@@ -105,7 +105,46 @@ async function addProblem(req, res) {
   }
 }
 
+async function editProblem(req, res) {
+  const { id } = req.params;
+  const {
+    title,
+    description,
+    difficulty,
+    problemScore,
+    contestId,
+    max_time_limit,
+    max_memory_limit,
+    tags,
+  } = req.body;
+
+  try {
+    const problem = await prisma.problem.update({
+      where: { id },
+      data: {
+        title,
+        description,
+        difficulty,
+        problemScore,
+        contestId,
+        max_time_limit,
+        max_memory_limit,
+        tags: {
+          set: tags.map((tagId) => ({ id: tagId })), // replace existing tags
+        },
+      },
+    });
+
+    console.log("Problem Updated:", problem);
+    res.status(200).json(problem);
+  } catch (error) {
+    console.error("Error updating problem:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   addTestcase,
   addProblem,
+  editProblem,
 };

@@ -117,7 +117,7 @@ async function getProblem(req, res) {
   return res.json(problem);
 }
 
-async function acceptanceRate (req, res) {
+async function acceptanceRate(req, res) {
   const { problemId } = req.params;
   console.log("Problem ID:", problemId);
   const totalSubmisionCount = await prisma.Submission.count({
@@ -154,9 +154,9 @@ async function getAllTags(req, res) {
     console.error("Error fetching tags:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
-};
+}
 
-async function deleteAllTestcases (req, res) {
+async function deleteAllTestcases(req, res) {
   const { problemId } = req.params;
   console.log("Problem ID:", problemId);
   try {
@@ -171,13 +171,12 @@ async function deleteAllTestcases (req, res) {
     console.error("Error deleting test cases:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+}
 
 module.exports = {
   allProblems,
   getProblem,
   acceptanceRate,
   getAllTags,
-  deleteAllTestcases
-
+  deleteAllTestcases,
 };

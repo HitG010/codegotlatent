@@ -661,6 +661,24 @@ const addTestCase = async (testCaseData) => {
   }
 };
 
+const editProblem = async (problemId, problemData) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/editProblem/${problemId}`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.put(url, problemData, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error editing problem:", error);
+    throw error;
+  }
+};
+
 export {
   api,
   executeCode,
@@ -693,4 +711,5 @@ export {
   editContest,
   getUserRankGuess,
   addTestCase,
+  editProblem,
 };
