@@ -622,7 +622,9 @@ function editContest(contestId, contestData) {
 }
 
 function getUserRankGuess(contestId, userId) {
-  const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/user/${userId}/rankGuess`;
+  const url = `${
+    import.meta.env.VITE_BASE_URL
+  }/contest/${contestId}/user/${userId}/rankGuess`;
   console.log("URL:", url);
   return axios
     .get(url, {
@@ -640,6 +642,24 @@ function getUserRankGuess(contestId, userId) {
       throw error;
     });
 }
+
+const addTestCase = async (testCaseData) => {
+  const url = `${import.meta.env.VITE_BASE_URL}/addTestCase`;
+  console.log("URL:", url);
+  try {
+    const response = await axios.post(url, testCaseData, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    console.log("Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding test case:", error);
+    throw error;
+  }
+};
 
 export {
   api,
@@ -672,4 +692,5 @@ export {
   addContest,
   editContest,
   getUserRankGuess,
+  addTestCase,
 };

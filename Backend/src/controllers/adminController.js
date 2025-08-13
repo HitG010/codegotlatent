@@ -3,7 +3,7 @@ const { uploadToGCS } = require("../services/gcs");
 const dotenv = require("dotenv");
 dotenv.config();
 
-async function addTestcase (req, res) {
+async function addTestcase(req, res) {
   const { problemId, input, stdin, output, stdout, isPublic } = req.body;
   console.log("Problem ID:", problemId);
   const inputSize = Buffer.byteLength(stdin, "utf8");
@@ -52,9 +52,9 @@ async function addTestcase (req, res) {
     console.log("Test case saved locally:", id);
     res.status(201).json({ message: "Test case saved locally", id: id });
   }
-};
+}
 
-async function addProblem (req, res) {
+async function addProblem(req, res) {
   let {
     title,
     description,
@@ -103,9 +103,9 @@ async function addProblem (req, res) {
     console.error("Error creating problem:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+}
 
 module.exports = {
   addTestcase,
   addProblem,
-}
+};

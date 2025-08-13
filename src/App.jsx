@@ -25,6 +25,7 @@ import Settings from "./pages/Settings";
 import Login2 from "./pages/login2";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import ContestForm from "./pages/ContestForm";
+import AddTestCase from "./pages/AddTestCase";
 
 const App = () => {
   const location = useLocation();
@@ -119,6 +120,7 @@ const App = () => {
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/contest/new" element={<ContestForm />} />
         <Route path="/admin/contest/:id" element={<ContestForm />} />
+        <Route path="/admin/addTestCase" element={<AddTestCase />} />
         {/* Add more routes as needed */}
 
         <Route path="/settings" element={<Settings />} />
