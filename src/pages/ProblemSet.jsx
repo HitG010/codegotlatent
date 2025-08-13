@@ -180,10 +180,10 @@ const ProblemSet = () => {
   const pathname = window.location.pathname;
   return (
     <div>
-      <div className="h-screen w-full flex flex-col lg:flex-row justify-between bg-[#0F0F0F]">
+      <div className="h-screen w-full flex flex-col lg:flex-row justify-between bg-[#0F0F0F] overflow-hidden">
         <Navbar path={pathname} />
         <div className="w-full lg:w-[80%] h-full flex flex-col lg:flex-row justify-between gap-4">
-          <div className="home flex flex-col h-full p-4 lg:pl-10 pt-6 lg:pt-16 pb-20 lg:pb-4 bg-[#0F0F0F] w-full">
+          <div className="home flex flex-col h-full p-4 lg:pl-10 pt-6 lg:pt-16 pb-24 lg:pb-4 bg-[#0F0F0F] w-full overflow-y-auto">
             <h2 className="text-white text-2xl lg:text-4xl font-semibold mb-4">
               Problems
             </h2>
@@ -200,7 +200,7 @@ const ProblemSet = () => {
                 />
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-white/15 hover:bg-white/25 px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-white text-xs lg:text-sm transition-colors flex items-center gap-0"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-white/15 hover:bg-white/25 px-3 lg:px-4 py-1 lg:py-2 rounded-full text-white text-xs lg:text-sm transition-colors flex items-center gap-0"
                 >
                   Filters {showFilters ? <ChevronDown  className="transform rotate-180 w-3 lg:w-4" /> : <ChevronDown className="w-3 lg:w-4" />}
                 </button>
@@ -383,24 +383,24 @@ const ProblemSet = () => {
               )}
             </div>
           </div>
-          <div className="hidden lg:flex flex-col h-fit gap-4">
-            <div className="py-4 px-6 lg:px-8 rounded-2xl bg-[#ffffff25] h-fit mt-30 mr-8 flex flex-col">
-              <div className="flex flex-row gap-8 lg:gap-12 items-center">
+          <div className="hidden xl:flex flex-col h-fit gap-4">
+            <div className="py-4 px-6 xl:px-8 rounded-2xl bg-[#ffffff25] h-fit mt-30 mr-8 flex flex-col">
+              <div className="flex flex-row gap-8 xl:gap-12 items-center">
                 <AvatarProgressRing progress={((easyCount+mediumCount+hardCount)/(easyTotal+mediumTotal+hardTotal)*100).toFixed(2)} imageComponent={avatars[userDetails?.pfpId - 1]} />
                 <div className="flex flex-col gap-1">
-                  <div className="flex flex-row justify-between w-[150px] lg:w-[170px]">
-                    <p className="text-base lg:text-lg font-medium text-green-500">Easy</p>
-                    <p className="text-white text-base lg:text-lg font-medium">{easyCount}/{easyTotal}</p>
+                  <div className="flex flex-row justify-between w-[150px] xl:w-[170px]">
+                    <p className="text-base xl:text-lg font-medium text-green-500">Easy</p>
+                    <p className="text-white text-base xl:text-lg font-medium">{easyCount}/{easyTotal}</p>
                   </div>
                   <div className="flex flex-row justify-between">
-                    <p className="text-yellow-500 text-base lg:text-lg font-medium">
+                    <p className="text-yellow-500 text-base xl:text-lg font-medium">
                       Medium
                     </p>
-                    <p className="text-white text-base lg:text-lg font-medium">{mediumCount}/{mediumTotal}</p>
+                    <p className="text-white text-base xl:text-lg font-medium">{mediumCount}/{mediumTotal}</p>
                   </div>
                   <div className="flex flex-row justify-between">
-                    <p className="text-red-500 text-base lg:text-lg font-medium">Hard</p>
-                    <p className="text-white text-base lg:text-lg font-medium">{hardCount}/{hardTotal}</p>
+                    <p className="text-red-500 text-base xl:text-lg font-medium">Hard</p>
+                    <p className="text-white text-base xl:text-lg font-medium">{hardCount}/{hardTotal}</p>
                   </div>
                 </div>
               </div>
