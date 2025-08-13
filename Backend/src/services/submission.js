@@ -1,4 +1,4 @@
-const getSubmissionStatus = async (tokens, maxRetries = 20, delayMs = 1000) => {
+const getSubmissionStatus = async (tokens, maxRetries = 60, delayMs = 1000) => {
   const url = `${process.env.JUDGE0_API}/submissions/batch?tokens=${tokens}&base64_encoded=true`;
   let retries = 0;
 
