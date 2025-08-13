@@ -20,7 +20,7 @@ const getSubmissionStatus = async (
     });
 
     const data = await response.json();
-    console.log("Raw submission status response:", data);
+    // console.log("Raw submission status response:", data);
 
     const submissions = data.submissions.map((sub) => ({
       ...sub,
