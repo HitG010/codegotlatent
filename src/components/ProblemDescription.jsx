@@ -40,7 +40,7 @@ const ProblemDescription = ({ data }) => {
         prose-blockquote:border-gray-600
         prose-blockquote:text-gray-300
         prose-code:text-gray-200
-        prose-pre:p-0 prose-pre:bg-transparent text-sm px-1">
+        prose-pre:p-0 prose-pre:bg-transparent text-base px-1">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{

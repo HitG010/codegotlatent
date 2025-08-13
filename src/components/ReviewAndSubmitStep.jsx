@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { addProblem, updateProblem } from "../api/api";
+import { addProblem, editProblem } from "../api/api";
 
 export default function ReviewAndSubmitStep({ data, isEdit = false, problemId = null }) {
   const [loading, setLoading] = useState(false);
@@ -9,7 +9,7 @@ export default function ReviewAndSubmitStep({ data, isEdit = false, problemId = 
     try {
       let response;
       if (isEdit && problemId) {
-        response = await updateProblem(problemId, data);
+        response = await editProblem(problemId, data);
         if (response) {
           alert("✅ Problem updated successfully!");
         } else {

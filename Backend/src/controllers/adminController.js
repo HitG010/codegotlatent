@@ -119,13 +119,14 @@ async function editProblem(req, res) {
   } = req.body;
 
   try {
+    let intProbScore = parseInt(problemScore);
     const problem = await prisma.problem.update({
       where: { id },
       data: {
         title,
         description,
         difficulty,
-        problemScore,
+        problemScore: intProbScore,
         contestId,
         max_time_limit,
         max_memory_limit,

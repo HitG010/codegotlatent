@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { addTestcase, addProblem } = require("../controllers/adminController");
+const { addTestcase, addProblem, editProblem } = require("../controllers/adminController");
 
 router.post("/addTestCase", async (req, res) => {
   await addTestcase(req, res);
