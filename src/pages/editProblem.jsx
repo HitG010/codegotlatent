@@ -43,7 +43,7 @@ export default function EditProblem() {
       setError("");
       // Using userId as 1 for admin access, you might want to get this from user context
       const data = await fetchProblem(id, 1);
-      
+
       // Transform the fetched data to match our state structure
       setProblemData({
         title: data.title || "",
@@ -59,7 +59,9 @@ export default function EditProblem() {
       setIsEditing(true);
     } catch (err) {
       console.error("Error fetching problem:", err);
-      setError("Failed to fetch problem. Please check the problem ID and try again.");
+      setError(
+        "Failed to fetch problem. Please check the problem ID and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -76,7 +78,11 @@ export default function EditProblem() {
     <ProblemDetailsStep data={problemData} setData={setProblemData} />,
     <TagsStep data={problemData} setData={setProblemData} />,
     <TestCasesStep data={problemData} setData={setProblemData} />,
-    <ReviewAndSubmitStep data={problemData} isEdit={true} problemId={problemId} />,
+    <ReviewAndSubmitStep
+      data={problemData}
+      isEdit={true}
+      problemId={problemId}
+    />,
   ];
 
   if (loading) {
@@ -151,29 +157,33 @@ export default function EditProblem() {
                   Load Different Problem
                 </button>
               </div>
-              
+
               {/* Progress indicator */}
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-2">
-                  {["Details", "Tags", "Test Cases", "Review"].map((stepName, index) => (
-                    <div
-                      key={index}
-                      className={`flex items-center ${
-                        index <= step ? "text-blue-400" : "text-white/40"
-                      }`}
-                    >
+                  {["Details", "Tags", "Test Cases", "Review"].map(
+                    (stepName, index) => (
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 ${
-                          index <= step
-                            ? "bg-blue-600 border-blue-600 text-white"
-                            : "border-white/20 text-white/40"
+                        key={index}
+                        className={`flex items-center ${
+                          index <= step ? "text-blue-400" : "text-white/40"
                         }`}
                       >
-                        {index + 1}
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 ${
+                            index <= step
+                              ? "bg-blue-600 border-blue-600 text-white"
+                              : "border-white/20 text-white/40"
+                          }`}
+                        >
+                          {index + 1}
+                        </div>
+                        <span className="ml-2 text-sm font-medium">
+                          {stepName}
+                        </span>
                       </div>
-                      <span className="ml-2 text-sm font-medium">{stepName}</span>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
                 <div className="w-full bg-[#ffffff10] rounded-full h-2">
                   <div

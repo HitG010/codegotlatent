@@ -120,7 +120,10 @@ const App = () => {
         <Route path="/user/:userName" element={<User />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/edit-problem" element={<EditProblem />} />
-        <Route path="/admin/edit-problem/:problemId" element={<EditProblem />} />
+        <Route
+          path="/admin/edit-problem/:problemId"
+          element={<EditProblem />}
+        />
         <Route path="/admin/contest/new" element={<ContestForm />} />
         <Route path="/admin/contest/:id" element={<ContestForm />} />
         <Route path="/admin/addTestCase" element={<AddTestCase />} />

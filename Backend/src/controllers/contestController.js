@@ -198,27 +198,45 @@ async function getContestProblem(req, res) {
   const { contestId, problemId, userId } = req.params;
   console.log("Contest ID:", contestId);
   console.log("Problem ID:", problemId);
+  const contest = await prisma.Contest.findUnique({
+    where: {
+      id: contestId,
+      status: {
+        in: ["Ongoing", "Rating Update Pending", "Ended"],
+      },
+    },
+  });
+  console.log("Contest:", contest);
+  if (!contest) {
+    return res
+      .status(404)
+      .json({ error: "Contest not found or not started yet" });
+  }
+
+  if (
+    contest.status === "Ongoing" &&
+    !(await checkIsRegistered(contestId, userId))
+  ) {
+    return res
+      .status(403)
+      .json({ error: "User is not registered for this contest." });
+  }
   try {
-    const isRegistered = await checkIsRegistered(contestId, userId);
-    if (isRegistered) {
-      const problem = await prisma.Problem.findUnique({
-        include: {
-          tags: true,
-          testCases: {
-            where: {
-              isPublic: true,
-            },
+    const problem = await prisma.Problem.findUnique({
+      include: {
+        tags: true,
+        testCases: {
+          where: {
+            isPublic: true,
           },
         },
-        where: {
-          id: problemId,
-          contestId: contestId,
-        },
-      });
-      return res.status(200).json(problem);
-    } else {
-      return res.status(403).json({ error: "Contest is not started yet" });
-    }
+      },
+      where: {
+        id: problemId,
+        contestId: contestId,
+      },
+    });
+    return res.status(200).json(problem);
   } catch (error) {
     console.error("Error fetching problems:", error);
     return res.status(500).json({ error: "Internal server error" });

@@ -72,13 +72,14 @@ async function addProblem(req, res) {
   if (!contestId) {
     contestId = null; // Allow for problems not associated with a contest
   }
+  let intProbScore = parseInt(problemScore);
   try {
     const problem = await prisma.problem.create({
       data: {
         title,
         description,
         difficulty,
-        problemScore,
+        problemScore: intProbScore,
         contestId,
         max_time_limit,
         max_memory_limit,
