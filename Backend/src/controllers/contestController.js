@@ -180,7 +180,7 @@ async function getContestProblems(req, res) {
           problem.Problems.length > 0
             ? problem.Problems[0].solvedInContest
             : false;
-
+        
         problem.penalty =
           problem.Problems.length > 0 ? problem.Problems[0].penalty : 0;
         delete problem.Problems;

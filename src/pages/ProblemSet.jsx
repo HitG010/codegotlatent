@@ -321,7 +321,7 @@ const ProblemSet = () => {
                 </div>
               )}
             </div>
-            <div className="problem-statement flex flex-col">
+            <div className="problem-statement flex flex-col overflow-y-scroll pr-2 scrollbar">
               {loading ? (
                 <div className="w-full text-center justify-center text-white py-8">
                   <div className="text-lg">Loading problems...</div>
