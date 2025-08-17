@@ -21,7 +21,7 @@ import AuthRoute from "./providers/authRoute";
 import ContestRanking from "./pages/ContestRanking";
 import User from "./pages/User";
 import Admin from "./pages/Admin";
-import EditProblem from "./pages/editProblem";
+import EditProblem from "./pages/ProbEdit";
 import Settings from "./pages/Settings";
 import Login2 from "./pages/login2";
 import { GoogleOAuthProvider } from "@react-oauth/google";
