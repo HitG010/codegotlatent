@@ -429,13 +429,13 @@ export default function Contest() {
               <p className="text-white/65 text-sm lg:text-base">
                 Total Score:{" "}
                 <span className="px-2 lg:px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white ml-1">
-                  {allProblems.reduce((acc, problem) => acc + problem.problemScore, 0)}
+                  {allProblems.reduce((acc, problem) => acc + (problem.solvedInContest ? problem.problemScore : 0), 0)}
                 </span>
               </p>
               <p className="text-white/65 text-sm lg:text-base">
                 Total Penalties:{" "}
                 <span className="px-2 lg:px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white ml-1">
-                  {allProblems.reduce((acc, problem) => acc + (problem.solvedInContest ? 0 : problem.penalty), 0)}
+                  {allProblems.reduce((acc, problem) => acc + (problem.solvedInContest ? problem.penalty : 0), 0)}
                 </span>
               </p>
             </div>

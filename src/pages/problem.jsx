@@ -188,10 +188,11 @@ function Problem() {
 
   useEffect(() => {
     const handleKeyDown = async (event) => {
-      if (event.ctrlKey && event.key === "'") {
+      // Handle Ctrl + ' or Cmd + ' for running code
+      if ((event.ctrlKey || event.metaKey) && event.key === "'") {
         // run code
         event.preventDefault();
-        console.log("Ctrl + ' pressed!");
+        console.log("Ctrl/Cmd + ' pressed!");
         if (!runLoading && data && data.testCases) {
           console.log("Running code...");
           // Get the current code from localStorage or state
@@ -201,9 +202,10 @@ function Problem() {
         // Your custom logic here
       }
 
-      if (event.ctrlKey && event.key === "Enter") {
+      // Handle Ctrl + Enter or Cmd + Enter for submitting code
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
         event.preventDefault();
-        console.log("Ctrl + Enter pressed!");
+        console.log("Ctrl/Cmd + Enter pressed!");
         if (!resultLoading && data) {
           console.log("Submitting code...");
           // Get the current code from localStorage or state
@@ -347,12 +349,12 @@ function Problem() {
               </button>
             )}
           </div>
-          <div className="hidden lg:flex text-sm text-white/50 items-center gap-2">
+          {/* <div className="hidden lg:flex text-sm text-white/50 items-center gap-2">
             Start Timer:{" "}
             <button className="p-2 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer">
               <LuAlarmClock className="h-5 w-5" />
             </button>
-          </div>
+          </div> */}
         </div>
         <div className="flex items-center">
           <Link to={`/user/${user?.username}`} className="hover:opacity-80">

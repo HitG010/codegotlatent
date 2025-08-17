@@ -13,8 +13,8 @@ const Testcases = ({ testCases, testcasesStatus, isLoading }) => {
   //   handleSetStatus(testcasesStatus);
   // }, [testcasesStatus]);
 
-  if (!testCases) {
-    return <div>No test cases available</div>;
+  if (testCases.length === 0) {
+    return <div className="flex items-center justify-center h-full text-white/65">No public test cases available</div>;
   }
   console.log("Test Cases:", testCases);
   console.log("Test Cases Status:", testcasesStatus);

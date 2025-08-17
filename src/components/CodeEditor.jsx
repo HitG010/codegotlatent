@@ -33,10 +33,10 @@ const CodeEditor = ({ langId, setLangId, code, SetCode, probId, handleRunSubmit,
     const language = langIdToName[langId] || "cpp";
     monaco.editor.setModelLanguage(editor.getModel(), language);
 
-    // Bind Ctrl + Enter to submit
+    // Bind Ctrl/Cmd + Enter to submit
     if (handleSubmit) {
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-        console.log("Monaco: Ctrl + Enter pressed - Submit");
+        console.log("Monaco: Ctrl/Cmd + Enter pressed - Submit");
         const currentCode = editor.getValue();
         console.log("Current Code:", currentCode);
         // Update state and localStorage
@@ -49,10 +49,24 @@ const CodeEditor = ({ langId, setLangId, code, SetCode, probId, handleRunSubmit,
       });
     }
 
-    // Bind Ctrl + ' to run
+    // Bind Ctrl/Cmd + ' to run (using backquote key which is the ` key)
     if (handleRunSubmit) {
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Backquote, () => {
-        console.log("Monaco: Ctrl + ' pressed - Run");
+        console.log("Monaco: Ctrl/Cmd + ` pressed - Run");
+        const currentCode = editor.getValue();
+        console.log("Current Code:", currentCode);
+        // Update state and localStorage
+        SetCode(currentCode);
+        if (probId) {
+          localStorage.setItem(`code${probId}${langId}`, currentCode);
+        }
+        // Pass the current code directly to the handler
+        handleRunSubmit(currentCode);
+      });
+
+      // Also bind Ctrl/Cmd + ' (single quote) to run - using Quote key
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Quote, () => {
+        console.log("Monaco: Ctrl/Cmd + ' pressed - Run");
         const currentCode = editor.getValue();
         console.log("Current Code:", currentCode);
         // Update state and localStorage
