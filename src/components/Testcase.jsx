@@ -22,7 +22,7 @@ export const Testcase = ({
               {/* <span className="font-medium text-gray-400">Status:</span>{" "} */}
               <span
                 className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                  testCaseStatus.status.id === 1
+                  testCaseStatus.status.id === 3
                     ? "bg-green-600 text-white"
                     : "bg-red-600 text-white"
                 }`}

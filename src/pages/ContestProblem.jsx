@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "../App.css";
-import { fetchProblem } from "../api/api";
+import { fetchProblem, fetchContestProblem } from "../api/api";
 import { executeCode, pollSubmissionStatus, submitProblem } from "../api/api";
 // import CodeEditor from "../pages/codeeditor";
 import TestCases from "../components/Testcases";
@@ -17,16 +17,11 @@ import CodeEditor from "../components/CodeEditor";
 import ProblemTab from "../components/ProblemTab";
 import ProblemSubmissions from "../components/ProblemSubmissions";
 import { ClockFading, File } from "lucide-react";
-import { fetchContestProblem } from "../api/api";
 import { avatars } from "../components/Avatars";
 
 function ContestProblem() {
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.accessToken);
-  const { contestId, id } = useParams();
-  let savedCode = localStorage.getItem(`code${id}`);
-  let savedLangId = localStorage.getItem(`langId${id}`);
-  const [code, setCode] = useState(savedCode || "// Write your code here\n\n");
   const [result, setResult] = useState([]);
   const [submissionResult, setSubmissionResult] = useState([]);
   const [data, setData] = useState(null);
@@ -35,9 +30,13 @@ function ContestProblem() {
   const [testCases, setTestCases] = useState([]);
   const [testCaseLoading, setTestCaseLoading] = useState(false);
   const [testCaseError, setTestCaseError] = useState(null);
+  const { contestId, id } = useParams();
+  let savedLangId = localStorage.getItem(`langId${id}`);
   const [langId, setLangId] = useState(
     savedLangId ? parseInt(savedLangId) : 54
   );
+  let savedCode = localStorage.getItem(`code${id}${langId}`);
+  const [code, setCode] = useState(savedCode || "// Write your code here\n\n");
   const [screenHeight, setScreenHeight] = useState(window.innerHeight - 75);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [tile1Height, setTile1Height] = useState((window.innerHeight - 75) / 2);
@@ -82,7 +81,7 @@ function ContestProblem() {
     async (currentCode = null) => {
       // Use passed code or fallback to state/localStorage
       const codeToUse =
-        currentCode || code || localStorage.getItem(`code${id}`) || "";
+        currentCode || code || localStorage.getItem(`code${id}${langId}`) || "";
 
       if (!codeToUse || !data || !data.testCases || !langId) {
         console.error("Code, data, test cases, or language ID is missing");
@@ -104,14 +103,14 @@ function ContestProblem() {
         setRunLoading(false);
         return;
       }
-
       console.log("Submitted Code:", codeToUse);
       // Simulate an API call to execute the code
+      console.log("Executing testcases", data.testCases);
       executeCode(codeToUse, data.testCases, langId, id)
         .then(async (result) => {
           // long poll the server for submission status
           console.log("Result:", result);
-          pollSubmissionStatus(result, id, 0, codeToUse, langId)
+          pollSubmissionStatus(result, id, codeToUse, langId)
             .then((data) => {
               console.log("Polling Response:", data);
               setResult(data);
@@ -141,7 +140,7 @@ function ContestProblem() {
     async (currentCode = null) => {
       // Use passed code or fallback to state/localStorage
       const codeToUse =
-        currentCode || code || localStorage.getItem(`code${id}`) || "";
+        currentCode || code || localStorage.getItem(`code${id}${langId}`) || "";
 
       if (!codeToUse || !data || !langId) {
         console.error("Code, data, or language ID is missing");
@@ -179,32 +178,38 @@ function ContestProblem() {
     [code, data, langId, id, user.id]
   );
 
+  // useEffect(() => {
+
+  // }, []);
+
   useEffect(() => {
     fetchData();
   }, []);
 
   useEffect(() => {
     const handleKeyDown = async (event) => {
-      if (event.ctrlKey && event.key === "'") {
+      // Handle Ctrl + ' or Cmd + ' for running code
+      if ((event.ctrlKey || event.metaKey) && event.key === "'") {
         // run code
         event.preventDefault();
-        console.log("Ctrl + ' pressed!");
+        console.log("Ctrl/Cmd + ' pressed!");
         if (!runLoading && data && data.testCases) {
           console.log("Running code...");
           // Get the current code from localStorage or state
-          const currentCode = localStorage.getItem(`code${id}`) || code;
+          const currentCode = localStorage.getItem(`code${id}${langId}`) || code;
           await handleRunSubmit(currentCode);
         }
         // Your custom logic here
       }
 
-      if (event.ctrlKey && event.key === "Enter") {
+      // Handle Ctrl + Enter or Cmd + Enter for submitting code
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
         event.preventDefault();
-        console.log("Ctrl + Enter pressed!");
+        console.log("Ctrl/Cmd + Enter pressed!");
         if (!resultLoading && data) {
           console.log("Submitting code...");
           // Get the current code from localStorage or state
-          const currentCode = localStorage.getItem(`code${id}`) || code;
+          const currentCode = localStorage.getItem(`code${id}${langId}`) || code;
           await handleSubmit(currentCode);
         }
         // e.g., close a modal
@@ -315,9 +320,9 @@ function ContestProblem() {
         verdict={submissionResult.verdict}
         submissionId={submissionResult.id}
       />
-      <div className="flex justify-between items-center px-8 pt-2 text-white h-[75px] overflow-hidden">
+      <div className="flex justify-between items-center px-4 lg:px-8 pt-2 text-white h-[60px] lg:h-[75px] overflow-hidden">
         <Link to={"/home"}>
-          <img src={latentNavLogo} className="h-8 w-8" />
+          <img src={latentNavLogo} className="h-6 w-6 lg:h-8 lg:w-8" />
         </Link>
         <div className="flex items-center gap-1">
           <div className="text-sm text-white/50 flex items-center gap-2">
@@ -325,10 +330,10 @@ function ContestProblem() {
               <Loader2 className="animate-spin" />
             ) : (
               <button
-                className="py-2 px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer"
-                onClick={handleRunSubmit}
+                className="py-1.5 px-2 lg:py-2 lg:px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer text-xs lg:text-sm"
+                onClick={() => handleRunSubmit(code)}
               >
-                Run <Play className="h-3 w-3 inline-block ml-1 fill-white/65" />
+                Run <Play className="h-2 w-2 lg:h-3 lg:w-3 inline-block ml-1 fill-white/65" />
               </button>
             )}
           </div>
@@ -337,34 +342,34 @@ function ContestProblem() {
               <Loader2 className="animate-spin" />
             ) : (
               <button
-                className="py-2 px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer text-green-500"
-                onClick={handleSubmit}
+                className="py-1.5 px-2 lg:py-2 lg:px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer text-green-500 text-xs lg:text-sm"
+                onClick={() => handleSubmit(code)}
               >
-                Submit <UploadCloud className="h-4 w-4 inline-block ml-1" />
+                Submit <UploadCloud className="h-3 w-3 lg:h-4 lg:w-4 inline-block ml-1" />
               </button>
             )}
           </div>
-          <div className="text-sm text-white/50 flex items-center gap-2">
+          {/* <div className="hidden lg:flex text-sm text-white/50 items-center gap-2">
             Start Timer:{" "}
             <button className="p-2 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer">
               <LuAlarmClock className="h-5 w-5" />
             </button>
-          </div>
+          </div> */}
         </div>
         <div className="flex items-center">
-          {/* <div className="rounded-full bg-white/50 text-sm text-white h-8 w-8"></div> */}
           <Link to={`/user/${user?.username}`} className="hover:opacity-80">
             <img
               src={avatars[user?.pfpId - 1] || null}
               alt=""
-              className="h-10 w-10 rounded-full mr-2 bg-black"
+              className="h-8 w-8 lg:h-10 lg:w-10 rounded-full mr-2 bg-black"
             />
           </Link>
         </div>
       </div>
+      {/* Desktop Layout */}
       <div
         ref={containerRef}
-        className="flex px-4 py-2 h-screen w-full box-border"
+        className="hidden lg:flex px-4 py-2 h-screen w-full box-border"
       >
         {/* Left column */}
         <div className="flex flex-col" style={{ width: tile1Width }}>
@@ -375,7 +380,6 @@ function ContestProblem() {
             <div className="tabs w-full flex flex-row justify-start gap-1 items-center mb-1 border-b border-[#ffffff15] pt-1 pb-0.5">
               <div className="flex gap-0.5 items-center justify-center">
                 <ProblemTab
-                  // title={"Problem"}
                   title={
                     <div className="flex gap-0.5 items-center justify-center">
                       <File className="inline-block mr-1 h-4 w-4 text-white/50" />{" "}
@@ -436,15 +440,6 @@ function ContestProblem() {
         </div>
 
         {/* Right Column: Code Editor */}
-        {/* <div
-          className="p-4 rounded-xl bg-[#212121] overflow-auto border-1 border-[#ffffff25] scrollbar"
-          style={{ width: tile3Width, height: screenHeight + 8 }}
-        >
-          Here goes Monaco Code Editor
-          <CodeEditor langId={langId} code={code} SetCode={setCode} />
-        </div> */}
-        {/* </div> */}
-        {/* Right Column: Code Editor */}
         <div
           className="rounded-xl bg-[#212121] overflow-auto border-1 border-[#ffffff25] scrollbar"
           style={{ width: tile3Width, height: screenHeight + 8 }}
@@ -455,12 +450,14 @@ function ContestProblem() {
           <select
             id="languages"
             name="languages"
-            className="bg-[#ffffff15] text-white py-1 ml-2 rounded-md text-sm my-1 border-[#ffffff25] focus:outline-none focus:border-[#ffffff50]"
+            className="bg-[#ffffff15] text-white py-1 ml-2 rounded-md text-sm my-1 border border-[#ffffff25] focus:outline-none focus:border-[#ffffff50]"
             value={langId}
             onChange={(e) => {
               const newLangId = parseInt(e.target.value);
               setLangId(newLangId);
               localStorage.setItem(`langId${id}`, newLangId.toString());
+              setCode(localStorage.getItem(`code${id}${newLangId}`) || "");
+              console.log("Language changed to:", newLangId);
             }}
           >
             <option value={54} className="bg-[#ffffff15] text-black">
@@ -478,12 +475,121 @@ function ContestProblem() {
           </select>
           <CodeEditor
             langId={langId}
+            setLangId={setLangId}
             code={code}
             SetCode={setCode}
             probId={id}
             handleRunSubmit={handleRunSubmit}
             handleSubmit={handleSubmit}
           />
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="lg:hidden flex flex-col h-full overflow-hidden">
+        {/* Tabs */}
+        <div className="flex bg-[#1A1A1A] border-b border-[#ffffff15]">
+          <button
+            className={`flex-1 py-3 px-2 text-center text-xs font-medium ${
+              tabId === 0 ? "text-white bg-[#2A2A2A]" : "text-white/65"
+            }`}
+            onClick={() => setTabId(0)}
+          >
+            Problem
+          </button>
+          <button
+            className={`flex-1 py-3 px-2 text-center text-xs font-medium ${
+              tabId === 1 ? "text-white bg-[#2A2A2A]" : "text-white/65"
+            }`}
+            onClick={() => setTabId(1)}
+          >
+            Code
+          </button>
+          <button
+            className={`flex-1 py-3 px-2 text-center text-xs font-medium ${
+              tabId === 2 ? "text-white bg-[#2A2A2A]" : "text-white/65"
+            }`}
+            onClick={() => setTabId(2)}
+          >
+            Tests
+          </button>
+          <button
+            className={`flex-1 py-3 px-2 text-center text-xs font-medium ${
+              tabId === 3 ? "text-white bg-[#2A2A2A]" : "text-white/65"
+            }`}
+            onClick={() => setTabId(3)}
+          >
+            Submissions
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-hidden">
+          {tabId === 0 && (
+            <div className="h-full p-4 bg-[#212121] overflow-auto scrollbar">
+              <ProblemDescription data={data} />
+            </div>
+          )}
+          {tabId === 1 && (
+            <div className="h-full bg-[#212121] flex flex-col">
+              <div className="p-4 border-b border-[#ffffff25] flex-shrink-0">
+                <label htmlFor="languages-mobile" className="text-sm text-white mr-2">
+                  Language:
+                </label>
+                <select
+                  id="languages-mobile"
+                  name="languages"
+                  className="bg-[#ffffff15] text-white py-1 px-2 rounded-md text-sm border border-[#ffffff25] focus:outline-none focus:border-[#ffffff50]"
+                  value={langId}
+                  onChange={(e) => {
+                    const newLangId = parseInt(e.target.value);
+                    setLangId(newLangId);
+                    localStorage.setItem(`langId${id}`, newLangId.toString());
+                    setCode(localStorage.getItem(`code${id}${newLangId}`) || "");
+                    console.log("Language changed to:", newLangId);
+                  }}
+                >
+                  <option value={54} className="bg-[#ffffff15] text-black">
+                    C++
+                  </option>
+                  <option value={71} className="bg-[#ffffff15] text-black">
+                    Python
+                  </option>
+                  <option value={63} className="bg-[#ffffff15] text-black">
+                    JavaScript
+                  </option>
+                  <option value={62} className="bg-[#ffffff15] text-black">
+                    Java
+                  </option>
+                </select>
+              </div>
+              <div className="flex-1">
+                <CodeEditor
+                  langId={langId}
+                  setLangId={setLangId}
+                  code={code}
+                  SetCode={setCode}
+                  probId={id}
+                  handleRunSubmit={handleRunSubmit}
+                  handleSubmit={handleSubmit}
+                />
+              </div>
+            </div>
+          )}
+          {tabId === 2 && (
+            <div className="h-full p-4 bg-[#212121] overflow-auto scrollbar">
+              <TestCases
+                testCases={data.testCases}
+                testcasesStatus={result}
+                isLoading={testCaseLoading}
+              />
+            </div>
+          )}
+          {tabId === 3 && (
+            <div className="h-full p-4 bg-[#212121] overflow-auto scrollbar">
+              <ProblemSubmissions problemId={id} userId={user.id} />
+            </div>
+          )}
         </div>
       </div>
     </div>
