@@ -173,13 +173,16 @@ async function getContestProblems(req, res) {
           },
         },
       });
-      // console.log("Problems:", problems);
+      console.log("Problems:", problems);
       // Flatten solvedInContest for each problem
       problems.forEach((problem) => {
         problem.solvedInContest =
           problem.Problems.length > 0
             ? problem.Problems[0].solvedInContest
             : false;
+
+        problem.penalty =
+          problem.Problems.length > 0 ? problem.Problems[0].penalty : 0;
         delete problem.Problems;
       });
       console.log("Problems:", problems);
