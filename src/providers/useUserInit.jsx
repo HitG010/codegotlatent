@@ -36,7 +36,15 @@ export const useUserInit = () => {
             })
             .catch((error) => {
                 console.error("Error refreshing token:", error);
+                
+                // Clear user data on refresh token failure
                 clearUser();
+                
+                // Additional iOS cleanup on auth failure
+                if (isIOSDevice) {
+                    localStorage.removeItem('ios-refresh-token');
+                    sessionStorage.clear();
+                }
             });
     }, []);
 };

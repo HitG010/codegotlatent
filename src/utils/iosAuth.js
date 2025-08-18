@@ -23,6 +23,46 @@ export const isLocalStorageAvailable = () => {
   }
 };
 
+// Enhanced iOS logout with comprehensive cleanup
+export const performIOSLogout = () => {
+  if (!isIOS()) return;
+  
+  try {
+    // Clear all auth-related localStorage items
+    const authKeys = ['ios-refresh-token', 'user-storage', 'accessToken'];
+    authKeys.forEach(key => {
+      try {
+        localStorage.removeItem(key);
+      } catch (e) {
+        console.warn(`Failed to remove ${key}:`, e);
+      }
+    });
+    
+    // Clear sessionStorage
+    try {
+      sessionStorage.clear();
+    } catch (e) {
+      console.warn('Failed to clear sessionStorage:', e);
+    }
+    
+    // Clear any remaining user-related data
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && (key.includes('user') || key.includes('auth') || key.includes('token'))) {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.warn(`Failed to remove ${key}:`, e);
+        }
+      }
+    }
+    
+    console.log('iOS logout cleanup completed');
+  } catch (error) {
+    console.error('Error during iOS logout cleanup:', error);
+  }
+};
+
 // Enhanced error handling for iOS
 export const handleIOSAuthError = (error) => {
   console.log('iOS Auth Error:', error);
@@ -68,6 +108,22 @@ export const testIOSCookieSupport = async () => {
     document.cookie = "ios-test=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     
     return canReadCookie;
+  } catch (error) {
+    return false;
+  }
+};
+
+// Validate iOS refresh token
+export const validateIOSRefreshToken = () => {
+  if (!isIOS()) return true;
+  
+  try {
+    const refreshToken = localStorage.getItem('ios-refresh-token');
+    if (!refreshToken) return false;
+    
+    // Basic validation - check if it's a valid JWT-like structure
+    const parts = refreshToken.split('.');
+    return parts.length === 3;
   } catch (error) {
     return false;
   }

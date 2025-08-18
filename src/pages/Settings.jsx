@@ -8,6 +8,7 @@ import { ExternalLink, Pencil, Check } from "lucide-react";
 // import avatar1_cgl from '../assets/avatar1_cgl.png';
 import { avatars, fallbackAvatar } from "../components/Avatars";
 import { useParams } from "react-router-dom";
+import { isIOSSafari } from "../utils/iosAuth";
 
 function Settings() {
   const user = useUserStore((state) => state.user);
@@ -73,19 +74,49 @@ function Settings() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // Add logout logic here
     const url = `${import.meta.env.VITE_BASE_URL}/auth/logout`;
-    axios
-      .post(url, {}, { withCredentials: true })
-      .then(() => {
-        clearUser(); // Clear user state in the store
-        window.location.href = "/login"; // Adjust the path as needed
-        // alert('Logged out!');
-      })
-      .catch((error) => {
-        console.error("Error logging out:", error);
+    
+    try {
+      // Get refresh token using the store method for iOS devices
+      const getRefreshToken = useUserStore.getState().getRefreshToken;
+      const refreshToken = getRefreshToken();
+      
+      const requestData = {};
+      
+      // For iOS devices, include refresh token in request body
+      if (isIOSSafari() && refreshToken) {
+        requestData.refreshToken = refreshToken;
+      }
+      
+      await axios.post(url, requestData, { 
+        withCredentials: true,
+        timeout: 10000 // Add timeout for iOS
       });
+      
+      // Clear user state in the store (this also clears iOS refresh token)
+      clearUser();
+      
+      // Additional cleanup for iOS
+      if (isIOSSafari()) {
+        localStorage.removeItem('ios-refresh-token');
+        sessionStorage.clear();
+      }
+      
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Error logging out:", error);
+      
+      // Even if logout fails on server, clear local data
+      clearUser();
+      if (isIOSSafari()) {
+        localStorage.removeItem('ios-refresh-token');
+        sessionStorage.clear();
+      }
+      
+      window.location.href = "/login";
+    }
   };
 
   return (

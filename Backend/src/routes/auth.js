@@ -189,22 +189,43 @@ router.post("/auth/refresh-token", async (req, res) => {
 });
 
 router.post("/auth/logout", async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
+  // Check if the request is from iOS
+  const userAgent = req.headers['user-agent'] || '';
+  const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+
+  const refreshToken = isIOS ? req.body.refreshToken : req.cookies.refreshToken;
   console.log("Refresh Token:", refreshToken);
+  console.log("Is iOS device:", isIOS);
+  
   if (!refreshToken) {
     return res.status(401).json({ message: "Refresh token not found." });
   }
 
   try {
-    await prisma.UserRefreshToken.update({
+    // Delete the refresh token from database (note: userRefreshToken not UserRefreshToken)
+    await prisma.userRefreshToken.delete({
       where: { refreshToken },
-      data: { refreshToken: null },
     });
-    res
-      .clearCookie("refreshToken")
-      .json({ message: "Logged out successfully." });
+    
+    // Clear cookie regardless of device type (for safety)
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      domain: process.env.DOMAIN,
+      path: "/",
+    });
+    
+    res.json({ message: "Logged out successfully." });
   } catch (error) {
     console.error("Error during logout:", error);
+    
+    // If refresh token doesn't exist in DB, still consider it a successful logout
+    if (error.code === 'P2025') { // Prisma record not found error
+      res.clearCookie("refreshToken");
+      return res.json({ message: "Logged out successfully." });
+    }
+    
     res.status(500).json({ message: "Internal server error." });
   }
 });
