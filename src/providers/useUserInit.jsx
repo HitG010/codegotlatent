@@ -5,14 +5,25 @@ import useUserStore from "../store/userStore";
 export const useUserInit = () => {
     const setUser = useUserStore((state) => state.setUser);
     const clearUser = useUserStore((state) => state.clearUser);
+    const getRefreshToken = useUserStore((state) => state.getRefreshToken);
     const user = useUserStore((state) => state.user);
     const accessToken = useUserStore((state) => state.accessToken);
+    const isIOSDevice = useUserStore((state) => state.isIOSDevice);
 
     console.log("User data:", user);
     console.log("Access Token:", accessToken);
 
     useEffect(() => {
-        api.post("/auth/refresh-token", {
+        // Prepare request data for iOS devices
+        const requestData = {};
+        if (isIOSDevice) {
+            const refreshToken = getRefreshToken();
+            if (refreshToken) {
+                requestData.refreshToken = refreshToken;
+            }
+        }
+
+        api.post("/auth/refresh-token", requestData, {
             withCredentials: true,
         })
             .then((response) => {
@@ -20,7 +31,7 @@ export const useUserInit = () => {
                 const { accessToken, user } = response.data;
                 console.log("User data:", user);
                 console.log("Access Token:", accessToken);
-                setUser(user, accessToken);
+                setUser({ user, accessToken });
                 console.log(useUserStore.getState().isAuthenticated, "isAuthenticated in useUserInit");
             })
             .catch((error) => {

@@ -53,7 +53,11 @@ const App = () => {
 
   return (
     // <UserProvider>
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider 
+      clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+      onScriptLoadError={() => console.log('Google Script Load Error')}
+      onScriptLoadSuccess={() => console.log('Google Script Loaded Successfully')}
+    >
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login2 />} />

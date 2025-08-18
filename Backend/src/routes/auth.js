@@ -9,11 +9,7 @@ const {
   generateRefreshToken,
 } = require("../services/auth");
 const { OAuth2Client } = require("google-auth-library");
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID,
-  {
-    ux_mode: 'popup',
-  }
-);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 
@@ -22,6 +18,12 @@ router.post("/auth/google", async (req, res) => {
   console.log("Received ID Token:", idToken);
 
   try {
+    // Set CORS headers for iOS compatibility
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,UPDATE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Authorization');
+
     const ticket = await client.verifyIdToken({
       idToken,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -80,19 +82,40 @@ router.post("/auth/google", async (req, res) => {
       });
     }
     console.log("Setting cookie with refresh token:", refreshToken);
+    
+    // Detect if request is from iOS
+    const userAgent = req.headers['user-agent'] || '';
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    
     // clear any pre-existing cookies
     res.clearCookie("refreshToken");
-    // set the cookie with the new refresh token
-    res
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.SAMESITE,
-        domain: process.env.DOMAIN,
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      })
-      .json({ accessToken, user: { id: user.id, email: user.email } });
+    
+    if (isIOS) {
+      // For iOS devices, send refresh token in response body instead of cookie
+      console.log("iOS device detected, sending refresh token in response body");
+      res.json({ 
+        accessToken, 
+        refreshToken, // Send refresh token in response for iOS
+        user: { id: user.id, email: user.email },
+        isIOS: true
+      });
+    } else {
+      // For other devices, use cookie as normal
+      res
+        .cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+          domain: process.env.DOMAIN,
+          path: "/",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
+        .json({ 
+          accessToken, 
+          user: { id: user.id, email: user.email },
+          isIOS: false
+        });
+    }
   } catch (error) {
     console.error("Google Auth Error:", error);
     res.status(401).json({ message: "Invalid Google ID token" });
@@ -100,9 +123,18 @@ router.post("/auth/google", async (req, res) => {
 });
 
 router.post("/auth/refresh-token", async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
+  // Try to get refresh token from cookie first, then from request body (for iOS)
+  let refreshToken = req.cookies.refreshToken;
+  
+  // If no cookie refresh token, check request body (for iOS devices)
+  if (!refreshToken && req.body.refreshToken) {
+    refreshToken = req.body.refreshToken;
+    console.log("Using refresh token from request body (iOS):", refreshToken);
+  }
+  
   console.log("Refresh Token:", refreshToken);
   console.log("log from refresh-token route");
+  
   if (!refreshToken) {
     return res.status(401).json({ message: "Refresh token not found." });
   }
