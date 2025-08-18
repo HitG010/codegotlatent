@@ -90,11 +90,16 @@ export default function Submission() {
         </div>
         <div>
           <span className="font-medium text-white/65">Memory Usage:</span>{" "}
-          {submission.memoryUsage ?? "N/A"} MB
+          {submission.memoryUsage
+            ? `${(submission.memoryUsage / 1024).toFixed(2)} MB`
+            : "N/A"}
         </div>
         <div>
           <span className="font-medium text-white/65">Execution Time:</span>{" "}
-          {submission.executionTime ?? "N/A"} ms
+          {submission.executionTime !== undefined &&
+          submission.executionTime !== null
+            ? `${Number(submission.executionTime).toFixed(2)} s`
+            : "N/A"}
         </div>
         <div className="col-span-2">
           <span className="font-medium text-white/65">Submitted At:</span>{" "}
