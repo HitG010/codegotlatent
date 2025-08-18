@@ -28,6 +28,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import ContestForm from "./pages/ContestForm";
 import AddTestCase from "./pages/AddTestCase";
 import RedirectHandler from "./RedirectHandler";
+import NotFound from "./pages/404";
 
 const App = () => {
   const location = useLocation();
@@ -133,6 +134,7 @@ const App = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/:path" element={<RedirectHandler />} />
         {/* Add more routes as needed */}
+        <Route path="/404" element={<NotFound />} />
       </Routes>
     </GoogleOAuthProvider>
   );

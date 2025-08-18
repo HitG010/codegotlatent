@@ -12,7 +12,7 @@ export default function RedirectHandler() {
       window.location.href = url; // Redirect
     } else {
       // Optional: redirect to 404 or show error
-      window.location.href = "/404-page";
+      window.location.href = "/404";
     }
   }, [path]);
 

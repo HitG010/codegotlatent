@@ -19,7 +19,7 @@ const ProblemDescription = ({ data }) => {
       <div className="m-2 flex gap-2 w-full items-center">
         <DifficultyTag tag={data.difficulty} />
         <div className="flex gap-2 flex-wrap">
-          {data.tags.map((tag) => (
+          {data.tags?.map((tag) => (
             <p
               key={tag.id}
               className="px-3 py-1 rounded-full text-sm font-medium bg-white/15 text-white/50"

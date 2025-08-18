@@ -227,7 +227,7 @@ async function getContestProblem(req, res) {
   try {
     const problem = await prisma.Problem.findUnique({
       include: {
-        tags: true,
+        // tags: true,
         testCases: {
           where: {
             isPublic: true,
