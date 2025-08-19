@@ -55,7 +55,7 @@ function Settings() {
         username: userDetails.username,
         name: userDetails.name,
       };
-      setUser(newUser);
+      setUser({ user: newUser, accessToken: useUserStore.getState().accessToken, refreshToken: useUserStore.getState().refreshToken });
       console.log("User details updated successfully:", updatedDetails);
     } catch (error) {
       if (

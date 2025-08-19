@@ -28,10 +28,11 @@ export const useUserInit = () => {
         })
             .then((response) => {
                 console.log("Response from refresh-token:", response.data);
-                const { accessToken, user } = response.data;
+                const { accessToken, user, refreshToken } = response.data;
                 console.log("User data:", user);
                 console.log("Access Token:", accessToken);
-                setUser({ user, accessToken });
+                // Always pass all three keys, even if refreshToken is undefined
+                setUser({ user, accessToken, refreshToken });
                 console.log(useUserStore.getState().isAuthenticated, "isAuthenticated in useUserInit");
             })
             .catch((error) => {
