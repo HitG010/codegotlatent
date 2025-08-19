@@ -24,17 +24,6 @@ function Settings() {
     pfpId: true,
   });
   const pathname = window.location.pathname;
-  React.useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const details = await getUserDetails(user.id);
-        setUserDetails(details);
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-      }
-    };
-    fetchUserDetails();
-  }, [user.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -118,6 +107,18 @@ function Settings() {
       window.location.href = "/login";
     }
   };
+
+  React.useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const details = await getUserDetails(user.id);
+        setUserDetails(details);
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+    fetchUserDetails();
+  }, [user.id]);
 
   return (
     <div className="h-screen w-100vh flex flex-col lg:flex-row justify-between bg-[#0F0F0F] overflow-hidden scrollbar">
