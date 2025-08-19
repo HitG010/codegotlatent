@@ -4,8 +4,6 @@ const { getSubmissionStatus } = require("../services/submission");
 const { updateContestUser } = require("../services/contest");
 const { getContestStartTime } = require("../services/contest");
 const dotenv = require("dotenv");
-const { get } = require("http");
-const { cache } = require("react");
 dotenv.config();
 
 async function submitCode(req, res) {

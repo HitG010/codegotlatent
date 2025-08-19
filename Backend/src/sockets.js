@@ -105,7 +105,10 @@ async function scheduleUpcomingContest(io, contestId) {
     });
     console.log("Contest updated:", updatedContest);
     console.log("Contest Rank Guess phase started:", contestId);
-    io.emit("contestRankGuessPhaseStarted", { contestId: contestId, updatedContest: updatedContest });
+    io.emit("contestRankGuessPhaseStarted", {
+      contestId: contestId,
+      updatedContest: updatedContest,
+    });
     await scheduleRankGuessContest(io, contestId);
   });
 }
@@ -179,7 +182,7 @@ async function scheduleRankGuessContest(io, contestId) {
     return;
   }
 
-   // Mark the contest as scheduled
+  // Mark the contest as scheduled
   await prisma.Contest.update({
     where: {
       id: contestId,
@@ -203,7 +206,10 @@ async function scheduleRankGuessContest(io, contestId) {
       },
     });
     console.log("Contest started:", contestId);
-    io.emit("contestStarted", { contestId: contestId, updatedContest: updatedContest });
+    io.emit("contestStarted", {
+      contestId: contestId,
+      updatedContest: updatedContest,
+    });
     await scheduleOngoingContest(io, contestId);
   });
 }
@@ -282,7 +288,7 @@ async function scheduleOngoingContest(io, contestId) {
     return;
   }
 
-   // Mark the contest as scheduled
+  // Mark the contest as scheduled
   await prisma.Contest.update({
     where: {
       id: contestId,
@@ -310,7 +316,10 @@ async function scheduleOngoingContest(io, contestId) {
     // call the ranking update
     console.log("Submitting contest for rating update:", contestId);
     submitContest(contestId);
-    io.emit("contestRatingPending", { contestId: contestId, updatedContest: updatedContest });
+    io.emit("contestRatingPending", {
+      contestId: contestId,
+      updatedContest: updatedContest,
+    });
     await scheduleRatingPendingContest(io, contestId);
   });
 }
@@ -386,7 +395,7 @@ async function scheduleRatingPendingContest(io, contestId) {
     return;
   }
 
-   // Mark the contest as scheduled
+  // Mark the contest as scheduled
   await prisma.Contest.update({
     where: {
       id: contestId,
@@ -413,7 +422,10 @@ async function scheduleRatingPendingContest(io, contestId) {
         },
       });
       console.log("Contest updated:", updatedContest);
-      io.emit("contestEnded", { contestId: contestId, updatedContest: updatedContest });
+      io.emit("contestEnded", {
+        contestId: contestId,
+        updatedContest: updatedContest,
+      });
     }
   );
 }
