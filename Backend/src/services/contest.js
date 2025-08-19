@@ -67,6 +67,7 @@ const getContestStartTime = async (contestId) => {
     select: {
       startTime: true,
     },
+    cacheStrategy: { ttl: 5 * 60 }, // cache for 30 minutes
   });
   if (!contest) {
     throw new Error("Contest not found");

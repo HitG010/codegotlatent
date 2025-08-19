@@ -5,6 +5,7 @@ const { updateContestUser } = require("../services/contest");
 const { getContestStartTime } = require("../services/contest");
 const dotenv = require("dotenv");
 const { get } = require("http");
+const { cache } = require("react");
 dotenv.config();
 
 async function submitCode(req, res) {
@@ -29,6 +30,7 @@ async function submitCode(req, res) {
     where: {
       problemId: problem_id,
     },
+    cacheStrategy: { ttl: 30 * 60 }, // cache for 30 seconds
   });
 
   // fetch problem memory and time limits
@@ -40,6 +42,7 @@ async function submitCode(req, res) {
       max_memory_limit: true, // in kBs
       max_time_limit: true, // in seconds
     },
+    cacheStrategy: { ttl: 30 * 60 }, // cache for 30 minutes
   });
   // console.log("Submissions:", submissions);
   const submissions = await Promise.all(
@@ -143,6 +146,7 @@ async function submitCode(req, res) {
     const { problemScore = 0 } = await prisma.problem.findUnique({
       where: { id: problem_id },
       select: { problemScore: true },
+      cacheStrategy: { ttl: 30 * 60 }, // cache for 30 minutes
     });
 
     const updatedContestProblem = await prisma.problemUser.upsert({
@@ -233,6 +237,7 @@ async function batchSubmission(req, res) {
       max_memory_limit: true, // in kBs
       max_time_limit: true, // in seconds
     },
+    cacheStrategy: { ttl: 30 * 60 }, // cache for 30 minutes
   });
   const submissions = [];
   console.log("Submissions:", submissions);
@@ -332,6 +337,7 @@ async function getUserSubmission(req, res) {
           },
         },
       },
+      cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });
     if (!submission) {
       return res.status(404).json({ error: "Submission not found" });
@@ -347,6 +353,10 @@ async function getUserSubmission(req, res) {
       where: {
         id: submission.contestId,
       },
+      select: {
+        status: true,
+      },
+      cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });
     if (
       contest.status === "Ended" ||

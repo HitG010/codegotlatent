@@ -8,7 +8,7 @@ import {
   getAllContestProblems,
   submitRank,
   getContestParticipants,
-  getUserRankGuess
+  getUserRankGuess,
 } from "../api/api";
 import { parseDate, calculateDuration } from "../utils/date";
 import CountdownTimer from "../components/CountdownTimer";
@@ -152,16 +152,19 @@ export default function Contest() {
   );
 
   // Rank Guess Phase Ended Webhook
-  socket.on("contestStarted", async ({ contestId: startedContestId, updatedContest }) => {
-    if (contestId === startedContestId) {
-      // setContestStatus("Ongoing");
-      // setContest(updatedContest);
-      await fetchAllProblems();
-      // isStarting2min = false;
-      // setIsStarting2min(false);
-      setContestStatus("Ongoing");
+  socket.on(
+    "contestStarted",
+    async ({ contestId: startedContestId, updatedContest }) => {
+      if (contestId === startedContestId) {
+        // setContestStatus("Ongoing");
+        // setContest(updatedContest);
+        await fetchAllProblems();
+        // isStarting2min = false;
+        // setIsStarting2min(false);
+        setContestStatus("Ongoing");
+      }
     }
-  });
+  );
 
   // Contest Rating Update Phase Started Webhook
   socket.on(
@@ -196,15 +199,20 @@ export default function Contest() {
       <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border-[#ffffff10] w-full lg:flex-1">
         <img src={cglContest} alt="CGL Contest" className="rounded-lg mb-4" />
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-4 mb-2">
-          <h2 className="text-2xl lg:text-4xl font-semibold">{contest?.name}</h2>
+          <h2 className="text-2xl lg:text-4xl font-semibold">
+            {contest?.name}
+          </h2>
           <h3 className="rounded-full bg-white/5 text-white/65 border-1 border-[#ffffff15] text-sm px-3 py-1 w-fit">
             {contestStatus}
           </h3>
         </div>
-        <p className="text-white/65 mb-2 text-sm lg:text-base">{contest?.description}</p>
+        <p className="text-white/65 mb-2 text-sm lg:text-base">
+          {contest?.description}
+        </p>
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 mb-2">
           <p className="rounded-md px-3 lg:px-4 py-1.5 lg:py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65 text-sm lg:text-base">
-            <Clock className="h-3 w-3 lg:h-4 lg:w-4" /> {parseDate(contest?.startTime)}
+            <Clock className="h-3 w-3 lg:h-4 lg:w-4" />{" "}
+            {parseDate(contest?.startTime)}
           </p>
           <p className="rounded-md px-3 lg:px-4 py-1.5 lg:py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65 text-sm lg:text-base">
             <GoStopwatch className="h-3 w-3 lg:h-4 lg:w-4" />{" "}
@@ -285,7 +293,7 @@ export default function Contest() {
           <p className="rounded-md px-2 py-0.5 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white font-semibold">
             {totalParticipants}
           </p>
-          </div>
+        </div>
         {isRegistered && contest?.status === "Rank Guess Phase" && (
           <div className="border-1 border-yellow-500/45 rounded-lg p-4 bg-[#ffffff10] mt-2">
             <h2 className="text-lg font-semibold">Guess Your Rank</h2>
@@ -394,55 +402,73 @@ export default function Contest() {
           </div>
         )}
       </div>
-      {(
+      {
         <div className="flex flex-col gap-4 w-full lg:flex-1">
-          <h2 className="text-2xl lg:text-4xl font-semibold mb-2 inline-block">Problems</h2>
+          <h2 className="text-2xl lg:text-4xl font-semibold mb-2 inline-block">
+            Problems
+          </h2>
           <div className="flex flex-col gap-0.5 w-full">
-            {allProblems ? <div className="h-24 w-full flex items-center justify-center text-white/65"> problems will appear hear once the contest start </div> :
-              allProblems.map((problem) => (
-                <div key={problem.id}>
-                  <Link
-                    to={`/contest/${contestId}/problem/${problem.id}`}
-                    className="text-base lg:text-lg font-semibold text-white hover:text-yellow-500 transition duration-200 bg-[#ffffff05] rounded-md px-3 lg:px-4 py-2 mb-2 hover:bg-[#ffffff10] border-1 border-[#ffffff15] flex justify-between items-center w-full"
-                  >
-                    <div className="flex items-center justify-between gap-2 lg:gap-4 w-full">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <div className="h-4 w-4 flex-shrink-0">
-                          {problem.solvedInContest ? (
-                            <Check className="h-4 w-4 text-green-500" />
-                          ) : (
-                            ""
-                          )}
-                        </div>
-                        <h3 className="truncate">{problem.title}</h3>
+            {!allProblems && (
+              <div className="h-24 w-full flex items-center justify-center text-white/65">
+                {" "}
+                problems will appear hear once the contest start{" "}
+              </div>
+            )}
+            {allProblems.map((problem) => (
+              <div key={problem.id}>
+                <Link
+                  to={`/contest/${contestId}/problem/${problem.id}`}
+                  className="text-base lg:text-lg font-semibold text-white hover:text-yellow-500 transition duration-200 bg-[#ffffff05] rounded-md px-3 lg:px-4 py-2 mb-2 hover:bg-[#ffffff10] border-1 border-[#ffffff15] flex justify-between items-center w-full"
+                >
+                  <div className="flex items-center justify-between gap-2 lg:gap-4 w-full">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className="h-4 w-4 flex-shrink-0">
+                        {problem.solvedInContest ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          ""
+                        )}
                       </div>
-                      <span className="text-xs lg:text-sm text-[#ffffff80] rounded-full px-2 lg:px-3 py-0.5 bg-[#ffffff10] flex-shrink-0">
-                        {problem.problemScore}
-                      </span>
+                      <h3 className="truncate">{problem.title}</h3>
                     </div>
-                  </Link>
-                </div>
-              ))}
+                    <span className="text-xs lg:text-sm text-[#ffffff80] rounded-full px-2 lg:px-3 py-0.5 bg-[#ffffff10] flex-shrink-0">
+                      {problem.problemScore}
+                    </span>
+                  </div>
+                </Link>
+              </div>
+            ))}
           </div>
           {allProblems && (
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-start gap-2 lg:gap-4 mt-4">
               <p className="text-white/65 text-sm lg:text-base">
                 Total Score:{" "}
                 <span className="px-2 lg:px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white ml-1">
-                  {allProblems.reduce((acc, problem) => acc + (problem.solvedInContest ? problem.problemScore : 0), 0)}
+                  {allProblems.reduce(
+                    (acc, problem) =>
+                      acc +
+                      (problem.solvedInContest ? problem.problemScore : 0),
+                    0
+                  )}
                 </span>
               </p>
               <p className="text-white/65 text-sm lg:text-base">
                 Total Penalties:{" "}
                 <span className="px-2 lg:px-3 py-1 rounded-md bg-[#ffffff10] font-semibold text-white ml-1">
-                  {allProblems.reduce((acc, problem) => acc + (problem.solvedInContest ? problem.penalty : 0), 0)}
+                  {allProblems.reduce(
+                    (acc, problem) =>
+                      acc + (problem.solvedInContest ? problem.penalty : 0),
+                    0
+                  )}
                 </span>
               </p>
             </div>
           )}
           <div className="flex flex-col gap-2">
             <div className="flex flex-col gap-2">
-              <h3 className="text-xl lg:text-2xl font-semibold">Contest Rules</h3>
+              <h3 className="text-xl lg:text-2xl font-semibold">
+                Contest Rules
+              </h3>
               <ul className="list-disc pl-5 text-white/65 text-sm lg:text-base">
                 {contest?.rules &&
                   contest?.rules.map((rule, index) => (
@@ -453,7 +479,9 @@ export default function Contest() {
           </div>
           {contest?.status === "Ended" && (
             <div className="bg-[#ffffff05] rounded-lg p-4 mt-4 border-1 border-[#ffffff10]">
-              <h2 className="text-xl lg:text-2xl font-semibold mb-2">Contest Rankings</h2>
+              <h2 className="text-xl lg:text-2xl font-semibold mb-2">
+                Contest Rankings
+              </h2>
               <p className="text-white/65 text-sm lg:text-base">
                 The contest has ended. You can view your results and ratings by
                 visiting the rankings page.
@@ -467,7 +495,7 @@ export default function Contest() {
             </div>
           )}
         </div>
-      )}
+      }
     </div>
   );
 }
