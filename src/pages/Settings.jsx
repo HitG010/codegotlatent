@@ -230,7 +230,7 @@ function Settings() {
                       };
                       setUserDetails(newDetails);
                       const newUser = { ...user, pfpId: String(idx + 1) };
-                      setUser(newUser);
+                      setUser({ user: newUser, accessToken: useUserStore.getState().accessToken, refreshToken: useUserStore.getState().refreshToken });
                       try {
                         const updated = await updateUserDetails(
                           user.id,
@@ -273,7 +273,7 @@ function Settings() {
                     // Logic to save the name
                     handleUpdateUserDetails();
                     const newUser = { ...user, name: userDetails.name };
-                    setUser(newUser);
+                    setUser({ user: newUser, accessToken: useUserStore.getState().accessToken, refreshToken: useUserStore.getState().refreshToken });
                   }
                 }}
                 className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"

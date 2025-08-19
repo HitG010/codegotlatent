@@ -394,11 +394,11 @@ export default function Contest() {
           </div>
         )}
       </div>
-      {(contest?.status === "Ended" || contest?.status === "Rank Guess Phase" || isRegistered) && (
+      {(
         <div className="flex flex-col gap-4 w-full lg:flex-1">
           <h2 className="text-2xl lg:text-4xl font-semibold mb-2 inline-block">Problems</h2>
           <div className="flex flex-col gap-0.5 w-full">
-            {allProblems &&
+            {allProblems ? <div className="h-24 w-full flex items-center justify-center text-white/65"> problems will appear hear once the contest start </div> :
               allProblems.map((problem) => (
                 <div key={problem.id}>
                   <Link
