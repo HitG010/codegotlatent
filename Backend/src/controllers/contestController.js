@@ -11,7 +11,6 @@ const {
   checkIsRegistered,
   getContestStartTime,
 } = require("../services/contest");
-const { cache } = require("react");
 
 async function getAllContests(req, res) {
   try {
