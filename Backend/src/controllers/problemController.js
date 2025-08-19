@@ -12,6 +12,9 @@ async function allProblems(req, res) {
         },
       },
     },
+    cacheStrategy: {
+      ttl: 2 * 60,
+    },
   });
 
   const problems = await prisma.problem.findMany({
@@ -52,6 +55,9 @@ async function allProblems(req, res) {
         },
       ],
     },
+    cacheStrategy: {
+      ttl: 1 * 60,
+    },
   });
 
   // Add submission count to each problem
@@ -85,6 +91,10 @@ async function getProblem(req, res) {
         },
       },
       contest: true,
+    },
+    cacheStrategy: {
+      ttl: 60 * 60,
+      swr: 5 * 60,
     },
   });
   const isSolved = await prisma.problemUser.findFirst({
@@ -124,11 +134,19 @@ async function acceptanceRate(req, res) {
     where: {
       problemId: problemId,
     },
+    cacheStrategy: {
+      ttl: 2 * 60,
+      swr: 1 * 60,
+    },
   });
   const acceptedSubmissionCount = await prisma.Submission.count({
     where: {
       problemId: problemId,
       verdict: "Accepted",
+    },
+    cacheStrategy: {
+      ttl: 2 * 60,
+      swr: 1 * 60,
     },
   });
   const acceptanceRate = totalSubmisionCount
@@ -148,6 +166,9 @@ async function getAllTags(req, res) {
   try {
     const allTags = await prisma.problemTags.findMany({
       select: { id: true, tag: true },
+      cacheStrategy: {
+        ttl: 60 * 60,
+      },
     });
     return res.json(allTags);
   } catch (error) {

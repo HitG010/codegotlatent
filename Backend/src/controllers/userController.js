@@ -1,7 +1,7 @@
 const prisma = require("../services/prisma");
 const { getUserProblemCount } = require("../services/user");
 
-async function getProblemCount (req, res) {
+async function getProblemCount(req, res) {
   const { userId } = req.params;
   console.log("User ID:", userId);
   try {
@@ -14,7 +14,7 @@ async function getProblemCount (req, res) {
   }
 }
 
-async function getUserProblemSubmissions (req, res) {
+async function getUserProblemSubmissions(req, res) {
   const { userId, problemId } = req.params;
   try {
     const result = await prisma.submission.findMany({
@@ -33,6 +33,7 @@ async function getUserProblemSubmissions (req, res) {
       orderBy: {
         createdAt: "desc",
       },
+      cacheStrategy: { ttl: 30 }, // cache for 60 seconds
     });
     console.log("Submissions for user:", userId, "and problem:", problemId);
     console.log("Result:", result);
@@ -41,9 +42,9 @@ async function getUserProblemSubmissions (req, res) {
     console.error("Error fetching submissions:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
-};
+}
 
-async function getUserDetailsFromUsername (req, res) {
+async function getUserDetailsFromUsername(req, res) {
   const { userName } = req.params;
   console.log("User Name he he he :", userName);
 
@@ -77,6 +78,7 @@ async function getUserDetailsFromUsername (req, res) {
           },
         },
       },
+      cacheStrategy: { ttl: 5 * 60, swr: 5 * 60 }, // cache for 5 minutes
     });
     const problemCount = await getUserProblemCount(user.id);
     user.problemCount = problemCount;
@@ -89,9 +91,9 @@ async function getUserDetailsFromUsername (req, res) {
     console.error("Error fetching user data:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+}
 
-async function getUserDetails (req, res) {
+async function getUserDetails(req, res) {
   const { userId } = req.params;
   console.log("User ID:", userId);
   try {
@@ -106,6 +108,7 @@ async function getUserDetails (req, res) {
         Location: true,
         pfpId: true,
       },
+      cacheStrategy: { ttl: 5 * 60, swr: 5 * 60 }, // cache for 5 minutes
     });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -116,9 +119,9 @@ async function getUserDetails (req, res) {
     console.error("Error fetching user details:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+}
 
-async function updateUserDetails (req, res) {
+async function updateUserDetails(req, res) {
   const { userId } = req.params;
   const { username, name, Bio, Location, pfpId } = req.body;
   console.log("User ID:", userId);
@@ -148,12 +151,12 @@ async function updateUserDetails (req, res) {
     console.error("Error updating user:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+}
 
 module.exports = {
   getProblemCount,
   getUserProblemSubmissions,
   getUserDetailsFromUsername,
   getUserDetails,
-  updateUserDetails
+  updateUserDetails,
 };
