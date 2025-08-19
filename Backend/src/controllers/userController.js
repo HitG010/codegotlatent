@@ -78,7 +78,7 @@ async function getUserDetailsFromUsername(req, res) {
           },
         },
       },
-      cacheStrategy: { ttl: 5 * 60, swr: 5 * 60 }, // cache for 5 minutes
+      // cacheStrategy: { ttl: 5 * 60, swr: 5 * 60, tags: [`user:${user.id}`] }, // cache for 5 minutes
     });
     const problemCount = await getUserProblemCount(user.id);
     user.problemCount = problemCount;
@@ -108,7 +108,11 @@ async function getUserDetails(req, res) {
         Location: true,
         pfpId: true,
       },
-      cacheStrategy: { ttl: 5 * 60, swr: 5 * 60 }, // cache for 5 minutes
+      // cacheStrategy: {
+      //   ttl: 5 * 60,
+      //   swr: 5 * 60,
+      //   tags: [`userDetails_${userId}`],
+      // }, // cache for 5 minutes
     });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -135,6 +139,14 @@ async function updateUserDetails(req, res) {
   }
 
   try {
+    // Invalidate cache
+    // try {
+    //   await prisma.$accelerate.invalidate({
+    //     tags: [`userDetails_${userId}`],
+    //   });
+    // } catch (error) {
+    //   console.error("Error invalidating cache:", error);
+    // }
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {

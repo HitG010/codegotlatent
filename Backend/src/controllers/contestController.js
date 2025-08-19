@@ -11,6 +11,7 @@ const {
   checkIsRegistered,
   getContestStartTime,
 } = require("../services/contest");
+const { cache } = require("react");
 
 async function getAllContests(req, res) {
   try {
@@ -18,6 +19,7 @@ async function getAllContests(req, res) {
       include: {
         participants: false,
       },
+      cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });
     console.log("Contests:", contests);
     return res.json(contests);
@@ -39,6 +41,7 @@ async function getContestById(req, res) {
       where: {
         id: contestId,
       },
+      cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });
     console.log("Contest:", contest);
     return res.status(200).json(contest);
@@ -172,6 +175,7 @@ async function getContestProblems(req, res) {
             },
           },
         },
+        cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
       });
       console.log("Problems:", problems);
       // Flatten solvedInContest for each problem
@@ -180,7 +184,7 @@ async function getContestProblems(req, res) {
           problem.Problems.length > 0
             ? problem.Problems[0].solvedInContest
             : false;
-        
+
         problem.penalty =
           problem.Problems.length > 0 ? problem.Problems[0].penalty : 0;
         delete problem.Problems;
@@ -238,6 +242,7 @@ async function getContestProblem(req, res) {
         id: problemId,
         contestId: contestId,
       },
+      cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });
     return res.status(200).json(problem);
   } catch (error) {
@@ -255,6 +260,10 @@ async function getRankings(req, res) {
       where: {
         id: contestId,
       },
+      select: {
+        status: true,
+      },
+      // cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });
     if (contest.status == "Rating Update Pending") {
       return res.status(200).json({ data: "System testing is underway" });
@@ -286,12 +295,18 @@ async function getRankings(req, res) {
         score: true,
         penalty: true,
       },
+      cacheStrategy: {
+        ttl: 10 * 60,
+      },
     });
 
     // Now fetch all ProblemUser data for this contest
     const allProblemUsers = await prisma.problemUser.findMany({
       where: {
         contestId: contestId,
+      },
+      cacheStrategy: {
+        ttl: 10 * 60,
       },
     });
     // console.log("Contest Users:", contestUsers);
@@ -370,6 +385,9 @@ async function getParticipantsCount(req, res) {
     const participantsCount = await prisma.contestUser.count({
       where: {
         contestId: contestId,
+      },
+      cacheStrategy: {
+        ttl: 10,
       },
     });
     console.log("Participants Count:", participantsCount);
