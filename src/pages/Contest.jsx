@@ -24,6 +24,7 @@ import { FaArrowLeftLong } from "react-icons/fa6";
 import ContestDescription from "../components/ContestDescription";
 import AccordionSection from "../components/AccordionSection";
 import { Loader2 } from "lucide-react"; 
+import GradientBlobsBackground from "../components/GradientBlobsBackground";
 
 const socket = io(import.meta.env.VITE_BASE_URL, {
   path: "/socket.io",
@@ -205,9 +206,10 @@ export default function Contest() {
 
   return (
     <>
-    <div className="flex flex-col lg:flex-row rounded-lg text-white max-w-full lg:max-w-280 my-auto p-4 lg:p-6 mx-auto gap-6 lg:gap-12 scrollbar overflow-y-auto">
+      <GradientBlobsBackground />
+      <div className="flex flex-col lg:flex-row rounded-lg text-white max-w-full lg:max-w-280 my-auto p-4 lg:p-6 mx-auto gap-6 lg:gap-12 scrollbar overflow-y-auto">
       {/* <ContestNavbar /> */}
-      <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border-[#ffffff10] w-full lg:w-[420px] xl:w-[480px] 2xl:w-[520px] flex-shrink-0 overflow-y-auto scrollbar">
+      <div className="h-full flex flex-col rounded-xl bg-white/3 border border-white/10 backdrop-blur-lg p-4 border-[#ffffff10] w-full lg:w-[420px] xl:w-[480px] 2xl:w-[520px] flex-shrink-0 overflow-y-auto scrollbar">
         <Link
           to={`/contests`}
           className="flex gap-2 items-center text-sm text-white/65 px-3 py-1 mb-1 hover:bg-white/10 transition-all duration-300 w-fit rounded rounded-lg"
@@ -420,14 +422,14 @@ export default function Contest() {
       </div>
       {
         <div className="flex flex-col gap-4 w-full lg:flex-1">
-          <h2 className="text-2xl lg:text-4xl font-semibold mb-2 inline-block">
+          <h2 className="text-lg lg:text-2xl font-semibold mb-2 inline-block">
             Problems
           </h2>
           <div className="flex flex-col gap-0.5 w-full">
-            {!allProblems && (
+            {allProblems.length === 0 && (
               <div className="h-24 w-full flex items-center justify-center text-white/65">
                 {" "}
-                problems will appear hear once the contest start{" "}
+                Problems for this contest will appear here{" "}
               </div>
             )}
             {allProblems.map((problem) => (
@@ -499,7 +501,7 @@ export default function Contest() {
           )}
           <div className="h-0.5 bg-white/5 rounded-md my-4 w-full" />
           <div className="flex flex-col gap-2">
-            <AccordionSection title="Problem Description" defaultOpen={true}>
+            <AccordionSection title="Contest Description" defaultOpen={true}>
               <ContestDescription description={contest?.description} />
             </AccordionSection>
             <AccordionSection title="Rules" defaultOpen={true}>
@@ -508,7 +510,7 @@ export default function Contest() {
           </div>
         </div>
       }
-    </div>
+      </div>
     </>
   );
 }

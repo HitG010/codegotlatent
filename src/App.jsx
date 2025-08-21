@@ -29,6 +29,7 @@ import ContestForm from "./pages/ContestForm";
 import AddTestCase from "./pages/AddTestCase";
 import RedirectHandler from "./RedirectHandler";
 import NotFound from "./pages/404";
+import "./index.css";
 
 const App = () => {
   const location = useLocation();
