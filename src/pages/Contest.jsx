@@ -19,6 +19,12 @@ import { Check, Clock, Info } from "lucide-react";
 import { GoStopwatch } from "react-icons/go";
 import cglContest from "../assets/cglContest.png";
 import DifficultyTag from "../components/DifficultyTag";
+import ContestNavbar from "../components/ContestNavbar";
+import { FaArrowLeftLong } from "react-icons/fa6";
+import ContestDescription from "../components/ContestDescription";
+import AccordionSection from "../components/AccordionSection";
+import { Loader2 } from "lucide-react"; 
+import GradientBlobsBackground from "../components/GradientBlobsBackground";
 
 const socket = io(import.meta.env.VITE_BASE_URL, {
   path: "/socket.io",
@@ -191,12 +197,26 @@ export default function Contest() {
   }, [contestStatus]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="text-base lg:text-lg text-white/65 flex items-center gap-2 justify-center w-full overflow-y-auto h-screen">
+        <Loader2 className="animate-spin" /> Loading...
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col lg:flex-row rounded-lg text-white max-w-full lg:max-w-280 my-auto p-4 lg:p-6 mx-auto gap-6 lg:gap-12">
-      <div className="h-full flex flex-col rounded-lg bg-[#212121] p-4 border-[#ffffff10] w-full lg:flex-1">
+    <>
+      <GradientBlobsBackground />
+      <div className="flex flex-col lg:flex-row rounded-lg text-white max-w-full lg:max-w-280 my-auto p-4 lg:p-6 mx-auto gap-6 lg:gap-12 scrollbar overflow-y-auto">
+      {/* <ContestNavbar /> */}
+      <div className="h-full flex flex-col rounded-xl bg-white/3 border border-white/10 backdrop-blur-lg p-4 border-[#ffffff10] w-full lg:w-[420px] xl:w-[480px] 2xl:w-[520px] flex-shrink-0 overflow-y-auto scrollbar">
+        <Link
+          to={`/contests`}
+          className="flex gap-2 items-center text-sm text-white/65 px-3 py-1 mb-1 hover:bg-white/10 transition-all duration-300 w-fit rounded rounded-lg"
+        >
+          {" "}
+          <FaArrowLeftLong className="w-3 h-3" /> Contests{" "}
+        </Link>
         <img src={cglContest} alt="CGL Contest" className="rounded-lg mb-4" />
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-4 mb-2">
           <h2 className="text-2xl lg:text-4xl font-semibold">
@@ -206,10 +226,8 @@ export default function Contest() {
             {contestStatus}
           </h3>
         </div>
-        <p className="text-white/65 mb-2 text-sm lg:text-base">
-          {contest?.description}
-        </p>
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 mb-2">
+        <div></div>
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 mb-2 scrollbar">
           <p className="rounded-md px-3 lg:px-4 py-1.5 lg:py-2 bg-[#ffffff10] w-fit flex justify-center items-center gap-2 text-white/65 text-sm lg:text-base">
             <Clock className="h-3 w-3 lg:h-4 lg:w-4" />{" "}
             {parseDate(contest?.startTime)}
@@ -404,14 +422,14 @@ export default function Contest() {
       </div>
       {
         <div className="flex flex-col gap-4 w-full lg:flex-1">
-          <h2 className="text-2xl lg:text-4xl font-semibold mb-2 inline-block">
+          <h2 className="text-lg lg:text-2xl font-semibold mb-2 inline-block">
             Problems
           </h2>
           <div className="flex flex-col gap-0.5 w-full">
-            {!allProblems && (
+            {allProblems.length === 0 && (
               <div className="h-24 w-full flex items-center justify-center text-white/65">
                 {" "}
-                problems will appear hear once the contest start{" "}
+                Problems for this contest will appear here{" "}
               </div>
             )}
             {allProblems.map((problem) => (
@@ -464,19 +482,6 @@ export default function Contest() {
               </p>
             </div>
           )}
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-col gap-2">
-              <h3 className="text-xl lg:text-2xl font-semibold">
-                Contest Rules
-              </h3>
-              <ul className="list-disc pl-5 text-white/65 text-sm lg:text-base">
-                {contest?.rules &&
-                  contest?.rules.map((rule, index) => (
-                    <li key={index}>{rule}</li>
-                  ))}
-              </ul>
-            </div>
-          </div>
           {contest?.status === "Ended" && (
             <div className="bg-[#ffffff05] rounded-lg p-4 mt-4 border-1 border-[#ffffff10]">
               <h2 className="text-xl lg:text-2xl font-semibold mb-2">
@@ -494,8 +499,18 @@ export default function Contest() {
               </Link>
             </div>
           )}
+          <div className="h-0.5 bg-white/5 rounded-md my-4 w-full" />
+          <div className="flex flex-col gap-2">
+            <AccordionSection title="Contest Description" defaultOpen={true}>
+              <ContestDescription description={contest?.description} />
+            </AccordionSection>
+            <AccordionSection title="Rules" defaultOpen={true}>
+              <ContestDescription description={contest?.rules} />
+            </AccordionSection>
+          </div>
         </div>
       }
-    </div>
+      </div>
+    </>
   );
 }

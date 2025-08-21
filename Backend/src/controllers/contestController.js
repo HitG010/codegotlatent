@@ -40,7 +40,7 @@ async function getContestById(req, res) {
       where: {
         id: contestId,
       },
-      cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
+      // cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });
     console.log("Contest:", contest);
     return res.status(200).json(contest);

@@ -1,18 +1,19 @@
 @import "tailwindcss";
 @plugin '@tailwindcss/typography';
 @font-face {
-    font-family: "Overused Grotesk";
-    src: url('https://raw.githubusercontent.com/RandomMaerks/Overused-Grotesk/master/fonts/variable/OverusedGroteskRoman-VF.ttf') format('truetype');
-    font-weight: 300 900;
+  font-family: "Overused Grotesk";
+  src: url("https://raw.githubusercontent.com/RandomMaerks/Overused-Grotesk/master/fonts/variable/OverusedGroteskRoman-VF.ttf")
+    format("truetype");
+  font-weight: 300 900;
 }
 
 body {
-    font-family: 'Overused Grotesk', sans-serif;
-    background-color: #1a1a1a;
-    color: #f1f3f5;
-    margin: 0;
-    padding: 0;
-    line-height: 1.6;
+  font-family: "Overused Grotesk", sans-serif;
+  background-color: #1a1a1a;
+  color: #f1f3f5;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
 }
 
 @layer utilities {
@@ -23,16 +24,54 @@ body {
 
   .scrollbar::-webkit-scrollbar-track {
     border-radius: 100vh;
-    background:rgb(41, 41, 41);
+    background: rgb(41, 41, 41);
   }
 
   .scrollbar::-webkit-scrollbar-thumb {
-    background:rgb(82, 82, 82);
+    background: rgb(82, 82, 82);
     border-radius: 100vh;
     border: 3px solid rgb(46, 46, 46);
   }
 
   .scrollbar::-webkit-scrollbar-thumb:hover {
-    background:rgb(104, 104, 104);
+    background: rgb(104, 104, 104);
+  }
+
+  @keyframes blob1 {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    100% {
+      transform: translate(60px, 80px) scale(1.15);
+    }
+  }
+
+  @keyframes blob2 {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    100% {
+      transform: translate(-80px, -60px) scale(1.1);
+    }
+  }
+
+  @keyframes blob3 {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    100% {
+      transform: translate(40px, -40px) scale(1.2);
+    }
+  }
+
+  /* Animation utility classes */
+  .blob-anim-1 {
+    animation: blob1 18s ease-in-out infinite alternate;
+  }
+  .blob-anim-2 {
+    animation: blob2 22s ease-in-out infinite alternate;
+  }
+  .blob-anim-3 {
+    animation: blob3 26s ease-in-out infinite alternate;
   }
 }

@@ -34,9 +34,9 @@ export default function Contests() {
   const pathname = window.location.pathname;
 
   return (
-    <div className="h-screen flex flex-col lg:flex-row justify-between bg-[#0F0F0F]">
+    <div className="h-screen flex flex-col lg:flex-row justify-between bg-[#0F0F0F] scrollbar">
       <Navbar path={pathname} />
-      <div className="w-full lg:w-[80%] h-full flex flex-col gap-4 p-4 lg:pl-10 pt-6 lg:pt-16 pb-24 lg:pb-8 overflow-y-auto">
+      <div className="w-full lg:w-[80%] h-full flex flex-col gap-4 p-4 lg:pl-10 pt-6 lg:pt-16 pb-24 lg:pb-8 overflow-y-auto scrollbar">
         <div className="flex flex-col mb-1">
           <h1 className="text-2xl lg:text-4xl font-semibold mb-0.2">Contests</h1>
           <h6 className="text-base lg:text-lg text-white/65 mb-4">Contest every week. Compete and showcase your "Latent"!</h6>
