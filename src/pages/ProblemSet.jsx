@@ -12,7 +12,7 @@ import latentNavLogo from "../assets/latentNavLogo.svg";
 import { getUserProblemCount, getUserDetails } from "../api/api";
 import { FaCircleHalfStroke } from "react-icons/fa6";
 import { avatars } from "../components/Avatars";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 
 
 const ProblemSet = () => {
@@ -243,7 +243,7 @@ const ProblemSet = () => {
                     {/* Tags Filter */}
                     <div className="filter-group flex-1">
                       <label className="block text-white/65 text-sm font-medium mb-2">Tags</label>
-                      <div className="flex flex-wrap gap-2 max-h-24 lg:max-h-32 overflow-y-auto">
+                      <div className="flex flex-wrap gap-2 max-h-24 lg:max-h-32 overflow-y-auto scrollbar">
                         {tags && tags.length > 0 ? (
                           tags.map((tag, index) => {
                             // Ensure tag is a string (handle both string and object formats)
@@ -321,10 +321,10 @@ const ProblemSet = () => {
                 </div>
               )}
             </div>
-            <div className="problem-statement flex flex-col overflow-y-scroll pr-2 scrollbar">
+            <div className="problem-statement flex flex-col overflow-y-auto pr-2 scrollbar">
               {loading ? (
-                <div className="w-full text-center justify-center text-white py-8">
-                  <div className="text-lg">Loading problems...</div>
+                <div className="w-full items-center justify-center text-white py-8">
+                  <div className="text-base lg:text-lg text-white/65 flex items-center gap-2"><Loader2 className="animate-spin" /> Loading...</div>
                 </div>
               ) : error ? (
                 <div className="text-center text-red-400 py-8">

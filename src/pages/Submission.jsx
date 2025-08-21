@@ -49,10 +49,10 @@ export default function Submission() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 shadow-md rounded-lg border border-[#ffffff10] bg-[#212121] text-white">
-      <h1 className="text-2xl font-semibold mb-6">Submission Details</h1>
+    <div className="max-w-4xl mx-auto mt-6 sm:mt-10 p-3 sm:p-6 shadow-md rounded-lg border border-[#ffffff10] bg-[#212121] text-white w-full">
+      <h1 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">Submission Details</h1>
 
-      <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
         <div>
           <span className="font-medium text-white/65">Submission ID:</span>{" "}
           {submission.id}
@@ -101,11 +101,11 @@ export default function Submission() {
             ? `${Number(submission.executionTime).toFixed(2)} s`
             : "N/A"}
         </div>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <span className="font-medium text-white/65">Submitted At:</span>{" "}
           {new Date(submission.createdAt).toLocaleString()}
         </div>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <span className="font-medium text-white/65">Verdict:</span>{" "}
           <span
             className={`inline-block px-3 py-1 rounded-full text-white font-medium ${getVerdictColor(
@@ -117,19 +117,23 @@ export default function Submission() {
         </div>
       </div>
 
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold mb-2">Code:</h3>
-        <Editor
-          height="400px"
-          language={langIdToName[submission.language]}
-          value={submission.code || "// No code submitted"}
-          theme="vs-dark"
-          options={{
-            readOnly: true,
-            minimap: { enabled: false },
-            wordWrap: "on",
-          }}
-        />
+      <div className="mt-4 sm:mt-6">
+        <h3 className="text-base sm:text-lg font-semibold mb-2">Code:</h3>
+        <div className="w-full overflow-x-auto rounded-md border border-[#ffffff10] bg-[#181818]">
+          <Editor
+            height="300px"
+            language={langIdToName[submission.language]}
+            value={submission.code || "// No code submitted"}
+            theme="vs-dark"
+            options={{
+              readOnly: true,
+              minimap: { enabled: false },
+              wordWrap: "on",
+              fontSize: 13,
+              scrollBeyondLastLine: false,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

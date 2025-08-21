@@ -1,9 +1,9 @@
 import React from "react";
 import latentNavLogo from "../assets/latentNavLogo.svg";
-import { GoHomeFill } from "react-icons/go";
-import { SlPuzzle } from "react-icons/sl";
-import { HiMiniTrophy } from "react-icons/hi2";
-import { IoSettingsOutline } from "react-icons/io5";
+import { GoHomeFill, GoHome } from "react-icons/go";
+import { IoExtensionPuzzleOutline, IoExtensionPuzzleSharp } from "react-icons/io5";
+import { HiMiniTrophy, HiOutlineTrophy } from "react-icons/hi2";
+import { IoSettingsOutline, IoSettingsSharp } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import { getUserDetails } from "../api/api";
 import useUserStore from "../store/userStore";
@@ -28,7 +28,11 @@ export default function Navbar({ path }) {
               path === "/home" ? "bg-[#2A2A2A]" : ""
             } transition-all duration-300`}
           >
-            <GoHomeFill className="text-white text-2xl mr-2 ml-2" />
+            {path === "/home" ? (
+              <GoHomeFill className="text-white text-2xl mr-2 ml-2" />
+            ) : (
+              <GoHome className="text-white/65 text-2xl mr-2 ml-2" />
+            )}
             <p className="text-lg">Home</p>
           </Link>
           <Link
@@ -37,7 +41,11 @@ export default function Navbar({ path }) {
               path === "/problemset" ? "bg-[#2A2A2A]" : ""
             } transition-all duration-300`}
           >
-            <SlPuzzle className="text-white text-2xl mr-2 ml-2 " />
+            {path === "/problemset" ? (
+              <IoExtensionPuzzleSharp className="text-white text-2xl mr-2 ml-2" />
+            ) : (
+              <IoExtensionPuzzleOutline className="text-white/65 text-2xl mr-2 ml-2" />
+            )}
             <p className="text-lg">Problems</p>
           </Link>
           <Link
@@ -46,7 +54,11 @@ export default function Navbar({ path }) {
               path === "/contests" ? "bg-[#2A2A2A]" : ""
             } transition-all duration-300`}
           >
-            <HiMiniTrophy className="text-white text-2xl mr-2 ml-2" />
+            {path === "/contests" ? (
+              <HiMiniTrophy className="text-white text-2xl mr-2 ml-2" />
+            ) : (
+              <HiOutlineTrophy className="text-white/65 text-2xl mr-2 ml-2" />
+            )}
             <p className="text-lg">Contests</p>
           </Link>
         </div>
@@ -58,11 +70,11 @@ export default function Navbar({ path }) {
             path === "/settings" ? "bg-[#2A2A2A]" : ""
           }`}
         >
-          <IoSettingsOutline
-            className={`text-2xl mr-2 ${
-              path === "/settings" ? "text-white" : "text-white/65"
-            }`}
-          />
+          {path === "/settings" ? (
+              <IoSettingsSharp className="text-white text-2xl mr-2 ml-2" />
+            ) : (
+              <IoSettingsOutline className="text-white/65 text-2xl mr-2 ml-2" />
+            )}
           <p
             className={`text-lg ${
               path === "/settings" ? "text-white" : "text-white/65"
@@ -108,7 +120,7 @@ export default function Navbar({ path }) {
             path === "/problemset" ? "bg-[#2A2A2A]" : ""
           }`}
         >
-          <SlPuzzle className={`text-xl ${path === "/problemset" ? "text-white" : "text-white/65"}`} />
+          <IoExtensionPuzzleOutline className={`text-xl ${path === "/problemset" ? "text-white" : "text-white/65"}`} />
           <span className={`text-xs mt-1 ${path === "/problemset" ? "text-white" : "text-white/65"}`}>Problems</span>
         </Link>
         <Link
@@ -146,10 +158,13 @@ export default function Navbar({ path }) {
     </div>
   );
 
+  
+
   return (
     <>
       <DesktopNav />
       <MobileNav />
+      {/* <ContestNavbar /> */}
     </>
   );
 }
