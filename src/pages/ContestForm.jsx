@@ -9,6 +9,7 @@ const ContestForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    rules: "",
     startTime: "",
     rankGuessStartTime: "",
     endTime: "",
@@ -26,6 +27,7 @@ const ContestForm = () => {
           setFormData({
             name: data.name,
             description: data.description,
+            rules: data.rules,
             startTime: new Date(data.startTime).toISOString().slice(0, 16),
             rankGuessStartTime: data.rankGuessStartTime
               ? new Date(data.rankGuessStartTime).toISOString().slice(0, 16)
@@ -76,7 +78,7 @@ const ContestForm = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-10">
+    <div className="max-w-2xl mx-auto py-10 text-black">
       <h2 className="text-3xl font-bold mb-6">
         {isEdit ? "Edit" : "Create"} Contest
       </h2>
@@ -107,6 +109,19 @@ const ContestForm = () => {
           <textarea
             name="description"
             value={formData.description}
+            onChange={handleChange}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
+
+        {/* Rules */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Rules
+          </label>
+          <textarea
+            name="rules"
+            value={formData.rules}
             onChange={handleChange}
             className="mt-1 block w-full border rounded-md p-2"
           />

@@ -88,7 +88,7 @@ app.post("/contests/new", async (req, res) => {
 
 app.put("/contests/edit/:id", async (req, res) => {
   const { id } = req.params;
-  const { name, description, startTime, endTime, rankGuessStartTime, status } =
+  const { name, description, rules, startTime, endTime, rankGuessStartTime, status } =
     req.body;
   try {
     const contest = await prisma.Contest.update({
@@ -96,6 +96,7 @@ app.put("/contests/edit/:id", async (req, res) => {
       data: {
         name,
         description,
+        rules,
         startTime: new Date(startTime),
         endTime: new Date(endTime),
         rankGuessStartTime: new Date(rankGuessStartTime),

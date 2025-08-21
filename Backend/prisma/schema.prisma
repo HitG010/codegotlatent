@@ -46,6 +46,7 @@ model Contest {
   id                   String        @id @default(uuid())
   name                 String
   description          String?
+  rules                String?
   startTime            DateTime
   rankGuessStartTime   DateTime? // Nullable for contests without a rank guess phase
   endTime              DateTime

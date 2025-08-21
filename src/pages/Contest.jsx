@@ -497,18 +497,13 @@ export default function Contest() {
               </Link>
             </div>
           )}
+          <div className="h-0.5 bg-white/5 rounded-md my-4 w-full" />
           <div className="flex flex-col gap-2">
             <AccordionSection title="Problem Description" defaultOpen={true}>
               <ContestDescription description={contest?.description} />
             </AccordionSection>
             <AccordionSection title="Rules" defaultOpen={true}>
-              <div className="list-disc pl-5 text-white/65 text-sm lg:text-base break-words whitespace-pre-line">
-                {/* {contest?.rules &&
-                  contest?.rules.map((rule, index) => (
-                    <p key={index}>{rule}</p>
-                  ))} */}
-                  <ContestDescription description={contest?.rules} />
-              </div>
+              <ContestDescription description={contest?.rules} />
             </AccordionSection>
           </div>
         </div>
