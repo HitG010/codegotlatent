@@ -111,7 +111,11 @@ export default function Navbar({ path }) {
             path === "/home" ? "bg-[#2A2A2A]" : ""
           }`}
         >
-          <GoHomeFill className={`text-xl ${path === "/home" ? "text-white" : "text-white/65"}`} />
+          {path === "/home" ? (
+            <GoHomeFill className="text-xl text-white" />
+          ) : (
+            <GoHome className="text-xl text-white/65" />
+          )}
           <span className={`text-xs mt-1 ${path === "/home" ? "text-white" : "text-white/65"}`}>Home</span>
         </Link>
         <Link
@@ -120,7 +124,11 @@ export default function Navbar({ path }) {
             path === "/problemset" ? "bg-[#2A2A2A]" : ""
           }`}
         >
-          <IoExtensionPuzzleOutline className={`text-xl ${path === "/problemset" ? "text-white" : "text-white/65"}`} />
+          {path === "/problemset" ? (
+            <IoExtensionPuzzleSharp className="text-xl text-white" />
+          ) : (
+            <IoExtensionPuzzleOutline className="text-xl text-white/65" />
+          )}
           <span className={`text-xs mt-1 ${path === "/problemset" ? "text-white" : "text-white/65"}`}>Problems</span>
         </Link>
         <Link
@@ -129,7 +137,11 @@ export default function Navbar({ path }) {
             path === "/contests" ? "bg-[#2A2A2A]" : ""
           }`}
         >
-          <HiMiniTrophy className={`text-xl ${path === "/contests" ? "text-white" : "text-white/65"}`} />
+          {path === "/contests" ? (
+            <HiMiniTrophy className="text-xl text-white" />
+          ) : (
+            <HiOutlineTrophy className="text-xl text-white/65" />
+          )}
           <span className={`text-xs mt-1 ${path === "/contests" ? "text-white" : "text-white/65"}`}>Contests</span>
         </Link>
         <Link
@@ -138,7 +150,11 @@ export default function Navbar({ path }) {
             path === "/settings" ? "bg-[#2A2A2A]" : ""
           }`}
         >
-          <IoSettingsOutline className={`text-xl ${path === "/settings" ? "text-white" : "text-white/65"}`} />
+          {path === "/settings" ? (
+            <IoSettingsSharp className="text-xl text-white" />
+          ) : (
+            <IoSettingsOutline className="text-xl text-white/65" />
+          )}
           <span className={`text-xs mt-1 ${path === "/settings" ? "text-white" : "text-white/65"}`}>Settings</span>
         </Link>
         <Link
