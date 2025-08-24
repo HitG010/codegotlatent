@@ -38,7 +38,7 @@ app.use(
     //   `${process.env.CLIENT_URL}/auth`,
     //   "https://www.codegotlatent.com",
     // ],
-    credentials: true,
+    // credentials: true,
   })
 );
 app.use(cookieParser());
