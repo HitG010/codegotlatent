@@ -14,8 +14,10 @@ api.interceptors.request.use(
     async (config) => {
         const { accessToken } = useUserStore.getState();
         if (accessToken) {
+            console.log("Access Token Found:", accessToken);
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
+        else console.log("No access token found");
         return config;
     },
     (error) => {

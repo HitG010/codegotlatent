@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { addProblem, editProblem } from "../api/api";
+import useUserStore from "../store/userStore";
 
 export default function ReviewAndSubmitStep({ data, isEdit = false, problemId = null }) {
   const [loading, setLoading] = useState(false);
+  const user = useUserStore((state) => state.user);
 
   const handleSubmit = async () => {
     setLoading(true);

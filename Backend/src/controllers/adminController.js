@@ -132,7 +132,7 @@ async function editProblem(req, res) {
         max_time_limit,
         max_memory_limit,
         tags: {
-          set: tags.map((tagId) => ({ id: tagId })), // replace existing tags
+          set: tags.map((tagId) => ({ id: tagId.id })), // replace existing tags
         },
       },
     });

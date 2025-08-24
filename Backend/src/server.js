@@ -37,9 +37,9 @@ app.use(
       process.env.CLIENT_URL,
       `${process.env.CLIENT_URL}/auth`,
       "https://www.codegotlatent.com",
-      "https://localhost:5173"
     ],
     credentials: true,
+    // allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(cookieParser());

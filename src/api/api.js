@@ -1,35 +1,35 @@
 // import dotenv from "dotenv";
 // dotenv.config();
-import axios from "axios";
+import api from "./axios.js";
 import { use } from "react";
 
-async function api() {
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
+// async function api() {
+//   const options = {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//   };
 
-  //   if (body) {
-  //     options.body = JSON.stringify(body);
-  //   }
-  const url = `${import.meta.env.VITE_BASE_URL}/hello`;
-  console.log("URL:", url);
-  return await fetch(url, options)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .catch((error) => {
-      console.error(
-        "There has been a problem with your fetch operation:",
-        error
-      );
-    });
-}
+//   //   if (body) {
+//   //     options.body = JSON.stringify(body);
+//   //   }
+//   const url = `${import.meta.env.VITE_BASE_URL}/hello`;
+//   console.log("URL:", url);
+//   return await fetch(url, options)
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error("Network response was not ok");
+//       }
+//       return response.json();
+//     })
+//     .catch((error) => {
+//       console.error(
+//         "There has been a problem with your fetch operation:",
+//         error
+//       );
+//     });
+// }
 
 // batch submission
 async function executeCode(code, testCases, langId, probId) {
@@ -51,7 +51,7 @@ async function executeCode(code, testCases, langId, probId) {
   const url = `${import.meta.env.VITE_BASE_URL}/batchSubmission`;
   console.log("URL:", url);
   console.log("Body:", body);
-  const response = await axios.post(url, body, options);
+  const response = await api.post(url, body, options);
   console.log("Response:", response.data);
   // await pollSubmissionStatus(response.data.token).then((data) => {
   //   console.log("Polling Response:", data);
@@ -81,7 +81,7 @@ async function submitProblem(code, probId, langId, contestId = null, userId) {
   const url = `${import.meta.env.VITE_BASE_URL}/submitContestCode`;
   console.log("URL:", url);
   console.log("Body:", body);
-  const response = await axios.post(url, body, options);
+  const response = await api.post(url, body, options);
   console.log("Response:", response.data);
   return response.data;
 }
@@ -104,7 +104,7 @@ async function submitProblem(code, probId, langId, contestId = null, userId) {
 //   const url = `${import.meta.env.VITE_BASE_URL}/batchSubmitProblem`;
 //   console.log("URL:", url);
 //   console.log("Body:", body);
-//   const response = await axios.post(url, body, options);
+//   const response = await api.post(url, body, options);
 //   console.log("Response:", response.data);
 //   // await pollSubmissionStatus(response.data.token).then((data) => {
 //   //   console.log("Polling Response:", data);
@@ -138,7 +138,7 @@ const pollSubmissionStatus = async (
       sourceCode: sourceCode,
       languageId: langId,
     };
-    const response = await axios.post(url, body, options);
+    const response = await api.post(url, body, options);
     console.log("Polling Response:", response);
     return response.data;
   } catch (error) {
@@ -151,7 +151,7 @@ const fetchProblems = async (userId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/allProblems/${userId}`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -170,7 +170,7 @@ const fetchProblem = async (problemId, userId) => {
   }/problem/${problemId}/user/${userId}`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -188,7 +188,7 @@ const fetchContests = async () => {
   const url = `${import.meta.env.VITE_BASE_URL}/contests`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -206,7 +206,7 @@ const getContest = async (contestId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -226,7 +226,7 @@ const getIfUserRegistered = async (contestId, userId) => {
   }/contest/${contestId}/participants/${userId}`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -246,7 +246,7 @@ const registerUser = async (contestId, userId) => {
   }/contest/${contestId}/register/${userId}`;
   console.log("URL:", url);
   try {
-    const response = await axios.post(url, {
+    const response = await api.post(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -265,7 +265,7 @@ const unregisterUser = async (contestId, userId) => {
   }/contest/${contestId}/unregister/${userId}`;
   console.log("URL:", url);
   try {
-    const response = await axios.post(url, {
+    const response = await api.post(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -285,7 +285,7 @@ const getAllContestProblems = async (contestId, userId) => {
   }/contest/${contestId}/problems/user/${userId}`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -305,7 +305,7 @@ const fetchContestProblem = async (problemId, contestId, userId) => {
   }/contest/${contestId}/problem/${problemId}/user/${userId}`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -325,7 +325,7 @@ const getSubmission = async (submissionId, userId) => {
   }/submission/${submissionId}/user/${userId}`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -343,7 +343,7 @@ const getContestUsers = async (contestId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/users`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -361,7 +361,7 @@ const fetchContestStartTime = async (contestId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/startTime`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -382,7 +382,7 @@ const submitRank = async (contestId, userId, rank) => {
   }/contest/${contestId}/user/${userId}/rank/${rank}`;
   console.log("URL:", url);
   try {
-    const response = await axios.post(url, {
+    const response = await api.post(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -402,7 +402,7 @@ const getProblemAcceptance = async (problemId) => {
   }/problem/${problemId}/acceptance`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -420,7 +420,7 @@ const getUserProblemCount = async (userId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}/problemCount`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -442,7 +442,7 @@ const getUserProblemSubmission = async (problemId, userId) => {
   }/user/${userId}/problem/${problemId}/submission`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -462,7 +462,7 @@ const getContestParticipants = async (contestId) => {
   }/contest/${contestId}/participants`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -480,7 +480,7 @@ const getUserData = async (userName) => {
   const url = `${import.meta.env.VITE_BASE_URL}/user/${userName}`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -498,7 +498,7 @@ const addProblem = async (problemData) => {
   const url = `${import.meta.env.VITE_BASE_URL}/addProblem`;
   console.log("URL:", url);
   try {
-    const response = await axios.post(url, problemData, {
+    const response = await api.post(url, problemData, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -514,7 +514,7 @@ const addProblem = async (problemData) => {
 
 const getAllTags = async () => {
   const url = `${import.meta.env.VITE_BASE_URL}/tags`;
-  const response = await axios.get(url, {
+  const response = await api.get(url, {
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
@@ -529,7 +529,7 @@ const getUserDetails = async (userId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}/details`;
   console.log("URL:", url);
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -547,7 +547,7 @@ const updateUserDetails = async (userId, userDetails) => {
   const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}/update`;
   console.log("URL:", url);
   try {
-    const response = await axios.post(url, userDetails, {
+    const response = await api.post(url, userDetails, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -564,7 +564,7 @@ const updateUserDetails = async (userId, userDetails) => {
 function fetchTags() {
   const url = `${import.meta.env.VITE_BASE_URL}/tags`;
   console.log("URL:", url);
-  return axios
+  return api
     .get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -584,7 +584,7 @@ function fetchTags() {
 function addContest(contestData) {
   const url = `${import.meta.env.VITE_BASE_URL}/contests/new`;
   console.log("URL:", url);
-  return axios
+  return api
     .post(url, contestData, {
       headers: {
         "Content-Type": "application/json",
@@ -604,7 +604,7 @@ function addContest(contestData) {
 function editContest(contestId, contestData) {
   const url = `${import.meta.env.VITE_BASE_URL}/contests/edit/${contestId}`;
   console.log("URL:", url);
-  return axios
+  return api
     .put(url, contestData, {
       headers: {
         "Content-Type": "application/json",
@@ -626,7 +626,7 @@ function getUserRankGuess(contestId, userId) {
     import.meta.env.VITE_BASE_URL
   }/contest/${contestId}/user/${userId}/rankGuess`;
   console.log("URL:", url);
-  return axios
+  return api
     .get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -647,7 +647,7 @@ const addTestCase = async (testCaseData) => {
   const url = `${import.meta.env.VITE_BASE_URL}/addTestCase`;
   console.log("URL:", url);
   try {
-    const response = await axios.post(url, testCaseData, {
+    const response = await api.post(url, testCaseData, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -665,11 +665,12 @@ const editProblem = async (problemId, problemData) => {
   const url = `${import.meta.env.VITE_BASE_URL}/editProblem/${problemId}`;
   console.log("URL:", url);
   try {
-    const response = await axios.put(url, problemData, {
+    const response = await api.put(url, problemData, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
+      withCredentials: true,
     });
     console.log("Response:", response.data);
     return response.data;
