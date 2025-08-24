@@ -33,12 +33,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: "*",
-    // origin: [
-    //   process.env.CLIENT_URL,
-    //   `${process.env.CLIENT_URL}/auth`,
-    //   "https://www.codegotlatent.com",
-    // ],
-    // credentials: true,
+    origin: [
+      process.env.CLIENT_URL,
+      `${process.env.CLIENT_URL}/auth`,
+      "https://www.codegotlatent.com",
+      "http://localhost:5173"
+    ],
+    credentials: true,
   })
 );
 app.use(cookieParser());
