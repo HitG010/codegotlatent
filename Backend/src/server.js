@@ -32,11 +32,12 @@ app.use(express.json({ limit: "50mb" })); // Increase the limit to handle larger
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL,
-      `${process.env.CLIENT_URL}/auth`,
-      "https://www.codegotlatent.com",
-    ],
+    origin: "*",
+    // origin: [
+    //   process.env.CLIENT_URL,
+    //   `${process.env.CLIENT_URL}/auth`,
+    //   "https://www.codegotlatent.com",
+    // ],
     credentials: true,
   })
 );
