@@ -20,7 +20,7 @@ import { useUserInit } from "./providers/useUserInit";
 import AuthRoute from "./providers/authRoute";
 import ContestRanking from "./pages/ContestRanking";
 import User from "./pages/User";
-import Admin from "./pages/Admin";
+import Admin from "./pages/AddProblem";
 import EditProblem from "./pages/ProbEdit";
 import Settings from "./pages/Settings";
 import Login2 from "./pages/login2";
@@ -30,6 +30,7 @@ import AddTestCase from "./pages/AddTestCase";
 import RedirectHandler from "./RedirectHandler";
 import NotFound from "./pages/404";
 import "./index.css";
+import AdminPage from "./pages/Admin";
 
 const App = () => {
   const location = useLocation();
@@ -125,15 +126,17 @@ const App = () => {
           element={<ContestRanking />}
         />
         <Route path="/user/:userName" element={<User />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/edit-problem" element={<EditProblem />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/problem/new" element={<Admin />} />
+        <Route path="/admin/problem" element={<EditProblem />} />
         <Route
-          path="/admin/edit-problem/:problemId"
+          path="/admin/problem/:problemId"
           element={<EditProblem />}
         />
-        <Route path="/admin/contest/new" element={<ContestForm />} />
-        <Route path="/admin/contest/:id" element={<ContestForm />} />
-        <Route path="/admin/addTestCase" element={<AddTestCase />} />
+  <Route path="/admin/contest/new" element={<ContestForm />} />
+  <Route path="/admin/contest/edit" element={<ContestForm />} />
+        {/* <Route path="/admin/contest/:id" element={<ContestForm />} /> */}
+        <Route path="/admin/testcase/new" element={<AddTestCase />} />
         {/* Add more routes as needed */}
 
         <Route path="/settings" element={<Settings />} />

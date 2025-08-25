@@ -50,7 +50,7 @@ export default function Contests() {
               {ongoingAndUpcoming.length === 0 ? (
                 <div className="text-white/65">No ongoing or upcoming contests.</div>
               ) : (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col lg:flex-row gap-4">
                   {ongoingAndUpcoming.map((contest) => (
                     <Link
                       key={contest.id}

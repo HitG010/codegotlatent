@@ -5,7 +5,7 @@ import ProblemDetailsStep from "../components/ProblemDetailsStep";
 import TagsStep from "../components/TagsStep";
 import TestCasesStep from "../components/TestCasesStep";
 import ReviewAndSubmitStep from "../components/ReviewAndSubmitStep";
-import Navbar from "../components/Navbar";
+// import Navbar from "../components/Navbar";
 
 export default function EditProblem() {
   const { problemId } = useParams();
@@ -70,7 +70,7 @@ export default function EditProblem() {
   const handleProblemIdSubmit = (e) => {
     e.preventDefault();
     if (problemIdInput.trim()) {
-      navigate(`/admin/edit-problem/${problemIdInput.trim()}`);
+      navigate(`/admin/problem/${problemIdInput.trim()}`);
     }
   };
 
@@ -88,7 +88,7 @@ export default function EditProblem() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0F0F0F] flex flex-col">
-        <Navbar path="/admin/edit-problem" />
+        {/* <Navbar path="/admin/edit-problem" /> */}
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white text-xl">Loading problem data...</div>
         </div>
@@ -98,7 +98,7 @@ export default function EditProblem() {
 
   return (
     <div className="min-h-screen bg-[#0F0F0F] flex flex-col">
-      <Navbar path="/admin/edit-problem" />
+      {/* <Navbar path="/admin/edit-problem" /> */}
       <div className="flex-1 p-4 lg:p-10 pt-20 lg:pt-24">
         <div className="max-w-4xl mx-auto">
           {!isEditing ? (
@@ -150,7 +150,7 @@ export default function EditProblem() {
                     setIsEditing(false);
                     setProblemIdInput("");
                     setStep(0);
-                    navigate("/admin/edit-problem");
+                    navigate("/admin/problem");
                   }}
                   className="text-white/70 hover:text-white transition-colors duration-200"
                 >

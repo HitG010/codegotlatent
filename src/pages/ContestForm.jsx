@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getContest, addContest, editContest } from "../api/api";
 const ContestForm = () => {
-  const { id } = useParams(); // contest ID from route
+  const { id } = useParams(); // contest ID from route (may be undefined on /admin/contest/edit)
   const navigate = useNavigate();
-  const isEdit = !!id && id !== "new";
+  const location = useLocation();
+  // Determine if we are in an edit flow: either /admin/contest/edit (needs ID) or /admin/contest/:id
+  const isPureEditRoute = location.pathname === "/admin/contest/edit" && !id;
+  const isEdit = (!!id && id !== "new") || isPureEditRoute; // treat pure edit route as edit after ID entered
+
+  const [contestIdInput, setContestIdInput] = useState("");
+  const [awaitingId, setAwaitingId] = useState(isPureEditRoute && !id);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -21,8 +27,10 @@ const ContestForm = () => {
 
   // If editing, load contest details
   useEffect(() => {
-    if (isEdit) {
-      getContest(id)
+    if (isEdit && !awaitingId) {
+      const contestToLoad = id || contestIdInput;
+      if (!contestToLoad) return;
+      getContest(contestToLoad)
         .then((data) => {
           setFormData({
             name: data.name,
@@ -42,7 +50,13 @@ const ContestForm = () => {
           alert("Error loading contest details");
         });
     }
-  }, [id, isEdit]);
+  }, [id, isEdit, awaitingId]);
+
+  const handleContestIdSubmit = (e) => {
+    e.preventDefault();
+    if (!contestIdInput.trim()) return;
+    setAwaitingId(false);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -65,17 +79,54 @@ const ContestForm = () => {
         : null,
     };
 
-    const res = await (isEdit ? editContest(id, payload) : addContest(payload));
+  const targetId = id || contestIdInput;
+  const res = await (isEdit ? editContest(targetId, payload) : addContest(payload));
 
     if (res) {
       alert(`Contest ${isEdit ? "updated" : "created"} successfully!`);
-      navigate("/admin/contests");
+      navigate("/admin");
     } else {
       alert("Error saving contest");
     }
 
     setLoading(false);
   };
+
+  if (awaitingId) {
+    return (
+      <div className="max-w-md mx-auto py-10 text-black">
+        <h2 className="text-2xl font-bold mb-4">Edit Contest</h2>
+        <form onSubmit={handleContestIdSubmit} className="space-y-4 bg-white p-6 rounded border shadow">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Contest ID</label>
+            <input
+              type="text"
+              value={contestIdInput}
+              onChange={(e) => setContestIdInput(e.target.value)}
+              placeholder="Enter contest ID"
+              className="mt-1 block w-full border rounded-md p-2"
+              required
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded"
+            >
+              Load Contest
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/admin")}
+              className="border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 px-4 rounded"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto py-10 text-black">
