@@ -11,21 +11,6 @@ export default function Admin() {
   const isAuthenticated = useUserStore((s) => s.isAuthenticated);
   const [authorized, setAuthorized] = useState(false);
   const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    async function run() {
-      if (!isAuthenticated) { setChecking(false); return; }
-      const ok = await verifyAdmin();
-      if (active) { setAuthorized(ok); setChecking(false); }
-    }
-    run();
-    return () => { active = false; };
-  }, [isAuthenticated]);
-
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (checking) return <div className="p-6">Verifying admin access...</div>;
-  if (!authorized) return <Navigate to="/home" replace />;
   const [step, setStep] = useState(0);
 
   const [problemData, setProblemData] = useState({
@@ -46,6 +31,29 @@ export default function Admin() {
     <TestCasesStep data={problemData} setData={setProblemData} />,
     <ReviewAndSubmitStep data={problemData} />,
   ];
+
+  useEffect(() => {
+    let active = true;
+    async function run() {
+      if (!isAuthenticated) {
+        setChecking(false);
+        return;
+      }
+      const ok = await verifyAdmin();
+      if (active) {
+        setAuthorized(ok);
+        setChecking(false);
+      }
+    }
+    run();
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (checking) return <div className="p-6">Verifying admin access...</div>;
+  if (!authorized) return <Navigate to="/home" replace />;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
