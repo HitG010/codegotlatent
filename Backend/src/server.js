@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 const redis = require("./services/redis");
 const cookieParser = require("cookie-parser");
 const prisma = require("./services/prisma");
-import { isAdmin } from "./middlewares/admin";
+const { isAdmin } = require("./middlewares/admin");
 const { scheduler } = require("./sockets");
 const {
   scheduleUpcomingContest,
