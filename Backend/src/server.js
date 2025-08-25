@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const redis = require("./services/redis");
 const cookieParser = require("cookie-parser");
 const prisma = require("./services/prisma");
+import { isAdmin } from "./middlewares/admin";
 const { scheduler } = require("./sockets");
 const {
   scheduleUpcomingContest,
@@ -64,7 +65,7 @@ app.use("/", submissionRouter);
 app.use("/", adminRouter);
 app.use("/", authRouter);
 
-app.post("/contests/new", async (req, res) => {
+app.post("/contests/new", isAdmin, async (req, res) => {
   const { name, description, startTime, endTime, rankGuessStartTime, status } =
     req.body;
   try {
@@ -88,10 +89,17 @@ app.post("/contests/new", async (req, res) => {
   }
 });
 
-app.put("/contests/edit/:id", async (req, res) => {
+app.put("/contests/edit/:id", isAdmin, async (req, res) => {
   const { id } = req.params;
-  const { name, description, rules, startTime, endTime, rankGuessStartTime, status } =
-    req.body;
+  const {
+    name,
+    description,
+    rules,
+    startTime,
+    endTime,
+    rankGuessStartTime,
+    status,
+  } = req.body;
   try {
     const contest = await prisma.Contest.update({
       where: { id },
