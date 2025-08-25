@@ -19,4 +19,9 @@ router.put("/editProblem/:id", isAdmin, async (req, res) => {
   await editProblem(req, res);
 });
 
+router.get("/admin/verify", isAdmin, async (req, res) => {
+  // isAdmin already verifies the user
+  res.json({ authorized: true });
+});
+
 module.exports = router;

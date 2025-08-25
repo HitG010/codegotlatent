@@ -1,13 +1,34 @@
 import { Link, Navigate } from "react-router-dom";
 import useUserStore from "../store/userStore";
+import { useEffect, useState } from "react";
+import { verifyAdmin } from "../utils/verifyAdmin";
 
 export default function AdminPage() {
-    const isAuthenticated = useUserStore((s) => s.isAuthenticated);
-    const user = useUserStore((s) => s.user);
+        const isAuthenticated = useUserStore((s) => s.isAuthenticated);
+        const user = useUserStore((s) => s.user);
+        const [authorized, setAuthorized] = useState(false);
+        const [checking, setChecking] = useState(true);
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
-    }
+        useEffect(() => {
+            let active = true;
+            async function run() {
+                if (!isAuthenticated) {
+                    setChecking(false);
+                    return;
+                }
+                const ok = await verifyAdmin();
+                if (active) {
+                    setAuthorized(ok);
+                    setChecking(false);
+                }
+            }
+            run();
+            return () => { active = false; };
+        }, [isAuthenticated]);
+
+        if (!isAuthenticated) return <Navigate to="/login" replace />;
+        if (checking) return <div className="p-6">Verifying admin access...</div>;
+        if (!authorized) return <Navigate to="/home" replace />;
 
     return (
         <div className="max-w-3xl mx-auto p-6">

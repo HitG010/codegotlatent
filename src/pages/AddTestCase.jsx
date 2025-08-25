@@ -1,13 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { addTestCase } from "../api/api";
+import { verifyAdmin } from "../utils/verifyAdmin";
+import useUserStore from "../store/userStore";
+import { Navigate } from "react-router-dom";
 
 const AddTestCase = () => {
+  const isAuthenticated = useUserStore((s) => s.isAuthenticated);
+  const [authorized, setAuthorized] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [problemId, setProblemId] = useState("");
   const [stdin, setStdin] = useState("");
   const [stdout, setStdout] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    async function guard() {
+      if (!isAuthenticated) { setChecking(false); return; }
+      const ok = await verifyAdmin();
+      if (active) { setAuthorized(ok); setChecking(false); }
+    }
+    guard();
+    return () => { active = false; };
+  }, [isAuthenticated]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +43,10 @@ const AddTestCase = () => {
       setLoading(false);
     }
   };
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (checking) return <div className="p-6">Verifying admin access...</div>;
+  if (!authorized) return <Navigate to="/home" replace />;
 
   return (
     <div className="max-w-md mx-auto mt-24">

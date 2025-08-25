@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { verifyAdmin } from "../utils/verifyAdmin";
+import useUserStore from "../store/userStore";
+import { Navigate } from "react-router-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchProblem } from "../api/api";
 import ProblemDetailsStep from "../components/ProblemDetailsStep";
@@ -8,6 +11,9 @@ import ReviewAndSubmitStep from "../components/ReviewAndSubmitStep";
 // import Navbar from "../components/Navbar";
 
 export default function EditProblem() {
+  const isAuthenticated = useUserStore((s) => s.isAuthenticated);
+  const [authorized, setAuthorized] = useState(false);
+  const [checking, setChecking] = useState(true);
   const { problemId } = useParams();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -29,6 +35,17 @@ export default function EditProblem() {
   });
 
   // Fetch problem data when component mounts or problemId changes
+  useEffect(() => {
+    let active = true;
+    async function guard() {
+      if (!isAuthenticated) { setChecking(false); return; }
+      const ok = await verifyAdmin();
+      if (active) { setAuthorized(ok); setChecking(false); }
+    }
+    guard();
+    return () => { active = false; };
+  }, [isAuthenticated]);
+
   useEffect(() => {
     if (problemId) {
       fetchProblemData(problemId);
@@ -84,6 +101,10 @@ export default function EditProblem() {
       problemId={problemId}
     />,
   ];
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (checking) return <div className="p-6 text-white">Verifying admin access...</div>;
+  if (!authorized) return <Navigate to="/home" replace />;
 
   if (loading) {
     return (

@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { verifyAdmin } from "../utils/verifyAdmin";
+import useUserStore from "../store/userStore";
+import { Navigate } from "react-router-dom";
 import { getContest, addContest, editContest } from "../api/api";
 const ContestForm = () => {
   const { id } = useParams(); // contest ID from route (may be undefined on /admin/contest/edit)
   const navigate = useNavigate();
   const location = useLocation();
+  const isAuthenticated = useUserStore((s) => s.isAuthenticated);
+  const [authorized, setAuthorized] = useState(false);
+  const [checking, setChecking] = useState(true);
   // Determine if we are in an edit flow: either /admin/contest/edit (needs ID) or /admin/contest/:id
   const isPureEditRoute = location.pathname === "/admin/contest/edit" && !id;
   const isEdit = (!!id && id !== "new") || isPureEditRoute; // treat pure edit route as edit after ID entered
@@ -52,6 +58,17 @@ const ContestForm = () => {
     }
   }, [id, isEdit, awaitingId]);
 
+  useEffect(() => {
+    let active = true;
+    async function guard() {
+      if (!isAuthenticated) { setChecking(false); return; }
+      const ok = await verifyAdmin();
+      if (active) { setAuthorized(ok); setChecking(false); }
+    }
+    guard();
+    return () => { active = false; };
+  }, [isAuthenticated]);
+
   const handleContestIdSubmit = (e) => {
     e.preventDefault();
     if (!contestIdInput.trim()) return;
@@ -91,6 +108,10 @@ const ContestForm = () => {
 
     setLoading(false);
   };
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (checking) return <div className="p-6">Verifying admin access...</div>;
+  if (!authorized) return <Navigate to="/home" replace />;
 
   if (awaitingId) {
     return (
