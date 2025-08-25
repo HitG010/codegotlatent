@@ -3,10 +3,10 @@ const { getUserProblemCount } = require("../services/user");
 
 async function getProblemCount(req, res) {
   const { userId } = req.params;
-  console.log("User ID:", userId);
+  // console.log("User ID:", userId);
   try {
     const problemCount = await getUserProblemCount(userId);
-    console.log("Problem Count:", problemCount);
+    // console.log("Problem Count:", problemCount);
     return res.status(200).json(problemCount);
   } catch (error) {
     console.error("Error fetching problem count:", error);
@@ -35,8 +35,8 @@ async function getUserProblemSubmissions(req, res) {
       },
       cacheStrategy: { ttl: 30 }, // cache for 60 seconds
     });
-    console.log("Submissions for user:", userId, "and problem:", problemId);
-    console.log("Result:", result);
+    // console.log("Submissions for user:", userId, "and problem:", problemId);
+    // console.log("Result:", result);
     return res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching submissions:", error);
@@ -46,7 +46,7 @@ async function getUserProblemSubmissions(req, res) {
 
 async function getUserDetailsFromUsername(req, res) {
   const { userName } = req.params;
-  console.log("User Name he he he :", userName);
+  // console.log("User Name he he he :", userName);
 
   // Fetch user data along with their recent submissions
   try {
@@ -85,7 +85,7 @@ async function getUserDetailsFromUsername(req, res) {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    console.log("User Data:", user);
+    // console.log("User Data:", user);
     res.status(200).json(user);
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -95,7 +95,7 @@ async function getUserDetailsFromUsername(req, res) {
 
 async function getUserDetails(req, res) {
   const { userId } = req.params;
-  console.log("User ID:", userId);
+  // console.log("User ID:", userId);
   try {
     const user = await prisma.User.findUnique({
       where: { id: userId },
@@ -117,7 +117,7 @@ async function getUserDetails(req, res) {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    console.log("User Details:", user);
+    // console.log("User Details:", user);
     res.status(200).json(user);
   } catch (error) {
     console.error("Error fetching user details:", error);
@@ -128,7 +128,7 @@ async function getUserDetails(req, res) {
 async function updateUserDetails(req, res) {
   const { userId } = req.params;
   const { username, name, Bio, Location, pfpId } = req.body;
-  console.log("User ID:", userId);
+  // console.log("User ID:", userId);
 
   // Check if the username already exists
   const existingUser = await prisma.user.findUnique({
@@ -157,7 +157,7 @@ async function updateUserDetails(req, res) {
         pfpId,
       },
     });
-    console.log("Updated User:", updatedUser);
+    // console.log("Updated User:", updatedUser);
     res.status(200).json(updatedUser);
   } catch (error) {
     console.error("Error updating user:", error);

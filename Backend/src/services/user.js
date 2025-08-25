@@ -1,7 +1,7 @@
 const prisma = require("../services/prisma");
 
 const getUserProblemCount = async (userId) => {
-  console.log("User ID:", userId);
+  // console.log("User ID:", userId);
 
   const easyCount = await prisma.problemUser.count({
     where: {
@@ -25,7 +25,7 @@ const getUserProblemCount = async (userId) => {
     },
   });
 
-  console.log("Easy Count:", easyCount);
+  // console.log("Easy Count:", easyCount);
 
   const mediumCount = await prisma.problemUser.count({
     where: {

@@ -23,8 +23,8 @@ const Login = () => {
       const response = await api.post("/login", { email, password });
       const { accessToken, user } = response.data;
       setUser(user, accessToken);
-      console.log("Login successful:", user);
-      console.log("Access Token:", accessToken);
+      // console.log("Login successful:", user);
+      // console.log("Access Token:", accessToken);
       // alert('Login successful!');
       // Redirect to home or any other page after successful login
       window.location.href = "/home";

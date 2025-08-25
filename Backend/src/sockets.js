@@ -90,7 +90,7 @@ async function scheduleUpcomingContest(io, contestId) {
   });
 
   const rankGuessStartTime = new Date(contest.rankGuessStartTime);
-  console.log("Rank Guess Start Time:", rankGuessStartTime);
+  // console.log("Rank Guess Start Time:", rankGuessStartTime);
 
   schedule.scheduleJob(rankGuessStartTime, async () => {
     // Update the contest status to "Rank Guess Phase"
@@ -193,7 +193,7 @@ async function scheduleRankGuessContest(io, contestId) {
   });
 
   const startTime = new Date(contest.startTime);
-  console.log("Start Time:", startTime);
+  // console.log("Start Time:", startTime);
   schedule.scheduleJob(startTime, async () => {
     // Update the contest status to "Ongoing"
     const updatedContest = await prisma.Contest.update({
@@ -299,7 +299,7 @@ async function scheduleOngoingContest(io, contestId) {
   });
 
   const endTime = new Date(contest.endTime);
-  console.log("End Time:", endTime);
+  // console.log("End Time:", endTime);
   schedule.scheduleJob(endTime, async () => {
     console.log("Contest rating update phase started:", contestId);
     // Update the contest status to "Ended"
@@ -406,7 +406,7 @@ async function scheduleRatingPendingContest(io, contestId) {
   });
 
   const endTime = new Date(contest.endTime);
-  console.log("End Time:", endTime);
+  // console.log("End Time:", endTime);
   schedule.scheduleJob(
     new Date(endTime.getTime() + 2 * 60 * 1000),
     async () => {

@@ -57,7 +57,7 @@ function Problem() {
   //   try {
   //     const response = await fetchTestcases(id);
   //     setTestCases([...response]);
-  //     console.log("Test Cases:", response);
+  //     // console.log("Test Cases:", response);
   //   } catch (err) {
   //     setTestCaseError(err);
   //   } finally {
@@ -103,16 +103,16 @@ function Problem() {
         setRunLoading(false);
         return;
       }
-      console.log("Submitted Code:", codeToUse);
+      // console.log("Submitted Code:", codeToUse);
       // Simulate an API call to execute the code
-      console.log("Executing testcases", data.testCases);
+      // console.log("Executing testcases", data.testCases);
       executeCode(codeToUse, data.testCases, langId, id)
         .then(async (result) => {
           // long poll the server for submission status
-          console.log("Result:", result);
+          // console.log("Result:", result);
           pollSubmissionStatus(result, id, codeToUse, langId)
             .then((data) => {
-              console.log("Polling Response:", data);
+              // console.log("Polling Response:", data);
               setResult(data);
               setTestCaseLoading(false);
               setRunLoading(false);
@@ -152,7 +152,7 @@ function Problem() {
         setCode(currentCode);
       }
 
-      console.log("Submitted Code:", codeToUse);
+      // console.log("Submitted Code:", codeToUse);
       try {
         setResultLoading(true);
         const result = await submitProblem(
@@ -162,7 +162,7 @@ function Problem() {
           null,
           user.id
         );
-        console.log("Result:", result);
+        // console.log("Result:", result);
         setSubmissionResult(result);
         setResultLoading(false);
         setDialogOpen(true);
@@ -192,11 +192,12 @@ function Problem() {
       if ((event.ctrlKey || event.metaKey) && event.key === "'") {
         // run code
         event.preventDefault();
-        console.log("Ctrl/Cmd + ' pressed!");
+        // console.log("Ctrl/Cmd + ' pressed!");
         if (!runLoading && data && data.testCases) {
-          console.log("Running code...");
+          // console.log("Running code...");
           // Get the current code from localStorage or state
-          const currentCode = localStorage.getItem(`code${id}${langId}`) || code;
+          const currentCode =
+            localStorage.getItem(`code${id}${langId}`) || code;
           await handleRunSubmit(currentCode);
         }
         // Your custom logic here
@@ -205,11 +206,12 @@ function Problem() {
       // Handle Ctrl + Enter or Cmd + Enter for submitting code
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
         event.preventDefault();
-        console.log("Ctrl/Cmd + Enter pressed!");
+        // console.log("Ctrl/Cmd + Enter pressed!");
         if (!resultLoading && data) {
-          console.log("Submitting code...");
+          // console.log("Submitting code...");
           // Get the current code from localStorage or state
-          const currentCode = localStorage.getItem(`code${id}${langId}`) || code;
+          const currentCode =
+            localStorage.getItem(`code${id}${langId}`) || code;
           await handleSubmit(currentCode);
         }
         // e.g., close a modal
@@ -333,7 +335,8 @@ function Problem() {
                 className="py-1.5 px-2 lg:py-2 lg:px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer text-xs lg:text-sm"
                 onClick={() => handleRunSubmit(code)}
               >
-                Run <Play className="h-2 w-2 lg:h-3 lg:w-3 inline-block ml-1 fill-white/65" />
+                Run{" "}
+                <Play className="h-2 w-2 lg:h-3 lg:w-3 inline-block ml-1 fill-white/65" />
               </button>
             )}
           </div>
@@ -345,7 +348,8 @@ function Problem() {
                 className="py-1.5 px-2 lg:py-2 lg:px-4 rounded-md bg-[#ffffff25] items-center hover:bg-[#ffffff35] transition-all duration-300 cursor-pointer text-green-500 text-xs lg:text-sm"
                 onClick={() => handleSubmit(code)}
               >
-                Submit <UploadCloud className="h-3 w-3 lg:h-4 lg:w-4 inline-block ml-1" />
+                Submit{" "}
+                <UploadCloud className="h-3 w-3 lg:h-4 lg:w-4 inline-block ml-1" />
               </button>
             )}
           </div>
@@ -457,7 +461,7 @@ function Problem() {
               setLangId(newLangId);
               localStorage.setItem(`langId${id}`, newLangId.toString());
               setCode(localStorage.getItem(`code${id}${newLangId}`) || "");
-              console.log("Language changed to:", newLangId);
+              // console.log("Language changed to:", newLangId);
             }}
           >
             <option value={54} className="bg-[#ffffff15] text-black">
@@ -533,7 +537,10 @@ function Problem() {
           {tabId === 1 && (
             <div className="h-full bg-[#212121] flex flex-col">
               <div className="p-4 border-b border-[#ffffff25] flex-shrink-0">
-                <label htmlFor="languages-mobile" className="text-sm text-white mr-2">
+                <label
+                  htmlFor="languages-mobile"
+                  className="text-sm text-white mr-2"
+                >
                   Language:
                 </label>
                 <select
@@ -545,8 +552,10 @@ function Problem() {
                     const newLangId = parseInt(e.target.value);
                     setLangId(newLangId);
                     localStorage.setItem(`langId${id}`, newLangId.toString());
-                    setCode(localStorage.getItem(`code${id}${newLangId}`) || "");
-                    console.log("Language changed to:", newLangId);
+                    setCode(
+                      localStorage.getItem(`code${id}${newLangId}`) || ""
+                    );
+                    // console.log("Language changed to:", newLangId);
                   }}
                 >
                   <option value={54} className="bg-[#ffffff15] text-black">

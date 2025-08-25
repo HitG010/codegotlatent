@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getContestUsers, fetchContestStartTime, getAllContestProblems } from "../api/api";
+import {
+  getContestUsers,
+  fetchContestStartTime,
+  getAllContestProblems,
+} from "../api/api";
 import { Link } from "react-router-dom";
 import { Bug, ExternalLink } from "lucide-react";
 import { avatars } from "../components/Avatars";
 
 const contestRanking = () => {
   const { contestId } = useParams();
-  console.log(contestId, "Contest ID in Contest Rating");
+  // console.log(contestId, "Contest ID in Contest Rating");
   // fetch the users in the contest using the contestId
   const [users, setUsers] = useState([]);
   const [startTime, setStartTime] = useState(new Date().getTime());
@@ -15,46 +19,52 @@ const contestRanking = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       const response = await getContestUsers(contestId);
-      console.log(response, "Contest Users");
+      // console.log(response, "Contest Users");
       setUsers(response);
     };
     fetchUsers();
     const fetchStartTime = async () => {
       const response = await fetchContestStartTime(contestId);
-      console.log(response, "Contest Start Time");
+      // console.log(response, "Contest Start Time");
       setStartTime(response);
     };
     fetchStartTime();
     const fetchProblems = async () => {
       const response = await getAllContestProblems(contestId);
-      console.log(response, "Contest Problems");
+      // console.log(response, "Contest Problems");
       setProblems(response);
     };
     fetchProblems();
     // const fetchProblems = async () => {
     //   const response = await getAllContestProblems(contestId);
-    //   console.log(response, "Contest Problems");
+    //   // console.log(response, "Contest Problems");
     //   setProblems(response);
     // };
     // fetchProblems();
   }, [contestId]);
 
-  console.log(typeof startTime, "Start Time");
-  console.log(typeof users[0]?.finishTime, "Finish Time");
+  // console.log(typeof startTime, "Start Time");
+  // console.log(typeof users[0]?.finishTime, "Finish Time");
 
   // Helper function to calculate user statistics
   const calculateUserStats = (user) => {
-    const solvedProblems = user.problems?.filter(p => p.solvedInContest) || [];
-    const totalPenalties = user.problems?.reduce((sum, p) => sum + (p.penalty || 0), 0) || 0;
-    const totalScore = user.problems?.reduce((sum, p) => sum + (p.score || 0), 0) || 0;
-    
+    const solvedProblems =
+      user.problems?.filter((p) => p.solvedInContest) || [];
+    const totalPenalties =
+      user.problems?.reduce((sum, p) => sum + (p.penalty || 0), 0) || 0;
+    const totalScore =
+      user.problems?.reduce((sum, p) => sum + (p.score || 0), 0) || 0;
+
     return {
       solvedCount: solvedProblems.length,
       totalPenalties,
       totalScore,
-      finishTime: user.finishTime ? 
-        ((new Date(user.finishTime) - new Date(startTime)) / (60 * 1000)).toFixed(2) : 
-        'N/A'
+      finishTime: user.finishTime
+        ? (
+            (new Date(user.finishTime) - new Date(startTime)) /
+            (60 * 1000)
+          ).toFixed(2)
+        : "N/A",
     };
   };
 
@@ -78,8 +88,14 @@ const contestRanking = () => {
         <div className="bg-[#ffffff05] rounded-lg border border-[#ffffff10] overflow-x-auto w-full">
           {/* Table Header */}
           <div className="min-w-[600px]">
-            <div className="grid gap-2 sm:gap-4 p-2 sm:p-4 text-white/65 font-medium text-xs sm:text-sm min-w-max"
-              style={{ gridTemplateColumns: `60px 150px 60px 120px ${problems.map(() => '100px').join(' ')}` }}>
+            <div
+              className="grid gap-2 sm:gap-4 p-2 sm:p-4 text-white/65 font-medium text-xs sm:text-sm min-w-max"
+              style={{
+                gridTemplateColumns: `60px 150px 60px 120px ${problems
+                  .map(() => "100px")
+                  .join(" ")}`,
+              }}
+            >
               <div className="text-center">Rank</div>
               <div className="text-left">Name</div>
               <div className="text-center">Score</div>
@@ -98,11 +114,25 @@ const contestRanking = () => {
               users.map((user, index) => {
                 const stats = calculateUserStats(user);
                 return (
-                  <div key={user.user.id} className="grid gap-2 sm:gap-4 p-2 sm:p-4 items-center hover:bg-[#ffffff08] transition-colors min-w-max"
-                    style={{ gridTemplateColumns: `60px 150px 60px 120px ${problems.map(() => '100px').join(' ')}` }}>
+                  <div
+                    key={user.user.id}
+                    className="grid gap-2 sm:gap-4 p-2 sm:p-4 items-center hover:bg-[#ffffff08] transition-colors min-w-max"
+                    style={{
+                      gridTemplateColumns: `60px 150px 60px 120px ${problems
+                        .map(() => "100px")
+                        .join(" ")}`,
+                    }}
+                  >
                     {/* Rank */}
                     <div className="text-center">
-                      <span className={"text-base sm:text-lg text-white/65" + (index === 0 ? " text-yellow-300 font-bold" : "") + (index === 1 ? " text-white/90 font-bold" : "") + (index === 2 ? " text-yellow-700 font-bold" : "")} >
+                      <span
+                        className={
+                          "text-base sm:text-lg text-white/65" +
+                          (index === 0 ? " text-yellow-300 font-bold" : "") +
+                          (index === 1 ? " text-white/90 font-bold" : "") +
+                          (index === 2 ? " text-yellow-700 font-bold" : "")
+                        }
+                      >
                         {index + 1}
                       </span>
                     </div>
@@ -110,10 +140,15 @@ const contestRanking = () => {
                     {/* Username */}
                     <div className="text-left">
                       <Link
-                        to={`/user/${user.user.username}`} target="_blank"
+                        to={`/user/${user.user.username}`}
+                        target="_blank"
                         className="text-base sm:text-lg font-semibold text-white hover:text-yellow-300 transition-colors duration-300 flex items-center gap-2"
                       >
-                        <img src={avatars[user.user.pfpId - 1]} alt={user.user.username} className="inline-block w-6 h-6 sm:w-7 sm:h-7 rounded-full" />
+                        <img
+                          src={avatars[user.user.pfpId - 1]}
+                          alt={user.user.username}
+                          className="inline-block w-6 h-6 sm:w-7 sm:h-7 rounded-full"
+                        />
                         {user.user.username}
                       </Link>
                     </div>
@@ -128,41 +163,58 @@ const contestRanking = () => {
                     {/* Finish Time */}
                     <div className="text-center">
                       <span className="text-xs sm:text-sm font-medium text-white">
-                        {stats.finishTime !== 'N/A' ? `${stats.finishTime}` : 'N/A'}
+                        {stats.finishTime !== "N/A"
+                          ? `${stats.finishTime}`
+                          : "N/A"}
                       </span>
                     </div>
 
                     {/* Individual Problem Status */}
                     {problems.map((problem, problemIndex) => {
-                      const userProblem = user.problems?.find(p => p.problemId === problem.id);
+                      const userProblem = user.problems?.find(
+                        (p) => p.problemId === problem.id
+                      );
                       const isSolved = userProblem?.solvedInContest;
                       const hasPenalty = userProblem?.penalty > 0;
-                      
+
                       if (!userProblem || !isSolved) {
                         // User didn't attempt this problem
                         return (
                           <div key={problem.id} className="text-center">
-                            <div className="text-white/40 text-xs sm:text-sm">--</div>
+                            <div className="text-white/40 text-xs sm:text-sm">
+                              --
+                            </div>
                           </div>
                         );
                       }
 
                       // Calculate time taken for this problem
-                      const timeTaken = userProblem.finishedAt ? 
-                        ((new Date(userProblem.finishedAt) - new Date(startTime)) / (60 * 1000)).toFixed(0) : 
-                        'N/A';
+                      const timeTaken = userProblem.finishedAt
+                        ? (
+                            (new Date(userProblem.finishedAt) -
+                              new Date(startTime)) /
+                            (60 * 1000)
+                          ).toFixed(0)
+                        : "N/A";
 
                       return (
                         <div key={problem.id} className="text-center">
-                          <div className={`
+                          <div
+                            className={`
                             py-1 px-2 sm:px-3 rounded text-xs sm:text-sm font-medium flex gap-2 items-center justify-center rounded-md bg-white/3
-                          `}>
+                          `}
+                          >
                             <div className="flex items-center justify-center gap-1">
-                              <span>{timeTaken !== 'N/A' ? `${timeTaken}:00` : 'N/A'}</span>
+                              <span>
+                                {timeTaken !== "N/A"
+                                  ? `${timeTaken}:00`
+                                  : "N/A"}
+                              </span>
                             </div>
                             {hasPenalty && (
                               <div className="text-xs text-red-500 bg-red-500/20 px-2 py-0.5 mb-1 rounded-full flex gap-1 items-center justify-center mt-1">
-                                <Bug className="w-4 h-4 inline-block" /> {userProblem.penalty}
+                                <Bug className="w-4 h-4 inline-block" />{" "}
+                                {userProblem.penalty}
                               </div>
                             )}
                           </div>
@@ -174,7 +226,9 @@ const contestRanking = () => {
               })
             ) : (
               <div className="p-8 text-center text-white/60 col-span-full">
-                <div className="text-base sm:text-lg">No participants found for this contest</div>
+                <div className="text-base sm:text-lg">
+                  No participants found for this contest
+                </div>
               </div>
             )}
           </div>
@@ -184,26 +238,46 @@ const contestRanking = () => {
         {users && users.length > 0 && (
           <div className="mt-6 sm:mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-[#ffffff05] p-3 sm:p-4 rounded-lg border border-[#ffffff10]">
-              <div className="text-white/60 text-xs sm:text-sm">Total Participants</div>
-              <div className="text-xl sm:text-2xl font-bold text-white">{users.length}</div>
-            </div>
-            <div className="bg-[#ffffff05] p-3 sm:p-4 rounded-lg border border-[#ffffff10]">
-              <div className="text-white/60 text-xs sm:text-sm">Total Problems</div>
-              <div className="text-xl sm:text-2xl font-bold text-white">{problems.length}</div>
-            </div>
-            <div className="bg-[#ffffff05] p-3 sm:p-4 rounded-lg border border-[#ffffff10]">
-              <div className="text-white/60 text-xs sm:text-sm">Average Score</div>
+              <div className="text-white/60 text-xs sm:text-sm">
+                Total Participants
+              </div>
               <div className="text-xl sm:text-2xl font-bold text-white">
-                {users.length > 0 ? 
-                  (users.reduce((sum, user) => sum + calculateUserStats(user).totalScore, 0) / users.length).toFixed(1) : 
-                  '0'
-                }
+                {users.length}
               </div>
             </div>
             <div className="bg-[#ffffff05] p-3 sm:p-4 rounded-lg border border-[#ffffff10]">
-              <div className="text-white/60 text-xs sm:text-sm">Problems Solved</div>
+              <div className="text-white/60 text-xs sm:text-sm">
+                Total Problems
+              </div>
               <div className="text-xl sm:text-2xl font-bold text-white">
-                {users.reduce((sum, user) => sum + calculateUserStats(user).solvedCount, 0)}
+                {problems.length}
+              </div>
+            </div>
+            <div className="bg-[#ffffff05] p-3 sm:p-4 rounded-lg border border-[#ffffff10]">
+              <div className="text-white/60 text-xs sm:text-sm">
+                Average Score
+              </div>
+              <div className="text-xl sm:text-2xl font-bold text-white">
+                {users.length > 0
+                  ? (
+                      users.reduce(
+                        (sum, user) =>
+                          sum + calculateUserStats(user).totalScore,
+                        0
+                      ) / users.length
+                    ).toFixed(1)
+                  : "0"}
+              </div>
+            </div>
+            <div className="bg-[#ffffff05] p-3 sm:p-4 rounded-lg border border-[#ffffff10]">
+              <div className="text-white/60 text-xs sm:text-sm">
+                Problems Solved
+              </div>
+              <div className="text-xl sm:text-2xl font-bold text-white">
+                {users.reduce(
+                  (sum, user) => sum + calculateUserStats(user).solvedCount,
+                  0
+                )}
               </div>
             </div>
           </div>

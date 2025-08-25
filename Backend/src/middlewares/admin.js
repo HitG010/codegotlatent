@@ -7,8 +7,8 @@ const WHITELIST = ["guptahitesh201105@gmail.com", "bindrakartik64@gmail.com"];
 const isAdmin = async (req, res, next) => {
   try {
     // 1. Get token from cookies or headers (prefer access token, not refresh)
-    console.log(req.headers)
-    const token = req.headers['authorization']?.split(" ")[1];
+    // console.log(req.headers)
+    const token = req.headers["authorization"]?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({ error: "No token provided" });
@@ -24,7 +24,7 @@ const isAdmin = async (req, res, next) => {
     }
 
     // 3. Fetch user from DB using id from token (NOT req.body)
-    console.log("Decoded Token:", decoded);
+    // console.log("Decoded Token:", decoded);
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: { id: true, email: true },
@@ -36,7 +36,7 @@ const isAdmin = async (req, res, next) => {
 
     // 4. Check whitelist (case-insensitive email check)
     const isWhitelisted = WHITELIST.some(
-      adminEmail => adminEmail.toLowerCase() === user.email.toLowerCase()
+      (adminEmail) => adminEmail.toLowerCase() === user.email.toLowerCase()
     );
 
     if (!isWhitelisted) {
@@ -46,7 +46,6 @@ const isAdmin = async (req, res, next) => {
     // 5. Attach user to req for downstream use
     req.user = user;
     next();
-
   } catch (err) {
     console.error("Admin auth error:", err);
     res.status(500).json({ error: "Internal Server Error" });

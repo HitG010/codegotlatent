@@ -16,10 +16,10 @@ function User() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        console.log("Fetching user data for:", userName);
+        // console.log("Fetching user data for:", userName);
         const data = await getUserData(userName);
         setUserData(data);
-        console.log("User data fetched:", data);
+        // console.log("User data fetched:", data);
       } catch (error) {
         console.error("Error fetching user data:", error);
       } finally {
@@ -84,7 +84,8 @@ function User() {
                     : ""}
                 </p>
                 <p className="text-white/65 flex items-center gap-2 lg:gap-4 text-sm lg:text-base">
-                  <MapPin className="w-4 h-4 lg:w-5 lg:h-5" /> {userData.Location}
+                  <MapPin className="w-4 h-4 lg:w-5 lg:h-5" />{" "}
+                  {userData.Location}
                 </p>
               </div>
             </div>
@@ -110,10 +111,14 @@ function User() {
             </div>
           </div>
           <div className="mt-4 bg-[#ffffff08] rounded-lg p-2 lg:p-8 w-full border border-[#ffffff15]">
-            <h2 className="text-xl lg:text-2xl font-semibold mb-2">Problems Solved</h2>
+            <h2 className="text-xl lg:text-2xl font-semibold mb-2">
+              Problems Solved
+            </h2>
             <div className="grid grid-cols-4 gap-1 lg:gap-4">
               <div className="bg-[#ffffff05] border border-[#ffffff10] rounded-lg p-1 lg:p-4 text-center">
-                <div className="text-green-400 font-semibold text-xs lg:text-sm mb-1">Easy</div>
+                <div className="text-green-400 font-semibold text-xs lg:text-sm mb-1">
+                  Easy
+                </div>
                 <div className="text-white text-sm lg:text-2xl font-bold mb-1">
                   {userData.problemCount.easyCount}
                 </div>
@@ -121,9 +126,11 @@ function User() {
                   of {userData.problemCount.totalEasyCount}
                 </div>
               </div>
-              
+
               <div className="bg-[#ffffff05] border border-[#ffffff10] rounded-lg p-1 lg:p-4 text-center">
-                <div className="text-yellow-400 font-semibold text-xs lg:text-sm mb-1">Medium</div>
+                <div className="text-yellow-400 font-semibold text-xs lg:text-sm mb-1">
+                  Medium
+                </div>
                 <div className="text-white text-sm lg:text-2xl font-bold mb-1">
                   {userData.problemCount.mediumCount}
                 </div>
@@ -131,9 +138,11 @@ function User() {
                   of {userData.problemCount.totalMediumCount}
                 </div>
               </div>
-              
+
               <div className="bg-[#ffffff05] border border-[#ffffff10] rounded-lg p-1 lg:p-4 text-center">
-                <div className="text-red-400 font-semibold text-xs lg:text-sm mb-1">Hard</div>
+                <div className="text-red-400 font-semibold text-xs lg:text-sm mb-1">
+                  Hard
+                </div>
                 <div className="text-white text-sm lg:text-2xl font-bold mb-1">
                   {userData.problemCount.hardCount}
                 </div>
@@ -141,9 +150,11 @@ function User() {
                   of {userData.problemCount.totalHardCount}
                 </div>
               </div>
-              
+
               <div className="bg-[#ffffff05] border border-[#ffffff10] rounded-lg p-1 lg:p-4 text-center">
-                <div className="text-blue-400 font-semibold text-xs lg:text-sm mb-1">Submissions</div>
+                <div className="text-blue-400 font-semibold text-xs lg:text-sm mb-1">
+                  Submissions
+                </div>
                 <div className="text-white text-sm lg:text-2xl font-bold mb-1">
                   {userData.submissions.length}
                 </div>

@@ -14,7 +14,6 @@ import { FaCircleHalfStroke } from "react-icons/fa6";
 import { avatars } from "../components/Avatars";
 import { ChevronDown, Loader2 } from "lucide-react";
 
-
 const ProblemSet = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,20 +30,20 @@ const ProblemSet = () => {
   const [userDetails, setUserDetails] = useState(null);
 
   // Filter states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDifficulty, setSelectedDifficulty] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [tags, setTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
 
   async function fetchAllTags() {
     try {
       const response = await fetchTags();
-      console.log("All Tags Response:", response);
+      // console.log("All Tags Response:", response);
       // Handle both array of strings and array of objects
-      const processedTags = response.map(tag => 
-        typeof tag === 'string' ? tag : tag?.tag || tag?.name || String(tag)
+      const processedTags = response.map((tag) =>
+        typeof tag === "string" ? tag : tag?.tag || tag?.name || String(tag)
       );
       setTags(processedTags);
     } catch (error) {
@@ -66,44 +65,55 @@ const ProblemSet = () => {
 
     // Filter by search query
     if (searchQuery.trim()) {
-      filtered = filtered.filter(problem =>
-        problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (problem.tags && problem.tags.some(tag => {
-          // Handle both string tags and object tags from problem data
-          const tagName = typeof tag === 'string' ? tag : tag?.tag || tag?.name || String(tag);
-          return tagName.toLowerCase().includes(searchQuery.toLowerCase());
-        }))
+      filtered = filtered.filter(
+        (problem) =>
+          problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (problem.tags &&
+            problem.tags.some((tag) => {
+              // Handle both string tags and object tags from problem data
+              const tagName =
+                typeof tag === "string"
+                  ? tag
+                  : tag?.tag || tag?.name || String(tag);
+              return tagName.toLowerCase().includes(searchQuery.toLowerCase());
+            }))
       );
     }
 
     // Filter by difficulty
-    if (selectedDifficulty !== 'all') {
-      filtered = filtered.filter(problem => 
-        problem.difficulty.toLowerCase() === selectedDifficulty.toLowerCase()
+    if (selectedDifficulty !== "all") {
+      filtered = filtered.filter(
+        (problem) =>
+          problem.difficulty.toLowerCase() === selectedDifficulty.toLowerCase()
       );
     }
 
     // Filter by tags
     if (selectedTags.length > 0) {
-      filtered = filtered.filter(problem =>
-        problem.tags && selectedTags.every(selectedTag =>
-          problem.tags.some(tag => {
-            // Handle both string tags and object tags from problem data
-            const tagName = typeof tag === 'string' ? tag : tag?.tag || tag?.name || String(tag);
-            return tagName === selectedTag;
-          })
-        )
+      filtered = filtered.filter(
+        (problem) =>
+          problem.tags &&
+          selectedTags.every((selectedTag) =>
+            problem.tags.some((tag) => {
+              // Handle both string tags and object tags from problem data
+              const tagName =
+                typeof tag === "string"
+                  ? tag
+                  : tag?.tag || tag?.name || String(tag);
+              return tagName === selectedTag;
+            })
+          )
       );
     }
 
     // Filter by status
-    if (selectedStatus !== 'all') {
-      if (selectedStatus === 'solved') {
-        filtered = filtered.filter(problem => problem.isSolved === true);
-      } else if (selectedStatus === 'attempted') {
-        filtered = filtered.filter(problem => problem.isSolved === false);
-      } else if (selectedStatus === 'not-attempted') {
-        filtered = filtered.filter(problem => problem.isSolved === null);
+    if (selectedStatus !== "all") {
+      if (selectedStatus === "solved") {
+        filtered = filtered.filter((problem) => problem.isSolved === true);
+      } else if (selectedStatus === "attempted") {
+        filtered = filtered.filter((problem) => problem.isSolved === false);
+      } else if (selectedStatus === "not-attempted") {
+        filtered = filtered.filter((problem) => problem.isSolved === null);
       }
     }
 
@@ -112,25 +122,23 @@ const ProblemSet = () => {
 
   // Handle tag selection
   const toggleTag = (tag) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 
   // Clear all filters
   const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedDifficulty('all');
+    setSearchQuery("");
+    setSelectedDifficulty("all");
     setSelectedTags([]);
-    setSelectedStatus('all');
+    setSelectedStatus("all");
   };
 
   async function fetchUserDetails() {
     try {
       const details = await getUserDetails(user.id);
-      console.log("User Details:", details);
+      // console.log("User Details:", details);
       // return details;
       setUserDetails(details);
     } catch (error) {
@@ -141,7 +149,7 @@ const ProblemSet = () => {
 
   async function fetchProblemCount() {
     const response = await getUserProblemCount(user.id);
-    console.log("Problem Count Response:", response);
+    // console.log("Problem Count Response:", response);
     setEasyCount(response.easyCount);
     setMediumCount(response.mediumCount);
     setHardCount(response.hardCount);
@@ -150,7 +158,6 @@ const ProblemSet = () => {
     setHardTotal(response.totalHardCount);
   }
 
-
   useEffect(() => {
     const initializeData = async () => {
       try {
@@ -158,7 +165,7 @@ const ProblemSet = () => {
           fetchProblemSet(),
           fetchProblemCount(),
           fetchUserDetails(),
-          fetchAllTags()
+          fetchAllTags(),
         ]);
       } catch (error) {
         console.error("Error initializing data:", error);
@@ -176,7 +183,14 @@ const ProblemSet = () => {
     if (problems.length > 0) {
       filterProblems();
     }
-  }, [searchQuery, selectedDifficulty, selectedTags, selectedStatus, problems, tags]);
+  }, [
+    searchQuery,
+    selectedDifficulty,
+    selectedTags,
+    selectedStatus,
+    problems,
+    tags,
+  ]);
   const pathname = window.location.pathname;
   return (
     <div>
@@ -202,7 +216,12 @@ const ProblemSet = () => {
                   onClick={() => setShowFilters(!showFilters)}
                   className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-white/15 hover:bg-white/25 px-3 lg:px-4 py-1 lg:py-2 rounded-full text-white text-xs lg:text-sm transition-colors flex items-center gap-0"
                 >
-                  Filters {showFilters ? <ChevronDown  className="transform rotate-180 w-3 lg:w-4" /> : <ChevronDown className="w-3 lg:w-4" />}
+                  Filters{" "}
+                  {showFilters ? (
+                    <ChevronDown className="transform rotate-180 w-3 lg:w-4" />
+                  ) : (
+                    <ChevronDown className="w-3 lg:w-4" />
+                  )}
                 </button>
               </div>
 
@@ -212,7 +231,9 @@ const ProblemSet = () => {
                   <div className="flex flex-col lg:flex-row flex-wrap gap-4 lg:gap-6">
                     {/* Difficulty Filter */}
                     <div className="filter-group">
-                      <label className="block text-white/65 text-sm font-medium mb-2">Difficulty</label>
+                      <label className="block text-white/65 text-sm font-medium mb-2">
+                        Difficulty
+                      </label>
                       <select
                         value={selectedDifficulty}
                         onChange={(e) => setSelectedDifficulty(e.target.value)}
@@ -227,7 +248,9 @@ const ProblemSet = () => {
 
                     {/* Status Filter */}
                     <div className="filter-group">
-                      <label className="block text-white/65 text-sm font-medium mb-2">Status</label>
+                      <label className="block text-white/65 text-sm font-medium mb-2">
+                        Status
+                      </label>
                       <select
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
@@ -242,20 +265,25 @@ const ProblemSet = () => {
 
                     {/* Tags Filter */}
                     <div className="filter-group flex-1">
-                      <label className="block text-white/65 text-sm font-medium mb-2">Tags</label>
+                      <label className="block text-white/65 text-sm font-medium mb-2">
+                        Tags
+                      </label>
                       <div className="flex flex-wrap gap-2 max-h-24 lg:max-h-32 overflow-y-auto scrollbar">
                         {tags && tags.length > 0 ? (
                           tags.map((tag, index) => {
                             // Ensure tag is a string (handle both string and object formats)
-                            const tagName = typeof tag === 'string' ? tag : tag?.tag || tag?.name || String(tag);
+                            const tagName =
+                              typeof tag === "string"
+                                ? tag
+                                : tag?.tag || tag?.name || String(tag);
                             return (
                               <button
                                 key={`filter-tag-${index}-${tagName}`}
                                 onClick={() => toggleTag(tagName)}
                                 className={`px-2 lg:px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
                                   selectedTags.includes(tagName)
-                                    ? 'bg-white text-black'
-                                    : 'bg-[#2A2A2A] text-white/70 hover:bg-[#3A3A3A]'
+                                    ? "bg-white text-black"
+                                    : "bg-[#2A2A2A] text-white/70 hover:bg-[#3A3A3A]"
                                 }`}
                               >
                                 {tagName}
@@ -263,7 +291,9 @@ const ProblemSet = () => {
                             );
                           })
                         ) : (
-                          <div className="text-white/40 text-sm">Loading tags...</div>
+                          <div className="text-white/40 text-sm">
+                            Loading tags...
+                          </div>
                         )}
                       </div>
                     </div>
@@ -272,7 +302,8 @@ const ProblemSet = () => {
                   {/* Filter Actions */}
                   <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 lg:gap-0 mt-4 pt-4 border-t border-[#ffffff20]">
                     <div className="text-white/60 text-sm">
-                      Showing {filteredProblems.length} of {problems.length} problems
+                      Showing {filteredProblems.length} of {problems.length}{" "}
+                      problems
                     </div>
                     <button
                       onClick={clearFilters}
@@ -285,36 +316,66 @@ const ProblemSet = () => {
               )}
 
               {/* Active Filters Display */}
-              {(searchQuery || selectedDifficulty !== 'all' || selectedTags.length > 0 || selectedStatus !== 'all') && (
+              {(searchQuery ||
+                selectedDifficulty !== "all" ||
+                selectedTags.length > 0 ||
+                selectedStatus !== "all") && (
                 <div className="active-filters mb-4">
                   <div className="flex flex-wrap gap-2 items-center">
-                    <span className="text-white/60 text-sm">Active filters:</span>
-                    
+                    <span className="text-white/60 text-sm">
+                      Active filters:
+                    </span>
+
                     {searchQuery && (
                       <span className="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-xs flex items-center gap-2">
                         Search: "{searchQuery}"
-                        <button onClick={() => setSearchQuery('')} className="hover:text-white">×</button>
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="hover:text-white"
+                        >
+                          ×
+                        </button>
                       </span>
                     )}
-                    
-                    {selectedDifficulty !== 'all' && (
+
+                    {selectedDifficulty !== "all" && (
                       <span className="bg-yellow-600/20 text-yellow-400 px-3 py-1 rounded-full text-xs flex items-center gap-2">
-                        {selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)}
-                        <button onClick={() => setSelectedDifficulty('all')} className="hover:text-white">×</button>
+                        {selectedDifficulty.charAt(0).toUpperCase() +
+                          selectedDifficulty.slice(1)}
+                        <button
+                          onClick={() => setSelectedDifficulty("all")}
+                          className="hover:text-white"
+                        >
+                          ×
+                        </button>
                       </span>
                     )}
-                    
-                    {selectedStatus !== 'all' && (
+
+                    {selectedStatus !== "all" && (
                       <span className="bg-green-600/20 text-green-400 px-3 py-1 rounded-full text-xs flex items-center gap-2">
-                        {selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1).replace('-', ' ')}
-                        <button onClick={() => setSelectedStatus('all')} className="hover:text-white">×</button>
+                        {selectedStatus.charAt(0).toUpperCase() +
+                          selectedStatus.slice(1).replace("-", " ")}
+                        <button
+                          onClick={() => setSelectedStatus("all")}
+                          className="hover:text-white"
+                        >
+                          ×
+                        </button>
                       </span>
                     )}
-                    
+
                     {selectedTags.map((tag, index) => (
-                      <span key={`active-tag-${index}`} className="bg-purple-600/20 text-purple-400 px-3 py-1 rounded-full text-xs flex items-center gap-2">
+                      <span
+                        key={`active-tag-${index}`}
+                        className="bg-purple-600/20 text-purple-400 px-3 py-1 rounded-full text-xs flex items-center gap-2"
+                      >
                         {tag}
-                        <button onClick={() => toggleTag(tag)} className="hover:text-white">×</button>
+                        <button
+                          onClick={() => toggleTag(tag)}
+                          className="hover:text-white"
+                        >
+                          ×
+                        </button>
                       </span>
                     ))}
                   </div>
@@ -324,7 +385,9 @@ const ProblemSet = () => {
             <div className="problem-statement flex flex-col overflow-y-auto pr-2 scrollbar">
               {loading ? (
                 <div className="w-full items-center justify-center text-white py-8">
-                  <div className="text-base lg:text-lg text-white/65 flex items-center gap-2"><Loader2 className="animate-spin" /> Loading...</div>
+                  <div className="text-base lg:text-lg text-white/65 flex items-center gap-2">
+                    <Loader2 className="animate-spin" /> Loading...
+                  </div>
                 </div>
               ) : error ? (
                 <div className="text-center text-red-400 py-8">
@@ -334,7 +397,9 @@ const ProblemSet = () => {
               ) : filteredProblems.length === 0 ? (
                 <div className="text-center text-white/60 py-8">
                   <div className="text-lg mb-2">No problems found</div>
-                  <div className="text-sm">Try adjusting your search or filter criteria</div>
+                  <div className="text-sm">
+                    Try adjusting your search or filter criteria
+                  </div>
                 </div>
               ) : (
                 filteredProblems.map((problem, idx) => (
@@ -343,37 +408,52 @@ const ProblemSet = () => {
                       <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 items-start lg:items-center w-full lg:w-auto">
                         <div className="flex items-center gap-2 lg:gap-3">
                           {problem.isSolved === true ? (
-                            <FaCheck className="text-green-500 flex-shrink-0"/>
-                          ) : ( problem.isSolved === false ? (
-                            <FaCircleHalfStroke className="text-yellow-500 flex-shrink-0"/>
+                            <FaCheck className="text-green-500 flex-shrink-0" />
+                          ) : problem.isSolved === false ? (
+                            <FaCircleHalfStroke className="text-yellow-500 flex-shrink-0" />
                           ) : (
-                            <div className="h-4 w-4 flex-shrink-0"/>
-                          ))}
+                            <div className="h-4 w-4 flex-shrink-0" />
+                          )}
                           <h2 className="font-semibold text-base lg:text-lg text-white">
-                            {problems.findIndex(p => p.id === problem.id) + 1}. {problem.title}
+                            {problems.findIndex((p) => p.id === problem.id) + 1}
+                            . {problem.title}
                           </h2>
                         </div>
                         {/* Display tags */}
                         {problem.tags && problem.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 ml-6 lg:ml-2">
                             {problem.tags.slice(0, 2).map((tag, tagIndex) => {
-                              const tagName = typeof tag === 'string' ? tag : tag?.tag || tag?.name || String(tag);
+                              const tagName =
+                                typeof tag === "string"
+                                  ? tag
+                                  : tag?.tag || tag?.name || String(tag);
                               return (
-                                <span key={`${problem.id}-tag-${tagIndex}-${tagName}`} className="bg-[#ffffff15] text-white/70 px-2 py-1 rounded text-xs">
+                                <span
+                                  key={`${problem.id}-tag-${tagIndex}-${tagName}`}
+                                  className="bg-[#ffffff15] text-white/70 px-2 py-1 rounded text-xs"
+                                >
                                   {tagName}
                                 </span>
                               );
                             })}
                             {problem.tags.length > 2 && (
-                              <span className="text-white/50 text-xs">+{problem.tags.length - 2} more</span>
+                              <span className="text-white/50 text-xs">
+                                +{problem.tags.length - 2} more
+                              </span>
                             )}
                           </div>
                         )}
                       </div>
                       <div className="flex items-center gap-3 lg:gap-4 ml-6 lg:ml-0">
                         <p className="text-gray-400 text-xs lg:text-sm">
-                          {problem.submissionCount > 0 ? 
-                          ((problem.acceptedCount/problem.submissionCount)*100).toFixed(2) : 0}%
+                          {problem.submissionCount > 0
+                            ? (
+                                (problem.acceptedCount /
+                                  problem.submissionCount) *
+                                100
+                              ).toFixed(2)
+                            : 0}
+                          %
                         </p>
                         <DifficultyTag tag={problem.difficulty} />
                       </div>
@@ -386,21 +466,38 @@ const ProblemSet = () => {
           <div className="hidden xl:flex flex-col h-fit gap-4">
             <div className="py-4 px-6 xl:px-8 rounded-2xl bg-[#ffffff25] h-fit mt-30 mr-8 flex flex-col">
               <div className="flex flex-row gap-8 xl:gap-12 items-center">
-                <AvatarProgressRing progress={((easyCount+mediumCount+hardCount)/(easyTotal+mediumTotal+hardTotal)*100).toFixed(2)} imageComponent={avatars[userDetails?.pfpId - 1]} />
+                <AvatarProgressRing
+                  progress={(
+                    ((easyCount + mediumCount + hardCount) /
+                      (easyTotal + mediumTotal + hardTotal)) *
+                    100
+                  ).toFixed(2)}
+                  imageComponent={avatars[userDetails?.pfpId - 1]}
+                />
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-row justify-between w-[150px] xl:w-[170px]">
-                    <p className="text-base xl:text-lg font-medium text-green-500">Easy</p>
-                    <p className="text-white text-base xl:text-lg font-medium">{easyCount}/{easyTotal}</p>
+                    <p className="text-base xl:text-lg font-medium text-green-500">
+                      Easy
+                    </p>
+                    <p className="text-white text-base xl:text-lg font-medium">
+                      {easyCount}/{easyTotal}
+                    </p>
                   </div>
                   <div className="flex flex-row justify-between">
                     <p className="text-yellow-500 text-base xl:text-lg font-medium">
                       Medium
                     </p>
-                    <p className="text-white text-base xl:text-lg font-medium">{mediumCount}/{mediumTotal}</p>
+                    <p className="text-white text-base xl:text-lg font-medium">
+                      {mediumCount}/{mediumTotal}
+                    </p>
                   </div>
                   <div className="flex flex-row justify-between">
-                    <p className="text-red-500 text-base xl:text-lg font-medium">Hard</p>
-                    <p className="text-white text-base xl:text-lg font-medium">{hardCount}/{hardTotal}</p>
+                    <p className="text-red-500 text-base xl:text-lg font-medium">
+                      Hard
+                    </p>
+                    <p className="text-white text-base xl:text-lg font-medium">
+                      {hardCount}/{hardTotal}
+                    </p>
                   </div>
                 </div>
               </div>

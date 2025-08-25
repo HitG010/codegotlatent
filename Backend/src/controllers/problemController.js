@@ -72,13 +72,13 @@ async function allProblems(req, res) {
     delete problem.Problems; // Remove the Problems array to clean up the response
     delete problem._count; // Remove the _count object to clean up the response
   });
-  console.log(problems);
+  // console.log(problems);
   return res.json(problems);
 }
 
 async function getProblem(req, res) {
   const { problemId, userId } = req.params;
-  console.log("Problem ID:", problemId);
+  // console.log("Problem ID:", problemId);
   const problem = await prisma.Problem.findUnique({
     where: {
       id: problemId,
@@ -113,7 +113,7 @@ async function getProblem(req, res) {
   if (!problem) {
     return res.status(404).json({ error: "Problem not found" });
   }
-  console.log("Problem:", problem);
+  // console.log("Problem:", problem);
   if (
     problem.contestId != null &&
     problem.contest.status !== "Ended" &&
@@ -123,13 +123,13 @@ async function getProblem(req, res) {
       .status(403)
       .json({ error: "Problem is part of an ongoing contest" });
   }
-  console.log(problem);
+  // console.log(problem);
   return res.json(problem);
 }
 
 async function acceptanceRate(req, res) {
   const { problemId } = req.params;
-  console.log("Problem ID:", problemId);
+  // console.log("Problem ID:", problemId);
   const totalSubmisionCount = await prisma.Submission.count({
     where: {
       problemId: problemId,
@@ -152,9 +152,9 @@ async function acceptanceRate(req, res) {
   const acceptanceRate = totalSubmisionCount
     ? (acceptedSubmissionCount / totalSubmisionCount) * 100
     : 0;
-  console.log("Total Submissions:", totalSubmisionCount);
-  console.log("Accepted Submissions:", acceptedSubmissionCount);
-  console.log("Acceptance Rate:", acceptanceRate);
+  // console.log("Total Submissions:", totalSubmisionCount);
+  // console.log("Accepted Submissions:", acceptedSubmissionCount);
+  // console.log("Acceptance Rate:", acceptanceRate);
   return res.status(200).json({
     totalSubmissions: totalSubmisionCount,
     acceptedSubmissions: acceptedSubmissionCount,
@@ -179,14 +179,14 @@ async function getAllTags(req, res) {
 
 async function deleteAllTestcases(req, res) {
   const { problemId } = req.params;
-  console.log("Problem ID:", problemId);
+  // console.log("Problem ID:", problemId);
   try {
     const deletedTestCases = await prisma.testCase.deleteMany({
       where: {
         problemId: problemId,
       },
     });
-    console.log("Deleted Test Cases:", deletedTestCases);
+    // console.log("Deleted Test Cases:", deletedTestCases);
     res.status(200).json(deletedTestCases);
   } catch (error) {
     console.error("Error deleting test cases:", error);

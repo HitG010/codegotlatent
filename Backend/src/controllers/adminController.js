@@ -5,12 +5,12 @@ dotenv.config();
 
 async function addTestcase(req, res) {
   const { problemId, input, stdin, output, stdout, isPublic } = req.body;
-  console.log("Problem ID:", problemId);
+  // console.log("Problem ID:", problemId);
   const inputSize = Buffer.byteLength(stdin, "utf8");
   const outputSize = Buffer.byteLength(stdout, "utf8");
   const totalSize = inputSize + outputSize;
 
-  console.log("Total Size:", totalSize);
+  // console.log("Total Size:", totalSize);
   const testcase = await prisma.testCase.create({
     data: {
       problemId,

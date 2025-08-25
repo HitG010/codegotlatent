@@ -15,14 +15,20 @@ const jwt = require("jsonwebtoken");
 
 router.post("/auth/google", async (req, res) => {
   const { idToken } = req.body;
-  console.log("Received ID Token:", idToken);
+  // console.log("Received ID Token:", idToken);
 
   try {
     // Set CORS headers for iOS compatibility
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,UPDATE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Authorization');
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET,PUT,POST,DELETE,UPDATE,OPTIONS"
+    );
+    res.header(
+      "Access-Control-Allow-Headers",
+      "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Authorization"
+    );
 
     const ticket = await client.verifyIdToken({
       idToken,
@@ -81,23 +87,23 @@ router.post("/auth/google", async (req, res) => {
         },
       });
     }
-    console.log("Setting cookie with refresh token:", refreshToken);
-    
+    // console.log("Setting cookie with refresh token:", refreshToken);
+
     // Detect if request is from iOS
-    const userAgent = req.headers['user-agent'] || '';
+    const userAgent = req.headers["user-agent"] || "";
     const isIOS = /iPad|iPhone|iPod/.test(userAgent);
-    
+
     // clear any pre-existing cookies
     res.clearCookie("refreshToken");
-    
+
     if (isIOS) {
       // For iOS devices, send refresh token in response body instead of cookie
-      console.log("iOS device detected, sending refresh token in response body");
-      res.json({ 
-        accessToken, 
+      // console.log("iOS device detected, sending refresh token in response body");
+      res.json({
+        accessToken,
         refreshToken, // Send refresh token in response for iOS
         user: { id: user.id, email: user.email },
-        isIOS: true
+        isIOS: true,
       });
     } else {
       // For other devices, use cookie as normal
@@ -110,10 +116,10 @@ router.post("/auth/google", async (req, res) => {
           path: "/",
           maxAge: 7 * 24 * 60 * 60 * 1000,
         })
-        .json({ 
-          accessToken, 
+        .json({
+          accessToken,
           user: { id: user.id, email: user.email },
-          isIOS: false
+          isIOS: false,
         });
     }
   } catch (error) {
@@ -125,16 +131,16 @@ router.post("/auth/google", async (req, res) => {
 router.post("/auth/refresh-token", async (req, res) => {
   // Try to get refresh token from cookie first, then from request body (for iOS)
   let refreshToken = req.cookies.refreshToken;
-  
+
   // If no cookie refresh token, check request body (for iOS devices)
   if (!refreshToken && req.body.refreshToken) {
     refreshToken = req.body.refreshToken;
-    console.log("Using refresh token from request body (iOS):", refreshToken);
+    // console.log("Using refresh token from request body (iOS):", refreshToken);
   }
-  
-  console.log("Refresh Token:", refreshToken);
-  console.log("log from refresh-token route");
-  
+
+  // console.log("Refresh Token:", refreshToken);
+  // console.log("log from refresh-token route");
+
   if (!refreshToken) {
     return res.status(401).json({ message: "Refresh token not found." });
   }
@@ -190,13 +196,13 @@ router.post("/auth/refresh-token", async (req, res) => {
 
 router.post("/auth/logout", async (req, res) => {
   // Check if the request is from iOS
-  const userAgent = req.headers['user-agent'] || '';
+  const userAgent = req.headers["user-agent"] || "";
   const isIOS = /iPad|iPhone|iPod/.test(userAgent);
 
   const refreshToken = isIOS ? req.body.refreshToken : req.cookies.refreshToken;
-  console.log("Refresh Token:", refreshToken);
-  console.log("Is iOS device:", isIOS);
-  
+  // console.log("Refresh Token:", refreshToken);
+  // console.log("Is iOS device:", isIOS);
+
   if (!refreshToken) {
     return res.status(401).json({ message: "Refresh token not found." });
   }
@@ -206,7 +212,7 @@ router.post("/auth/logout", async (req, res) => {
     await prisma.userRefreshToken.delete({
       where: { refreshToken },
     });
-    
+
     // Clear cookie regardless of device type (for safety)
     res.clearCookie("refreshToken", {
       httpOnly: true,
@@ -215,17 +221,18 @@ router.post("/auth/logout", async (req, res) => {
       domain: process.env.DOMAIN,
       path: "/",
     });
-    
+
     res.json({ message: "Logged out successfully." });
   } catch (error) {
     console.error("Error during logout:", error);
-    
+
     // If refresh token doesn't exist in DB, still consider it a successful logout
-    if (error.code === 'P2025') { // Prisma record not found error
+    if (error.code === "P2025") {
+      // Prisma record not found error
       res.clearCookie("refreshToken");
       return res.json({ message: "Logged out successfully." });
     }
-    
+
     res.status(500).json({ message: "Internal server error." });
   }
 });

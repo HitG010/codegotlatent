@@ -15,10 +15,10 @@ export default function Submission() {
   useEffect(() => {
     const fetchSubmission = async () => {
       try {
-        console.log("Fetching submission with ID:", submissionId);
-        console.log("User ID:", user.id);
+        // console.log("Fetching submission with ID:", submissionId);
+        // console.log("User ID:", user.id);
         const response = await getSubmission(submissionId, user.id);
-        console.log("Submission fetched successfully:", response);
+        // console.log("Submission fetched successfully:", response);
         setSubmission(response);
       } catch (error) {
         alert("Error fetching submission");
@@ -50,7 +50,9 @@ export default function Submission() {
 
   return (
     <div className="max-w-4xl mx-auto mt-6 sm:mt-10 p-3 sm:p-6 shadow-md rounded-lg border border-[#ffffff10] bg-[#212121] text-white w-full">
-      <h1 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">Submission Details</h1>
+      <h1 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">
+        Submission Details
+      </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
         <div>

@@ -15,7 +15,7 @@ const updateContestUser = async (contestId, userId, contestStartTime) => {
       finishedAt: true, // Get the maximum finish time
     },
   });
-  console.log("Response: ", response);
+  // console.log("Response: ", response);
   const totalPenalties = response._sum.penalty || 0;
   const totalScore = response._sum.score || 0;
   // Ensure contestStartTime is a number (timestamp in ms)
@@ -26,7 +26,7 @@ const updateContestUser = async (contestId, userId, contestStartTime) => {
     baseTime = new Date(contestStartTime).getTime();
   }
   const totalFinishTime = baseTime + totalPenalties * 5 * 60 * 1000;
-  console.log("Total Finish Time: ", totalFinishTime);
+  // console.log("Total Finish Time: ", totalFinishTime);
   const updatedContestUser = await prisma.contestUser.update({
     where: {
       userId_contestId: {
@@ -210,16 +210,16 @@ function calculateRatingChanges(users) {
       },
     });
 
-    console.log(
-      `User ${user.user.username} | Δ: ${roundedDelta}, New Rating: ${newRating}`
-    );
+    // console.log(
+    //   `User ${user.user.username} | Δ: ${roundedDelta}, New Rating: ${newRating}`
+    // );
   });
 
   return users;
 }
 
 async function submitContest(contestId) {
-  console.log("Contest ID:", contestId);
+  // console.log("Contest ID:", contestId);
   try {
     // fetch all the users who participated in the contest
     let contestUsers = await prisma.contestUser.findMany({
@@ -231,22 +231,22 @@ async function submitContest(contestId) {
         user: true,
       },
     });
-    console.log("Contest Users:", contestUsers);
+    // console.log("Contest Users:", contestUsers);
     if (contestUsers.length === 0) {
       throw new Error("No participants found.");
     }
     const contestStartTime = await getContestStartTime(contestId);
     // assign ranks to the users
     const rankedUsers = assignRanks(contestUsers, contestStartTime);
-    console.log("Ranked Users:", rankedUsers);
+    // console.log("Ranked Users:", rankedUsers);
 
     // assign random guesses to users who have not guessed their rank
     const usersWithGuesses = assignRandomGuesses(rankedUsers);
-    console.log("Users with Guesses:", usersWithGuesses);
+    // console.log("Users with Guesses:", usersWithGuesses);
 
     // calculate rating changes
     const usersWithRatingChanges = calculateRatingChanges(usersWithGuesses);
-    console.log("Users with Rating Changes:", usersWithRatingChanges);
+    // console.log("Users with Rating Changes:", usersWithRatingChanges);
 
     return usersWithRatingChanges;
   } catch (error) {

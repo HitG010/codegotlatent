@@ -11,7 +11,7 @@ export const Testcase = ({
   index,
   isLoading,
 }) => {
-  console.log("Testcase Status:", testCaseStatus);
+  // console.log("Testcase Status:", testCaseStatus);
   return (
     <div className="relative flex items-start my-2 py-3 px-4 border border-white/10 rounded-xl shadow-lg bg-[#1a1a1a75]">
       <div className="flex flex-col w-full">

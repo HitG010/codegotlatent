@@ -14,7 +14,7 @@ function Settings() {
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const clearUser = useUserStore((state) => state.clearUser);
-  console.log("user in settings", user);
+  // console.log("user in settings", user);
   const [userDetails, setUserDetails] = React.useState(null);
   const [editField, setEditField] = React.useState({
     username: true,
@@ -44,8 +44,12 @@ function Settings() {
         username: userDetails.username,
         name: userDetails.name,
       };
-      setUser({ user: newUser, accessToken: useUserStore.getState().accessToken, refreshToken: useUserStore.getState().refreshToken });
-      console.log("User details updated successfully:", updatedDetails);
+      setUser({
+        user: newUser,
+        accessToken: useUserStore.getState().accessToken,
+        refreshToken: useUserStore.getState().refreshToken,
+      });
+      // console.log("User details updated successfully:", updatedDetails);
     } catch (error) {
       if (
         error?.response?.data?.error === "Username already exists" ||
@@ -66,44 +70,44 @@ function Settings() {
   const handleLogout = async () => {
     // Add logout logic here
     const url = `${import.meta.env.VITE_BASE_URL}/auth/logout`;
-    
+
     try {
       // Get refresh token using the store method for iOS devices
       const getRefreshToken = useUserStore.getState().getRefreshToken;
       const refreshToken = getRefreshToken();
-      
+
       const requestData = {};
-      
+
       // For iOS devices, include refresh token in request body
       if (isIOSSafari() && refreshToken) {
         requestData.refreshToken = refreshToken;
       }
-      
-      await axios.post(url, requestData, { 
+
+      await axios.post(url, requestData, {
         withCredentials: true,
-        timeout: 10000 // Add timeout for iOS
+        timeout: 10000, // Add timeout for iOS
       });
-      
+
       // Clear user state in the store (this also clears iOS refresh token)
       clearUser();
-      
+
       // Additional cleanup for iOS
       if (isIOSSafari()) {
-        localStorage.removeItem('ios-refresh-token');
+        localStorage.removeItem("ios-refresh-token");
         sessionStorage.clear();
       }
-      
+
       window.location.href = "/login";
     } catch (error) {
       console.error("Error logging out:", error);
-      
+
       // Even if logout fails on server, clear local data
       clearUser();
       if (isIOSSafari()) {
-        localStorage.removeItem('ios-refresh-token');
+        localStorage.removeItem("ios-refresh-token");
         sessionStorage.clear();
       }
-      
+
       window.location.href = "/login";
     }
   };
@@ -124,7 +128,9 @@ function Settings() {
     <div className="h-screen w-100vh flex flex-col lg:flex-row justify-between bg-[#0F0F0F] overflow-hidden scrollbar">
       <Navbar path={pathname} />
       <div className="home flex flex-col h-full w-full lg:w-[80%] p-4 lg:p-10 pt-4 lg:pt-16 bg-[#0F0F0F] overflow-auto scrollbar pb-20 lg:pb-10">
-        <h2 className="text-white text-2xl lg:text-4xl font-semibold">Settings</h2>
+        <h2 className="text-white text-2xl lg:text-4xl font-semibold">
+          Settings
+        </h2>
         <div className="mt-4 lg:mt-8 flex flex-col lg:flex-row gap-4 lg:gap-16 items-center lg:items-start">
           <img
             src={
@@ -155,7 +161,9 @@ function Settings() {
             Account Information
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-1 lg:gap-1 items-start lg:items-center">
-            <h2 className="text-white/65 text-base lg:text-lg font-medium">Username</h2>
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">
+              Username
+            </h2>
             <div className="flex flex-col sm:flex-row gap-2 col-span-1 lg:col-span-4">
               <input
                 type="text"
@@ -190,7 +198,9 @@ function Settings() {
                 )}
               </button>
             </div>
-            <h2 className="text-white/65 text-base lg:text-lg font-medium">Email</h2>
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">
+              Email
+            </h2>
             <div className="flex flex-col sm:flex-row gap-2 col-span-1 lg:col-span-4">
               <input
                 type="email"
@@ -210,7 +220,9 @@ function Settings() {
                         Edit <Pencil className='w-3 h-3 inline' />
                     </button> */}
             </div>
-            <h2 className="text-white/65 text-base lg:text-lg font-medium">Choose Avatar</h2>
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">
+              Choose Avatar
+            </h2>
             <div className="flex flex-wrap gap-2 col-span-1 lg:col-span-4">
               {avatars.map((avatar, idx) => (
                 <img
@@ -231,7 +243,11 @@ function Settings() {
                       };
                       setUserDetails(newDetails);
                       const newUser = { ...user, pfpId: String(idx + 1) };
-                      setUser({ user: newUser, accessToken: useUserStore.getState().accessToken, refreshToken: useUserStore.getState().refreshToken });
+                      setUser({
+                        user: newUser,
+                        accessToken: useUserStore.getState().accessToken,
+                        refreshToken: useUserStore.getState().refreshToken,
+                      });
                       try {
                         const updated = await updateUserDetails(
                           user.id,
@@ -252,9 +268,13 @@ function Settings() {
             </div>
           </div>
 
-          <h2 className="text-xl lg:text-2xl font-medium mt-4">Basic Information</h2>
+          <h2 className="text-xl lg:text-2xl font-medium mt-4">
+            Basic Information
+          </h2>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-1 lg:gap-1 items-start lg:items-center">
-            <h2 className="text-white/65 text-base lg:text-lg font-medium">Full Name</h2>
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">
+              Full Name
+            </h2>
             <div className="flex flex-col sm:flex-row gap-2 col-span-1 lg:col-span-4">
               <input
                 type="text"
@@ -274,7 +294,11 @@ function Settings() {
                     // Logic to save the name
                     handleUpdateUserDetails();
                     const newUser = { ...user, name: userDetails.name };
-                    setUser({ user: newUser, accessToken: useUserStore.getState().accessToken, refreshToken: useUserStore.getState().refreshToken });
+                    setUser({
+                      user: newUser,
+                      accessToken: useUserStore.getState().accessToken,
+                      refreshToken: useUserStore.getState().refreshToken,
+                    });
                   }
                 }}
                 className="bg-white text-black py-1 px-3 rounded hover:bg-white/65 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
@@ -290,7 +314,9 @@ function Settings() {
                 )}
               </button>
             </div>
-            <h2 className="text-white/65 text-base lg:text-lg font-medium">Bio</h2>
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">
+              Bio
+            </h2>
             <div className="flex flex-col sm:flex-row gap-2 col-span-1 lg:col-span-4 items-start">
               <textarea
                 name="Bio"
@@ -324,7 +350,9 @@ function Settings() {
                 )}
               </button>
             </div>
-            <h2 className="text-white/65 text-base lg:text-lg font-medium">Location</h2>
+            <h2 className="text-white/65 text-base lg:text-lg font-medium">
+              Location
+            </h2>
             <div className="flex flex-col sm:flex-row gap-2 col-span-1 lg:col-span-4">
               <input
                 type="text"
@@ -387,7 +415,9 @@ function Settings() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-1 items-start lg:items-center">
             <div className="text-white/65 text-base lg:text-lg font-medium col-span-1 lg:col-span-4 flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <span>Allow Email Notifications for Upcoming Contests</span>
-              <span className="text-xs bg-yellow-600/20 text-yellow-400 px-2 py-1 rounded-full">Coming Soon</span>
+              <span className="text-xs bg-yellow-600/20 text-yellow-400 px-2 py-1 rounded-full">
+                Coming Soon
+              </span>
             </div>
             <div className="flex gap-2 col-span-1 lg:col-span-1">
               <div className="relative inline-block w-10 h-5">

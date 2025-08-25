@@ -20,7 +20,7 @@ async function getAllContests(req, res) {
       },
       cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });
-    console.log("Contests:", contests);
+    // console.log("Contests:", contests);
     return res.json(contests);
   } catch (error) {
     console.error("Error fetching contests:", error);
@@ -34,7 +34,7 @@ async function getAllContests(req, res) {
 
 async function getContestById(req, res) {
   const contestId = req.params.id;
-  console.log("Contest ID:", contestId);
+  // console.log("Contest ID:", contestId);
   try {
     const contest = await prisma.Contest.findUnique({
       where: {
@@ -42,7 +42,7 @@ async function getContestById(req, res) {
       },
       // cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });
-    console.log("Contest:", contest);
+    // console.log("Contest:", contest);
     return res.status(200).json(contest);
   } catch (error) {
     console.error("Error fetching contest:", error);
@@ -60,8 +60,8 @@ async function isContestRegistered(req, res) {
 
 async function registerContest(req, res) {
   const { contestId, userId } = req.params;
-  console.log("Contest ID:", contestId);
-  console.log("User ID:", userId);
+  // console.log("Contest ID:", contestId);
+  // console.log("User ID:", userId);
   try {
     // Check if contest status is Upcoming before registering
     const contest = await prisma.Contest.findUnique({
@@ -85,7 +85,7 @@ async function registerContest(req, res) {
         userId: userId,
       },
     });
-    console.log("Result:", result);
+    // console.log("Result:", result);
     return res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching contest:", error);
@@ -95,8 +95,8 @@ async function registerContest(req, res) {
 
 async function unregisterContest(req, res) {
   const { contestId, userId } = req.params;
-  console.log("Contest ID:", contestId);
-  console.log("User ID:", userId);
+  // console.log("Contest ID:", contestId);
+  // console.log("User ID:", userId);
   if (!(await checkIsRegistered(contestId, userId))) {
     return res
       .status(400)
@@ -114,7 +114,7 @@ async function unregisterContest(req, res) {
         },
       },
     });
-    console.log("Result:", result);
+    // console.log("Result:", result);
     res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching contest:", error);
@@ -124,7 +124,7 @@ async function unregisterContest(req, res) {
 
 async function getContestProblems(req, res) {
   const { contestId, userId } = req.params;
-  console.log("Contest ID for getting all probs:", contestId);
+  // console.log("Contest ID for getting all probs:", contestId);
   try {
     const contest = await prisma.Contest.findUnique({
       where: {
@@ -134,7 +134,7 @@ async function getContestProblems(req, res) {
         },
       },
     });
-    console.log("Contest:", contest);
+    // console.log("Contest:", contest);
     if (!contest) {
       return res
         .status(404)
@@ -176,7 +176,7 @@ async function getContestProblems(req, res) {
         },
         cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
       });
-      console.log("Problems:", problems);
+      // console.log("Problems:", problems);
       // Flatten solvedInContest for each problem
       problems.forEach((problem) => {
         problem.solvedInContest =
@@ -188,7 +188,7 @@ async function getContestProblems(req, res) {
           problem.Problems.length > 0 ? problem.Problems[0].penalty : 0;
         delete problem.Problems;
       });
-      console.log("Problems:", problems);
+      // console.log("Problems:", problems);
       return res.status(200).json(problems);
     } catch (error) {
       console.error("Error fetching problems:", error);
@@ -202,8 +202,8 @@ async function getContestProblems(req, res) {
 
 async function getContestProblem(req, res) {
   const { contestId, problemId, userId } = req.params;
-  console.log("Contest ID:", contestId);
-  console.log("Problem ID:", problemId);
+  // console.log("Contest ID:", contestId);
+  // console.log("Problem ID:", problemId);
   const contest = await prisma.Contest.findUnique({
     where: {
       id: contestId,
@@ -212,7 +212,7 @@ async function getContestProblem(req, res) {
       },
     },
   });
-  console.log("Contest:", contest);
+  // console.log("Contest:", contest);
   if (!contest) {
     return res
       .status(404)
@@ -252,7 +252,7 @@ async function getContestProblem(req, res) {
 
 async function getRankings(req, res) {
   const { contestId } = req.params;
-  console.log("Contest ID:", contestId);
+  // console.log("Contest ID:", contestId);
   try {
     // check if the cnontest has ended
     const contest = await prisma.Contest.findUnique({
@@ -309,7 +309,7 @@ async function getRankings(req, res) {
       },
     });
     // console.log("Contest Users:", contestUsers);
-    console.log("All Problem Users hue hue hue:", allProblemUsers);
+    // console.log("All Problem Users hue hue hue:", allProblemUsers);
 
     // Group problemUser entries by userId
     const problemsByUser = new Map();
@@ -326,7 +326,7 @@ async function getRankings(req, res) {
       ...userEntry,
       problems: problemsByUser.get(userEntry.user.id) || [],
     }));
-    console.log("Contest Leaderboard:", contestLeaderboard);
+    // console.log("Contest Leaderboard:", contestLeaderboard);
     return res.status(200).send(contestLeaderboard);
   } catch (error) {
     console.error("Error fetching contest ranking:", error);
@@ -336,7 +336,7 @@ async function getRankings(req, res) {
 
 async function getStartTime(req, res) {
   const { contestId } = req.params;
-  console.log("Contest ID:", contestId);
+  // console.log("Contest ID:", contestId);
   try {
     const startTime = await getContestStartTime(contestId);
     if (!startTime) {
@@ -372,14 +372,14 @@ async function submitPredictedRank(req, res) {
       error: "Contest user not found or contest is not in rank guess phase.",
     });
   }
-  console.log("Updated User:", updatedUser);
+  // console.log("Updated User:", updatedUser);
   return res.status(200).json(updatedUser);
 }
 
 async function getParticipantsCount(req, res) {
   // get the number of participants in the contest
   const { contestId } = req.params;
-  console.log("Contest ID:", contestId);
+  // console.log("Contest ID:", contestId);
   try {
     const participantsCount = await prisma.contestUser.count({
       where: {
@@ -389,7 +389,7 @@ async function getParticipantsCount(req, res) {
         ttl: 10,
       },
     });
-    console.log("Participants Count:", participantsCount);
+    // console.log("Participants Count:", participantsCount);
     return res.status(200).json({ participantsCount });
   } catch (error) {
     console.error("Error fetching participants count:", error);
@@ -399,8 +399,8 @@ async function getParticipantsCount(req, res) {
 
 async function getUserRankGuess(req, res) {
   const { contestId, userId } = req.params;
-  console.log("Contest ID:", contestId);
-  console.log("User ID:", userId);
+  // console.log("Contest ID:", contestId);
+  // console.log("User ID:", userId);
   try {
     const user = await prisma.contestUser.findUnique({
       where: {

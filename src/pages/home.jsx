@@ -18,9 +18,9 @@ const Home = () => {
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.accessToken);
   const isAuthenticated = useUserStore((state) => state.isAuthenticated);
-  console.log(user, "User in Home");
-  console.log(token, "Access Token in Home");
-  console.log(isAuthenticated, "Is Authenticated in Home");
+  // console.log(user, "User in Home");
+  // console.log(token, "Access Token in Home");
+  // console.log(isAuthenticated, "Is Authenticated in Home");
   const pathname = window.location.pathname;
   // alert("Home Page");
   return (
@@ -54,7 +54,11 @@ const Home = () => {
                 Structures and Algorithms skills!
               </p>
             </div>
-            <img src={language} alt="Contest Trophy" className="h-24 w-24 lg:h-35 lg:w-35" />
+            <img
+              src={language}
+              alt="Contest Trophy"
+              className="h-24 w-24 lg:h-35 lg:w-35"
+            />
           </Link>
           <Link
             to={"/contests"}

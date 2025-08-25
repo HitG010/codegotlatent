@@ -21,7 +21,7 @@ async function submitCode(req, res) {
       contestId: true, // Get the contest ID if the problem is part of an ongoing contest
     },
   });
-  console.log("Contest ID hue hue hue:", contest_id);
+  // console.log("Contest ID hue hue hue:", contest_id);
   if (contest_id) contest_id = contest_id.contestId;
   console.time("Fetch Testcases");
   const testcases = await prisma.TestCase.findMany({
@@ -46,7 +46,7 @@ async function submitCode(req, res) {
   const submissions = await Promise.all(
     testcases.map(async (testCase) => {
       if (testCase.isGCS) {
-        console.log("Fetching test case from GCS:", testCase.id);
+        // console.log("Fetching test case from GCS:", testCase.id);
         const [stdin, stdout] = await Promise.all([
           fetchFileFromGCS(testCase.stdin),
           fetchFileFromGCS(testCase.stdout),
@@ -71,7 +71,7 @@ async function submitCode(req, res) {
 
   console.time("Submission");
 
-  console.log("Submissions:", submissions);
+  // console.log("Submissions:", submissions);
 
   // long poll the server for submission status
   const url = `${process.env.JUDGE0_API}/submissions/batch`;
@@ -84,10 +84,10 @@ async function submitCode(req, res) {
     body: JSON.stringify({ submissions: submissions }),
   });
 
-  console.log("Result:", result);
+  // console.log("Result:", result);
 
   const resultJson = await result.json();
-  console.log("Batch submission string: ", result);
+  // console.log("Batch submission string: ", result);
   const tokensString = resultJson.map((item) => item.token).join(",");
 
   const response = await getSubmissionStatus(tokensString);
@@ -120,8 +120,8 @@ async function submitCode(req, res) {
       contestId: contest_id,
     },
   });
-  console.log("Submission:", submission);
-  console.log("submission created successfully. Verdict:", finalVerdict);
+  // console.log("Submission:", submission);
+  // console.log("submission created successfully. Verdict:", finalVerdict);
   const isCorrect = finalVerdict === "Accepted";
 
   if (contest_id !== null) {
@@ -238,7 +238,7 @@ async function batchSubmission(req, res) {
     cacheStrategy: { ttl: 30 * 60 }, // cache for 30 minutes
   });
   const submissions = [];
-  console.log("Submissions:", submissions);
+  // console.log("Submissions:", submissions);
   testcases.forEach((testCase) => {
     const submission = {
       source_code: source_code,
@@ -254,7 +254,7 @@ async function batchSubmission(req, res) {
   });
   // console.log("Submissions:", submissions);
 
-  console.log(JSON.stringify({ submissions: submissions }));
+  // console.log(JSON.stringify({ submissions: submissions }));
 
   const url = `${process.env.JUDGE0_API}/submissions/batch`;
   const response = await fetch(url, {
@@ -266,16 +266,16 @@ async function batchSubmission(req, res) {
     body: JSON.stringify({ submissions: submissions }),
   });
   const data = await response.json();
-  console.log("Response:", data);
+  // console.log("Response:", data);
 
   // res.status(200).send("OK");
   return res.json(data);
 }
 
 async function getSubmission(req, res) {
-  console.log(req.params);
+  // console.log(req.params);
   const url = `${process.env.JUDGE0_API}/submissions/${req.params.id}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -284,7 +284,7 @@ async function getSubmission(req, res) {
     },
   });
   const data = await response.json();
-  console.log("Response:", data);
+  // console.log("Response:", data);
 
   // res.status(200).send("OK");
   return res.json(data);
@@ -292,14 +292,14 @@ async function getSubmission(req, res) {
 
 async function pollSubmission(req, res) {
   const response = await getSubmissionStatus(req.params.id);
-  console.log("Response:", response);
+  // console.log("Response:", response);
   return res.json(response);
 }
 
 async function getUserSubmission(req, res) {
   const { submissionId, userId } = req.params;
-  console.log("Submission ID:", submissionId);
-  console.log("User ID:", userId);
+  // console.log("Submission ID:", submissionId);
+  // console.log("User ID:", userId);
   try {
     const submission = await prisma.Submission.findUnique({
       where: {

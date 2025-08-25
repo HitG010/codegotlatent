@@ -27,10 +27,10 @@ const rateLimiterMiddleware = async (req, res, next) => {
     // Check user rate limit
     const userId = req.user ? req.user.id : req.ip; // Use user ID if authenticated, else use IP address
     const userRateLimit = await userLimiter.consume(userId);
-    console.log("User Rate Limit:", userRateLimit);
+    // console.log("User Rate Limit:", userRateLimit);
     // Check global rate limit
     const globalRateLimit = await globalLimiter.consume("global");
-    console.log("Global Rate Limit:", globalRateLimit);
+    // console.log("Global Rate Limit:", globalRateLimit);
     next();
   } catch (err) {
     res.set("Retry-After", Math.ceil(err.msBeforeNext / 1000));

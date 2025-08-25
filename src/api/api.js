@@ -15,7 +15,7 @@ import { use } from "react";
 //   //     options.body = JSON.stringify(body);
 //   //   }
 //   const url = `${import.meta.env.VITE_BASE_URL}/hello`;
-//   console.log("URL:", url);
+//   // console.log("URL:", url);
 //   return await fetch(url, options)
 //     .then((response) => {
 //       if (!response.ok) {
@@ -24,7 +24,7 @@ import { use } from "react";
 //       return response.json();
 //     })
 //     .catch((error) => {
-//       console.error(
+//       // console.error(
 //         "There has been a problem with your fetch operation:",
 //         error
 //       );
@@ -33,7 +33,7 @@ import { use } from "react";
 
 // batch submission
 async function executeCode(code, testCases, langId, probId) {
-  console.log("Code:", typeof code);
+  // console.log("Code:", typeof code);
   const options = {
     method: "POST",
     headers: {
@@ -49,20 +49,20 @@ async function executeCode(code, testCases, langId, probId) {
     problem_id: probId,
   };
   const url = `${import.meta.env.VITE_BASE_URL}/batchSubmission`;
-  console.log("URL:", url);
-  console.log("Body:", body);
+  // console.log("URL:", url);
+  // console.log("Body:", body);
   const response = await api.post(url, body, options);
-  console.log("Response:", response.data);
+  // console.log("Response:", response.data);
   // await pollSubmissionStatus(response.data.token).then((data) => {
-  //   console.log("Polling Response:", data);
+  //   // console.log("Polling Response:", data);
   // });
   const tokensString = response.data.map((item) => item.token).join(",");
-  console.log("Tokens String:", tokensString);
+  // console.log("Tokens String:", tokensString);
   return tokensString;
 }
 
 async function submitProblem(code, probId, langId, contestId = null, userId) {
-  console.log("Code:", code);
+  // console.log("Code:", code);
   const options = {
     method: "POST",
     headers: {
@@ -79,15 +79,15 @@ async function submitProblem(code, probId, langId, contestId = null, userId) {
     userId: userId,
   };
   const url = `${import.meta.env.VITE_BASE_URL}/submitContestCode`;
-  console.log("URL:", url);
-  console.log("Body:", body);
+  // console.log("URL:", url);
+  // console.log("Body:", body);
   const response = await api.post(url, body, options);
-  console.log("Response:", response.data);
+  // console.log("Response:", response.data);
   return response.data;
 }
 
 // async function submitCode(code, probId, langId) {
-//   console.log("Code:", typeof code);
+//   // console.log("Code:", typeof code);
 //   const options = {
 //     method: "POST",
 //     headers: {
@@ -102,15 +102,15 @@ async function submitProblem(code, probId, langId, contestId = null, userId) {
 //     callback_url: "http://localhost:5000/callback",
 //   };
 //   const url = `${import.meta.env.VITE_BASE_URL}/batchSubmitProblem`;
-//   console.log("URL:", url);
-//   console.log("Body:", body);
+//   // console.log("URL:", url);
+//   // console.log("Body:", body);
 //   const response = await api.post(url, body, options);
-//   console.log("Response:", response.data);
+//   // console.log("Response:", response.data);
 //   // await pollSubmissionStatus(response.data.token).then((data) => {
-//   //   console.log("Polling Response:", data);
+//   //   // console.log("Polling Response:", data);
 //   // });
 //   const tokensString = response.data.map((item) => item.token).join(",");
-//   console.log("Tokens String:", tokensString);
+//   // console.log("Tokens String:", tokensString);
 //   return tokensString;
 // }
 
@@ -122,9 +122,9 @@ const pollSubmissionStatus = async (
   langId
 ) => {
   const url = `${import.meta.env.VITE_BASE_URL}/pollSubmission/${submissionId}`;
-  console.log("Polling URL:", url);
+  // console.log("Polling URL:", url);
   try {
-    console.log("Waiting for response at Front");
+    // console.log("Waiting for response at Front");
     const options = {
       method: "POST",
       headers: {
@@ -139,17 +139,17 @@ const pollSubmissionStatus = async (
       languageId: langId,
     };
     const response = await api.post(url, body, options);
-    console.log("Polling Response:", response);
+    // console.log("Polling Response:", response);
     return response.data;
   } catch (error) {
-    console.error("Error polling submission status:", error);
+    // console.error("Error polling submission status:", error);
     throw error;
   }
 };
 
 const fetchProblems = async (userId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/allProblems/${userId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -157,10 +157,10 @@ const fetchProblems = async (userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching problems:", error);
+    // console.error("Error fetching problems:", error);
   }
 };
 
@@ -168,7 +168,7 @@ const fetchProblem = async (problemId, userId) => {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/problem/${problemId}/user/${userId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -176,17 +176,17 @@ const fetchProblem = async (problemId, userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching problem:", error);
+    // console.error("Error fetching problem:", error);
     throw error;
   }
 };
 
 const fetchContests = async () => {
   const url = `${import.meta.env.VITE_BASE_URL}/contests`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -194,17 +194,17 @@ const fetchContests = async () => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching contests:", error);
+    // console.error("Error fetching contests:", error);
     throw error;
   }
 };
 
 const getContest = async (contestId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -212,10 +212,10 @@ const getContest = async (contestId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching contest:", error);
+    // console.error("Error fetching contest:", error);
     throw error;
   }
 };
@@ -224,7 +224,7 @@ const getIfUserRegistered = async (contestId, userId) => {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/contest/${contestId}/participants/${userId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -232,10 +232,10 @@ const getIfUserRegistered = async (contestId, userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching contest:", error);
+    // console.error("Error fetching contest:", error);
     throw error;
   }
 };
@@ -244,7 +244,7 @@ const registerUser = async (contestId, userId) => {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/contest/${contestId}/register/${userId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.post(url, {
       headers: {
@@ -252,10 +252,10 @@ const registerUser = async (contestId, userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error registering user:", error);
+    // console.error("Error registering user:", error);
     throw error;
   }
 };
@@ -263,7 +263,7 @@ const unregisterUser = async (contestId, userId) => {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/contest/${contestId}/unregister/${userId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.post(url, {
       headers: {
@@ -271,10 +271,10 @@ const unregisterUser = async (contestId, userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error unregistering user:", error);
+    // console.error("Error unregistering user:", error);
     throw error;
   }
 };
@@ -283,7 +283,7 @@ const getAllContestProblems = async (contestId, userId) => {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/contest/${contestId}/problems/user/${userId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -291,10 +291,10 @@ const getAllContestProblems = async (contestId, userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching contest problems:", error);
+    // console.error("Error fetching contest problems:", error);
     throw error;
   }
 };
@@ -303,7 +303,7 @@ const fetchContestProblem = async (problemId, contestId, userId) => {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/contest/${contestId}/problem/${problemId}/user/${userId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -311,10 +311,10 @@ const fetchContestProblem = async (problemId, contestId, userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching contest problem:", error);
+    // console.error("Error fetching contest problem:", error);
     throw error;
   }
 };
@@ -323,7 +323,7 @@ const getSubmission = async (submissionId, userId) => {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/submission/${submissionId}/user/${userId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -331,17 +331,17 @@ const getSubmission = async (submissionId, userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching submission:", error);
+    // console.error("Error fetching submission:", error);
     throw error;
   }
 };
 
 const getContestUsers = async (contestId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/users`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -349,17 +349,17 @@ const getContestUsers = async (contestId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching contest users:", error);
+    // console.error("Error fetching contest users:", error);
     throw error;
   }
 };
 
 const fetchContestStartTime = async (contestId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/contest/${contestId}/startTime`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -367,10 +367,10 @@ const fetchContestStartTime = async (contestId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching contest start time:", error);
+    // console.error("Error fetching contest start time:", error);
     throw error;
   }
 };
@@ -380,7 +380,7 @@ const submitRank = async (contestId, userId, rank) => {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/contest/${contestId}/user/${userId}/rank/${rank}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.post(url, {
       headers: {
@@ -388,10 +388,10 @@ const submitRank = async (contestId, userId, rank) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error submitting rank:", error);
+    // console.error("Error submitting rank:", error);
     throw error;
   }
 };
@@ -400,7 +400,7 @@ const getProblemAcceptance = async (problemId) => {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/problem/${problemId}/acceptance`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -408,17 +408,17 @@ const getProblemAcceptance = async (problemId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching problem acceptance:", error);
+    // console.error("Error fetching problem acceptance:", error);
     throw error;
   }
 };
 
 const getUserProblemCount = async (userId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}/problemCount`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -426,21 +426,21 @@ const getUserProblemCount = async (userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching user problem count:", error);
+    // console.error("Error fetching user problem count:", error);
     throw error;
   }
 };
 
 const getUserProblemSubmission = async (problemId, userId) => {
-  // console.log("User ID:", userId);
-  // console.log("Problem ID:", problemId);
+  // // console.log("User ID:", userId);
+  // // console.log("Problem ID:", problemId);
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/user/${userId}/problem/${problemId}/submission`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -448,10 +448,10 @@ const getUserProblemSubmission = async (problemId, userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching user problem submission:", error);
+    // console.error("Error fetching user problem submission:", error);
     throw error;
   }
 };
@@ -460,7 +460,7 @@ const getContestParticipants = async (contestId) => {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/contest/${contestId}/participants`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -468,17 +468,17 @@ const getContestParticipants = async (contestId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching contest participants:", error);
+    // console.error("Error fetching contest participants:", error);
     throw error;
   }
 };
 
 const getUserData = async (userName) => {
   const url = `${import.meta.env.VITE_BASE_URL}/user/${userName}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -486,17 +486,17 @@ const getUserData = async (userName) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching user data:", error);
+    // console.error("Error fetching user data:", error);
     throw error;
   }
 };
 
 const addProblem = async (problemData) => {
   const url = `${import.meta.env.VITE_BASE_URL}/addProblem`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.post(url, problemData, {
       headers: {
@@ -504,10 +504,10 @@ const addProblem = async (problemData) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error adding problem:", error);
+    // console.error("Error adding problem:", error);
     throw error;
   }
 };
@@ -520,14 +520,14 @@ const getAllTags = async () => {
       "Access-Control-Allow-Origin": "*",
     },
   });
-  console.log("Response:", response.data);
+  // console.log("Response:", response.data);
   return response.data;
 };
 
 // for settings page
 const getUserDetails = async (userId) => {
   const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}/details`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.get(url, {
       headers: {
@@ -535,17 +535,17 @@ const getUserDetails = async (userId) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching user data:", error);
+    // console.error("Error fetching user data:", error);
     throw error;
   }
 };
 
 const updateUserDetails = async (userId, userDetails) => {
   const url = `${import.meta.env.VITE_BASE_URL}/user/${userId}/update`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.post(url, userDetails, {
       headers: {
@@ -553,17 +553,17 @@ const updateUserDetails = async (userId, userDetails) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error updating user details:", error);
+    // console.error("Error updating user details:", error);
     throw error;
   }
 };
 
 function fetchTags() {
   const url = `${import.meta.env.VITE_BASE_URL}/tags`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   return api
     .get(url, {
       headers: {
@@ -572,18 +572,18 @@ function fetchTags() {
       },
     })
     .then((response) => {
-      console.log("Response:", response.data);
+      // console.log("Response:", response.data);
       return response.data;
     })
     .catch((error) => {
-      console.error("Error fetching tags:", error);
+      // console.error("Error fetching tags:", error);
       throw error;
     });
 }
 
 function addContest(contestData) {
   const url = `${import.meta.env.VITE_BASE_URL}/contests/new`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   return api
     .post(url, contestData, {
       headers: {
@@ -592,18 +592,18 @@ function addContest(contestData) {
       },
     })
     .then((response) => {
-      console.log("Response:", response.data);
+      // console.log("Response:", response.data);
       return response.data;
     })
     .catch((error) => {
-      console.error("Error adding contest:", error);
+      // console.error("Error adding contest:", error);
       throw error;
     });
 }
 
 function editContest(contestId, contestData) {
   const url = `${import.meta.env.VITE_BASE_URL}/contests/edit/${contestId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   return api
     .put(url, contestData, {
       headers: {
@@ -612,11 +612,11 @@ function editContest(contestId, contestData) {
       },
     })
     .then((response) => {
-      console.log("Response:", response.data);
+      // console.log("Response:", response.data);
       return response.data;
     })
     .catch((error) => {
-      console.error("Error editing contest:", error);
+      // console.error("Error editing contest:", error);
       throw error;
     });
 }
@@ -625,7 +625,7 @@ function getUserRankGuess(contestId, userId) {
   const url = `${
     import.meta.env.VITE_BASE_URL
   }/contest/${contestId}/user/${userId}/rankGuess`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   return api
     .get(url, {
       headers: {
@@ -634,18 +634,18 @@ function getUserRankGuess(contestId, userId) {
       },
     })
     .then((response) => {
-      console.log("Response:", response.data);
+      // console.log("Response:", response.data);
       return response.data;
     })
     .catch((error) => {
-      console.error("Error fetching user rank guess:", error);
+      // console.error("Error fetching user rank guess:", error);
       throw error;
     });
 }
 
 const addTestCase = async (testCaseData) => {
   const url = `${import.meta.env.VITE_BASE_URL}/addTestCase`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.post(url, testCaseData, {
       headers: {
@@ -653,17 +653,17 @@ const addTestCase = async (testCaseData) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error adding test case:", error);
+    // console.error("Error adding test case:", error);
     throw error;
   }
 };
 
 const editProblem = async (problemId, problemData) => {
   const url = `${import.meta.env.VITE_BASE_URL}/editProblem/${problemId}`;
-  console.log("URL:", url);
+  // console.log("URL:", url);
   try {
     const response = await api.put(url, problemData, {
       headers: {
@@ -672,10 +672,10 @@ const editProblem = async (problemId, problemData) => {
       },
       withCredentials: true,
     });
-    console.log("Response:", response.data);
+    // console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error editing problem:", error);
+    // console.error("Error editing problem:", error);
     throw error;
   }
 };
