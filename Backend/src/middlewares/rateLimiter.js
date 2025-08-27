@@ -15,10 +15,10 @@ const userLimiter = new RateLimiterRedis({
 const globalLimiter = new RateLimiterRedis({
   storeClient: redis,
   keyPrefix: "global",
-  points: 1000, // 1000 requests
+  points: 2000, // 1000 requests
   duration: 60, // per minute
-  execEvenlyly: true, // Execute evenly over the duration
-  execEvenlyMinDelayMs: 50, // Minimum delay between executions
+  // execEvenlyly: true, // Execute evenly over the duration
+  // execEvenlyMinDelayMs: 50, // Minimum delay between executions
   blockDuration: 20, // Block for 20 seconds if limit is reached
 });
 

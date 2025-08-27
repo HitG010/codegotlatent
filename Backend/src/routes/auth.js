@@ -175,7 +175,7 @@ router.post("/auth/refresh-token", async (req, res) => {
 
         if (!user) {
           return res.status(404).json({ message: "User not found." });
-        } else console.log("User found:", user);
+        }
 
         const accessToken = await generateAccessToken({
           id: user.id,
