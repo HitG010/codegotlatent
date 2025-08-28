@@ -147,6 +147,8 @@ async function scheduleContest(contestId) {
     case "Rating Update Pending":
       await scheduleRatingPendingContest(io, contestId);
       break;
+    case "Ended":
+      break;
     default:
       throw new Error("Unknown contest status");
   }
