@@ -25,7 +25,7 @@ const globalLimiter = new RateLimiterRedis({
 const rateLimiterMiddleware = async (req, res, next) => {
   try {
     // Check user rate limit
-    const userId = req.user ? req.user.id : req.ip; // Use user ID if authenticated, else use IP address
+    const userId = req.body.userId || req.ip; // Use user ID if authenticated, else use IP address
     const userRateLimit = await userLimiter.consume(userId);
     // console.log("User Rate Limit:", userRateLimit);
     // Check global rate limit

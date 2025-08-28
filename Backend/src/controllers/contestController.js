@@ -79,6 +79,11 @@ async function registerContest(req, res) {
         .status(400)
         .json({ error: "User is already registered for this contest." });
     }
+
+    const currCount = await getParticipantsCount(contestId);
+    if (currCount.participantsCount >= 150) {
+      return res.status(400).json({ error: "Contest is already full." });
+    }
     const result = await prisma.contestUser.create({
       data: {
         contestId: contestId,
