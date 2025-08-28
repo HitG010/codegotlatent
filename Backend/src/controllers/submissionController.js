@@ -74,15 +74,21 @@ async function submitCode(req, res) {
   // console.log("Submissions:", submissions);
 
   // long poll the server for submission status
-  const url = `${process.env.JUDGE0_API}/submissions/batch`;
-  const result = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-    body: JSON.stringify({ submissions: submissions }),
-  });
+  let result;
+  try {
+    const url = `${process.env.JUDGE0_API}/submissions/batch`;
+    result = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ submissions: submissions }),
+    });
+  } catch (error) {
+    console.error("Error submitting code batch:", error);
+    return res.status(500).json({ error: "Failed to submit code batch" });
+  }
 
   // console.log("Result:", result);
 
@@ -256,15 +262,21 @@ async function batchSubmission(req, res) {
 
   // console.log(JSON.stringify({ submissions: submissions }));
 
-  const url = `${process.env.JUDGE0_API}/submissions/batch`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-    body: JSON.stringify({ submissions: submissions }),
-  });
+  let response;
+  try {
+    const url = `${process.env.JUDGE0_API}/submissions/batch`;
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ submissions: submissions }),
+    });
+  } catch (error) {
+    console.error("Error submitting code batch:", error);
+    return res.status(500).json({ error: "Failed to submit code batch" });
+  }
   const data = await response.json();
   // console.log("Response:", data);
 
@@ -274,15 +286,21 @@ async function batchSubmission(req, res) {
 
 async function getSubmission(req, res) {
   // console.log(req.params);
-  const url = `${process.env.JUDGE0_API}/submissions/${req.params.id}`;
-  // console.log("URL:", url);
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
+  let response;
+  try {
+    const url = `${process.env.JUDGE0_API}/submissions/${req.params.id}`;
+    // console.log("URL:", url);
+    response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching submission:", error);
+    return res.status(500).json({ error: "Failed to fetch submission" });
+  }
   const data = await response.json();
   // console.log("Response:", data);
 
