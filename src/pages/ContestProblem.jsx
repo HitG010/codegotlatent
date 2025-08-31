@@ -11,7 +11,7 @@ import latentNavLogo from "../assets/latentNavLogo.png";
 import { LuAlarmClock } from "react-icons/lu";
 import "highlight.js/styles/github.css";
 import SubmitDialog from "../components/submitDailog";
-import { Loader2, Play, UploadCloud } from "lucide-react";
+import { ChevronLeft, Loader2, Play, UploadCloud } from "lucide-react";
 import ProblemDescription from "../components/ProblemDescription";
 import CodeEditor from "../components/CodeEditor";
 import ProblemTab from "../components/ProblemTab";
@@ -323,9 +323,14 @@ function ContestProblem() {
         submissionId={submissionResult.id}
       />
       <div className="flex justify-between items-center px-4 lg:px-8 pt-2 text-white h-[60px] lg:h-[75px] overflow-hidden">
-        <Link to={"/home"}>
-          <img src={latentNavLogo} className="h-6 w-6 lg:h-8 lg:w-8" />
-        </Link>
+        <div className="flex items-center justify-center gap-2">
+          <Link to={"/home"}>
+            <img src={latentNavLogo} className="h-6 w-6 lg:h-8 lg:w-8" />
+          </Link>
+          <Link className="text-sm lg:text-md truncate max-w-[200px] lg:max-w-md text-white/45 border rounded-lg border-white/10 px-3 py-2 hover:bg-white/10 transition-all duration-300" to={`/contest/${contestId}`}>
+            <ChevronLeft className="h-5 w-5 inline-block mr-1" /> Back to Contest
+          </Link>
+        </div>
         <div className="flex items-center gap-1">
           <div className="text-sm text-white/50 flex items-center gap-2">
             {runLoading ? (
