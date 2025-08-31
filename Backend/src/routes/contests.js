@@ -12,9 +12,8 @@ const {
   getRankings,
   getStartTime,
   submitPredictedRank,
-  getParticipantsCount,
+  participantsCount,
   getUserRankGuess,
-
 } = require("../controllers/contestController");
 
 router.get("/contests", getAllContests);
@@ -33,7 +32,7 @@ router.post(
   "/contest/:contestId/user/:userId/rank/:predictedrank",
   submitPredictedRank
 );
-router.get("/contest/:contestId/participants", getParticipantsCount);
-router.get('/contest/:contestId/user/:userId/rankGuess', getUserRankGuess);
+router.get("/contest/:contestId/participants", participantsCount);
+router.get("/contest/:contestId/user/:userId/rankGuess", getUserRankGuess);
 
 module.exports = router;

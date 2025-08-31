@@ -119,6 +119,8 @@ async function editProblem(req, res) {
     tags,
   } = req.body;
 
+  console.log("Tags:", tags);
+
   try {
     let intProbScore = parseInt(problemScore);
     const problem = await prisma.problem.update({
@@ -128,11 +130,11 @@ async function editProblem(req, res) {
         description,
         difficulty,
         problemScore: intProbScore,
-        contestId,
+        contestId: contestId ? contestId : null,
         max_time_limit,
         max_memory_limit,
         tags: {
-          set: tags.map((tagId) => ({ id: tagId.id })), // replace existing tags
+          set: tags.map((tagId) => ({ id: tagId })), // replace existing tags
         },
       },
     });

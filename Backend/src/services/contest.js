@@ -1,5 +1,14 @@
 const prisma = require("../services/prisma");
 
+const getParticipantsCount = async (contestId) => {
+  const count = await prisma.contestUser.count({
+    where: {
+      contestId: contestId,
+    },
+  });
+  return { participantsCount: count };
+};
+
 const updateContestUser = async (contestId, userId, contestStartTime) => {
   const response = await prisma.problemUser.aggregate({
     where: {
@@ -263,4 +272,5 @@ module.exports = {
   assignRandomGuesses,
   calculateRatingChanges,
   submitContest,
+  getParticipantsCount,
 };
