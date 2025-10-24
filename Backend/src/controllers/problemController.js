@@ -92,10 +92,10 @@ async function getProblem(req, res) {
       },
       contest: true,
     },
-    cacheStrategy: {
-      ttl: 60 * 60,
-      swr: 5 * 60,
-    },
+    // cacheStrategy: {
+    //   ttl: 60 * 60,
+    //   swr: 5 * 60,
+    // },
   });
   const isSolved = await prisma.problemUser.findFirst({
     where: {
