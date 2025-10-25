@@ -18,6 +18,9 @@ async function allProblems(req, res) {
   });
 
   const problems = await prisma.problem.findMany({
+    orderBy: {
+      createdAt: "asc",
+    },
     select: {
       id: true,
       title: true,
