@@ -76,6 +76,7 @@ model Problem {
   difficulty       String // "Easy", "Medium", "Hard"
   max_time_limit   Int          @default(2)
   max_memory_limit Int          @default(262144) // 256MB in kBs
+  isPublic        Boolean      @default(true) // Public vs. private problems
   testCases        TestCase[]
   submissions      Submission[]
   createdAt        DateTime     @default(now())

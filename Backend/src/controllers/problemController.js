@@ -52,9 +52,11 @@ async function allProblems(req, res) {
               in: ["Ended", "Rating Update Pending"], // Include problems from ended or rating pending contests
             },
           },
+          isPublic: true,
         },
         {
           contest: null,
+          isPublic: true,
         },
       ],
     },
@@ -85,6 +87,7 @@ async function getProblem(req, res) {
   const problem = await prisma.Problem.findUnique({
     where: {
       id: problemId,
+      isPublic: true,
     },
     include: {
       tags: true,
@@ -109,13 +112,13 @@ async function getProblem(req, res) {
       isSolved: true,
     },
   });
-  if (!isSolved) {
-    problem.isSolved = null;
-  } else problem.isSolved = isSolved.isSolved;
 
   if (!problem) {
     return res.status(404).json({ error: "Problem not found" });
   }
+  if (!isSolved) {
+    problem.isSolved = null;
+  } else problem.isSolved = isSolved.isSolved;
   // console.log("Problem:", problem);
   if (
     problem.contestId != null &&
