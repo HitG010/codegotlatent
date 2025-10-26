@@ -252,67 +252,81 @@ function Problem() {
   // }, []);
 
   const startHorizontalDrag = (e) => {
-    const startX = e.clientX;
-    const initialTile3Width = tile3Width;
-    const initialTile1Width = tile1Width;
+  e.preventDefault();
+  const startX = e.clientX;
+  const initialTile3Width = tile3Width;
+  const initialTile1Width = tile1Width;
 
-    document.body.style.userSelect = "none";
+  document.body.style.userSelect = "none";
 
-    const onMouseMove = (e) => {
-      const delta = e.clientX - startX;
+  let animationFrameId = null;
+
+  const onMouseMove = (e) => {
+    const delta = e.clientX - startX;
+
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    animationFrameId = requestAnimationFrame(() => {
       const newTile3Width = Math.max(minTileWidth, initialTile3Width - delta);
-      const newTile1Width = screenWidth - newTile3Width - 12; // accounting for drag handle
+      const newTile1Width = screenWidth - newTile3Width - 12; // handle gap
 
       if (newTile1Width >= minTileWidth) {
         setTile3Width(newTile3Width);
         setTile1Width(newTile1Width);
-        setTile2Width(newTile1Width); // keep tile1 and tile2 in syncxw
+        setTile2Width(newTile1Width); // keep in sync
       }
-    };
-
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-      document.body.style.userSelect = "";
-    };
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
+    });
   };
 
-  const startVerticalDrag = (e) => {
-    const startY = e.clientY;
-    const initialTile1Height = tile1Height;
-    const initialTile2Height = tile2Height;
+  const onMouseUp = () => {
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+    document.body.style.userSelect = "";
+  };
 
-    document.body.style.userSelect = "none";
+  document.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("mouseup", onMouseUp);
+};
 
-    const onMouseMove = (e) => {
-      const delta = e.clientY - startY;
-      const newTile1Height = Math.max(
-        minTileHeight,
-        initialTile1Height + delta
-      );
-      const newTile2Height = Math.max(
-        minTileHeight,
-        initialTile2Height - delta
-      );
 
-      // if (newTile1Height + newTile2Height <= screenHeight - 12) {
+const startVerticalDrag = (e) => {
+  e.preventDefault();
+  const startY = e.clientY;
+  const initialTile1Height = tile1Height;
+  const initialTile2Height = tile2Height;
+
+  document.body.style.userSelect = "none";
+
+  let animationFrameId = null;
+
+  const onMouseMove = (e) => {
+    const delta = e.clientY - startY;
+
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    animationFrameId = requestAnimationFrame(() => {
+      const newTile1Height = Math.max(minTileHeight, initialTile1Height + delta);
+      const newTile2Height = Math.max(minTileHeight, initialTile2Height - delta);
+
+      // Keep the total height consistent (optional)
+      const totalHeight = initialTile1Height + initialTile2Height;
+      if (newTile1Height + newTile2Height > totalHeight) return;
+
       setTile1Height(newTile1Height);
       setTile2Height(newTile2Height);
-      // }
-    };
-
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-      document.body.style.userSelect = "";
-    };
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
+    });
   };
+
+  const onMouseUp = () => {
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+    document.body.style.userSelect = "";
+  };
+
+  document.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("mouseup", onMouseUp);
+};
+
 
   return (
     <div className="flex flex-col h-screen w-full box-border bg-black overflow-hidden">
