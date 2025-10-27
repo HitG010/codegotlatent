@@ -141,6 +141,12 @@ const App = () => {
 
         <Route path="/settings" element={<Settings />} />
         <Route path="/:path" element={<RedirectHandler />} />
+        <Route path="/problem/:path" element={<RedirectHandler />} />
+        <Route path="/contest/:path" element={<RedirectHandler />} />
+        <Route path="/submission/:path" element={<RedirectHandler />} />
+        <Route path="/user/:path" element={<RedirectHandler />} />
+        <Route path="/admin/:path" element={<RedirectHandler />} />
+        <Route path="/contest/:contestId/problem/:path" element={<RedirectHandler />} />
         {/* Add more routes as needed */}
         <Route path="/404" element={<NotFound />} />
       </Routes>
