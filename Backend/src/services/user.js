@@ -9,6 +9,7 @@ const getUserProblemCount = async (userId) => {
       isSolved: true,
       problem: {
         difficulty: "Easy",
+        isPublic: true,
       },
       OR: [
         {
@@ -33,6 +34,7 @@ const getUserProblemCount = async (userId) => {
       isSolved: true,
       problem: {
         difficulty: "Medium",
+        isPublic: true,
       },
       OR: [
         {
@@ -55,6 +57,7 @@ const getUserProblemCount = async (userId) => {
       isSolved: true,
       problem: {
         difficulty: "Hard",
+        isPublic: true,
       },
       OR: [
         {
@@ -78,6 +81,7 @@ const getUserProblemCount = async (userId) => {
       id: true,
     },
     where: {
+      isPublic: true,
       OR: [
         {
           contest: {
