@@ -219,17 +219,37 @@ function Problem() {
     };
 
     const handleResize = () => {
-      setScreenHeight(window.innerHeight);
-      setScreenWidth(window.innerWidth);
+      const newWidth = window.innerWidth;
+      const newHeight = window.innerHeight - 75;
+
+      setScreenWidth(newWidth);
+      setScreenHeight(newHeight);
+
+      // Maintain the ratio between tiles
+      const totalWidth = tile1Width + tile3Width + 12; // +12 for divider width
+      const tile1Ratio = tile1Width / totalWidth;
+      const tile3Ratio = tile3Width / totalWidth;
+
+      const totalHeight = tile1Height + tile2Height + 2; // +2 for divider height
+      const tile1HeightRatio = tile1Height / totalHeight;
+      const tile2HeightRatio = tile2Height / totalHeight;
+
+      // Apply ratios to new dimensions
+      setTile1Width(newWidth * tile1Ratio);
+      setTile3Width(newWidth * tile3Ratio);
+      setTile2Width(newWidth * tile1Ratio); // keep in sync if needed
+
+      setTile1Height(newHeight * tile1HeightRatio);
+      setTile2Height(newHeight * tile2HeightRatio);
     };
 
-    document.addEventListener("keydown", handleKeyDown);
     window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
 
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("resize", handleResize);
-    };
+    // return () => {
+    //   document.removeEventListener("keydown", handleKeyDown);
+    //   window.removeEventListener("resize", handleResize);
+    // };
   }, [runLoading, resultLoading, data, code, handleRunSubmit, handleSubmit]);
 
   if (loading) {
