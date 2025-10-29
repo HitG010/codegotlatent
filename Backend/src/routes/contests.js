@@ -30,7 +30,11 @@ router.post(
   isSameUser,
   unregisterContest
 );
-router.get("/contest/:contestId/problems/user/:userId", getContestProblems);
+router.get(
+  "/contest/:contestId/problems/user/:userId",
+  isSameUser,
+  getContestProblems
+);
 router.get(
   "/contest/:contestId/problem/:problemId/user/:userId",
   getContestProblem
