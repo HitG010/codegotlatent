@@ -1,6 +1,7 @@
 // /contests
 const express = require("express");
 const router = express.Router();
+const { isSameUser } = require("../middlewares/user");
 const {
   getAllContests,
   getContestById,
@@ -19,8 +20,16 @@ const {
 router.get("/contests", getAllContests);
 router.get("/contest/:id", getContestById);
 router.get("/contest/:contestId/participants/:userId", isContestRegistered);
-router.post("/contest/:contestId/register/:userId", registerContest);
-router.post("/contest/:contestId/unregister/:userId", unregisterContest);
+router.post(
+  "/contest/:contestId/register/:userId",
+  isSameUser,
+  registerContest
+);
+router.post(
+  "/contest/:contestId/unregister/:userId",
+  isSameUser,
+  unregisterContest
+);
 router.get("/contest/:contestId/problems/user/:userId", getContestProblems);
 router.get(
   "/contest/:contestId/problem/:problemId/user/:userId",
@@ -30,6 +39,7 @@ router.get("/contest/:contestId/users", getRankings);
 router.get("/contest/:contestId/startTime", getStartTime);
 router.post(
   "/contest/:contestId/user/:userId/rank/:predictedrank",
+  isSameUser,
   submitPredictedRank
 );
 router.get("/contest/:contestId/participants", participantsCount);
