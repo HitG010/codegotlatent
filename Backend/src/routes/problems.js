@@ -1,7 +1,7 @@
 // /allProblems, /problem/:pId/user/:uId
 const express = require("express");
 const router = express.Router();
-const isAdmin = require("../middlewares/admin");
+const { isAdmin } = require("../middlewares/admin");
 const {
   allProblems,
   getProblem,

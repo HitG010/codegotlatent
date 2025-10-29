@@ -50,6 +50,7 @@ async function submitCode(req, res) {
         const [stdin, stdout] = await Promise.all([
           fetchFileFromGCS(testCase.stdin),
           fetchFileFromGCS(testCase.stdout),
+          3,
         ]);
         testCase.stdin = stdin;
         testCase.stdout = stdout;
