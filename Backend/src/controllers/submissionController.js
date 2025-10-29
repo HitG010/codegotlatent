@@ -90,10 +90,10 @@ async function submitCode(req, res) {
     return res.status(500).json({ error: "Failed to submit code batch" });
   }
 
-  // console.log("Result:", result);
+  console.log("Result:", result);
 
   const resultJson = await result.json();
-  // console.log("Batch submission string: ", result);
+  console.log("Batch submission string: ", result);
   const tokensString = resultJson.map((item) => item.token).join(",");
 
   const response = await getSubmissionStatus(tokensString);
