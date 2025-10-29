@@ -1,6 +1,7 @@
 // /allProblems, /problem/:pId/user/:uId
 const express = require("express");
 const router = express.Router();
+const { isSameUser } = require("../middlewares/user");
 const { isAdmin } = require("../middlewares/admin");
 const {
   allProblems,
@@ -11,7 +12,7 @@ const {
 } = require("../controllers/problemController");
 
 router.get("/allProblems/:userId", allProblems);
-router.get("/problem/:problemId/user/:userId", getProblem);
+router.get("/problem/:problemId/user/:userId", isSameUser, getProblem);
 router.get("/problem/:problemId/acceptance", acceptanceRate);
 router.get("/tags", getAllTags);
 router.post(
