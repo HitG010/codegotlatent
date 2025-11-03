@@ -323,7 +323,7 @@ async function getUserSubmission(req, res) {
     const submission = await prisma.Submission.findUnique({
       where: {
         id: submissionId,
-        Problem: {
+        problem: {
           isPublic: true,
         },
       },

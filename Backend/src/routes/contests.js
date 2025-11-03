@@ -37,6 +37,7 @@ router.get(
 );
 router.get(
   "/contest/:contestId/problem/:problemId/user/:userId",
+  isSameUser,
   getContestProblem
 );
 router.get("/contest/:contestId/users", getRankings);
