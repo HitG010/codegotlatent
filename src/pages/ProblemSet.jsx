@@ -382,6 +382,24 @@ const ProblemSet = () => {
                 </div>
               )}
             </div>
+            <div
+              className="problem-button px-4 py-3 mb-4 flex flex-row items-center border-1 border-[#FFB72620] rounded-3xl hover:inset-shadow-xs hover:inset-shadow-[#FFB72610] hover:cursor-pointer transition-all duration-300 hover:bg-[#FFB72610]"
+              style={{
+                boxShadow:
+                  "inset 0 0 30px rgba(255, 183, 38, 0.15), inset 0 0 10px rgba(255, 183, 38, 0.08), inset 0 1px 2px rgba(255, 183, 38, 0.27)",
+              }}
+            >
+              <div className="flex flex-col p-2">
+                <div className="flex flex-row gap-3 items-center justify-items-start mb-3 hover:gap-4 transition-all duration-300">
+                  <h1 className="text-2xl font-semibold">24-Hour Challenge</h1>
+                  {/* <FaArrowRightLong className="h-5 w-5" /> */}
+                  <div className="px-2 py-1 text-yellow-500 bg-yellow-500/20 rounded-xl text-sm">Coming Soon</div>
+                </div>
+                <p className="text-[#ffffff65] text-sm">
+                  Get a chance to win HIMS CAFE food vouchers worth ₹1000. Dropping Soon! Stay Tuned.
+                </p>
+              </div>
+            </div>
             <div className="problem-statement flex flex-col overflow-y-auto pr-2 scrollbar">
               {loading ? (
                 <div className="w-full items-center justify-center text-white py-8">
