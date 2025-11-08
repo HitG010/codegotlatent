@@ -12,6 +12,13 @@ async function getAllContests(req, res) {
     const contests = await prisma.Contest.findMany({
       include: {
         participants: false,
+        problems: false,
+      },
+      where: {
+        isPublic: true,
+      },
+      orderBy: {
+        startTime: "desc",
       },
       cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });
@@ -34,6 +41,7 @@ async function getContestById(req, res) {
     const contest = await prisma.Contest.findUnique({
       where: {
         id: contestId,
+        isPublic: true,
       },
       // cacheStrategy: { ttl: 5 * 60 }, // cache for 5 minutes
     });

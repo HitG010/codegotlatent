@@ -50,6 +50,7 @@ model Contest {
   startTime            DateTime
   rankGuessStartTime   DateTime? // Nullable for contests without a rank guess phase
   endTime              DateTime
+  isPublic            Boolean       @default(true) // Public vs. private contests
   participants         ContestUser[]
   numberOfParticipants Int?          @default(0) // Number of participants
   createdAt            DateTime      @default(now())
