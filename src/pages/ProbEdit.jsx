@@ -12,6 +12,7 @@ import ReviewAndSubmitStep from "../components/ReviewAndSubmitStep";
 
 export default function EditProblem() {
   const isAuthenticated = useUserStore((s) => s.isAuthenticated);
+  const userId = useUserStore((s) => s.user?.id);
   const [authorized, setAuthorized] = useState(false);
   const [checking, setChecking] = useState(true);
   const { problemId } = useParams();
@@ -59,7 +60,7 @@ export default function EditProblem() {
       setLoading(true);
       setError("");
       // Using userId as 1 for admin access, you might want to get this from user context
-      const data = await fetchProblem(id, 1);
+      const data = await fetchProblem(id, userId);
 
       // Transform the fetched data to match our state structure
       setProblemData({

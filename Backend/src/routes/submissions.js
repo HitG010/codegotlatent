@@ -19,11 +19,11 @@ router.post(
 router.post(
   "/batchSubmission",
   rateLimiterMiddleware,
-  isSameUser,
+  // isSameUser,
   batchSubmission
 );
 router.get("/submission/:id", getSubmission);
-router.post("/pollSubmission/:id", isSameUser, pollSubmission);
+router.post("/pollSubmission/:id", pollSubmission);
 router.get(
   "/submission/:submissionId/user/:userId",
   isSameUser,
