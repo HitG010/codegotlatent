@@ -15,7 +15,6 @@ const jwt = require("jsonwebtoken");
 
 router.post("/auth/google", async (req, res) => {
   const { idToken } = req.body;
-  // console.log("Received ID Token:", idToken);
 
   try {
     // Set CORS headers for iOS compatibility
