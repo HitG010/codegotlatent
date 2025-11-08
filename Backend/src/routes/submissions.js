@@ -16,12 +16,7 @@ router.post(
   isSameUser,
   submitCode
 );
-router.post(
-  "/batchSubmission",
-  rateLimiterMiddleware,
-  // isSameUser,
-  batchSubmission
-);
+router.post("/batchSubmission", rateLimiterMiddleware, batchSubmission);
 router.get("/submission/:id", getSubmission);
 router.post("/pollSubmission/:id", pollSubmission);
 router.get(
