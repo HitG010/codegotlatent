@@ -1,10 +1,11 @@
 const { Storage } = require("@google-cloud/storage");
+const BUCKET_NAME = process.env.BUCKET_NAME;
 
 const storage = new Storage({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
 
-const BUCKET_NAME = "codegotlatent";
+// const BUCKET_NAME = "cgl1";
 
 async function fetchFileFromGCS(path) {
   const file = storage.bucket(BUCKET_NAME).file(path);
