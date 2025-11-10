@@ -24,10 +24,10 @@ const getSubmissionStatus = async (
 
     const submissions = data.submissions.map((sub) => ({
       ...sub,
-      stdout: decode(sub.stdout),
-      stderr: decode(sub.stderr),
-      compile_output: decode(sub.compile_output),
-      message: decode(sub.message),
+      stdout: sub.stdout ? decode(sub.stdout) : "",
+      stderr: sub.stderr ? decode(sub.stderr) : "",
+      compile_output: sub.compile_output ? decode(sub.compile_output) : "",
+      message: sub.message ? decode(sub.message) : "",
     }));
 
     const pending = submissions.filter((sub) => sub.status.id < 3);
