@@ -18,16 +18,21 @@ const getSubmissionStatus = async (
         "Content-Type": "application/json",
       },
     });
+    if (!response.ok) {
+      throw new Error(
+        `Error fetching submission status: ${response.status} ${response.statusText}`
+      );
+    }
 
     const data = await response.json();
     // console.log("Raw submission status response:", data);
 
-    const submissions = data.submissions.map((sub) => ({
+    const submissions = (data.submissions || []).filter(Boolean).map((sub) => ({
       ...sub,
-      stdout: decode(sub.stdout),
-      stderr: decode(sub.stderr),
-      compile_output: decode(sub.compile_output),
-      message: decode(sub.message),
+      stdout: decode(sub?.stdout),
+      stderr: decode(sub?.stderr),
+      compile_output: decode(sub?.compile_output),
+      message: decode(sub?.message),
     }));
 
     const pending = submissions.filter((sub) => sub.status.id < 3);

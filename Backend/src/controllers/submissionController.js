@@ -83,7 +83,7 @@ async function submitCode(req, res) {
       }
 
       return {
-        source_code: source_code || "// No code submitted",
+        source_code: source_code,
         language_id: language_id,
         stdin: testCase.stdin,
         expected_output: testCase.stdout,
@@ -336,6 +336,9 @@ async function getSubmission(req, res) {
 }
 
 async function pollSubmission(req, res) {
+  if (!req.params.id) {
+    return res.status(400).json({ error: "Submission ID is required" });
+  }
   const response = await getSubmissionStatus(req.params.id);
   // console.log("Response:", response);
   return res.json(response);
