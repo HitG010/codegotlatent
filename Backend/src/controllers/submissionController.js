@@ -9,6 +9,33 @@ dotenv.config();
 async function submitCode(req, res) {
   const body = await req.body;
   const { problem_id, language_id, source_code, userId } = body;
+  if (!problem_id || !language_id || !source_code || !userId) {
+    return res.status(400).json({
+      error: "problem_id, language_id, source_code and userId are required",
+    });
+  }
+
+  // fetch problem memory and time limits
+  let problem;
+  try {
+    problem = await prisma.Problem.findUnique({
+      where: {
+        id: problem_id,
+      },
+      select: {
+        max_memory_limit: true, // in kBs
+        max_time_limit: true, // in seconds
+      },
+      cacheStrategy: { ttl: 30 * 60 }, // cache for 30 minutes
+    });
+  } catch (error) {
+    console.error("Error fetching problem limits:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+
+  if (!problem) {
+    return res.status(404).json({ error: "Problem not found" });
+  }
 
   let contest_id = await prisma.Problem.findUnique({
     where: {
@@ -23,25 +50,24 @@ async function submitCode(req, res) {
   });
   // console.log("Contest ID hue hue hue:", contest_id);
   if (contest_id) contest_id = contest_id.contestId;
+  let testcases = [];
   console.time("Fetch Testcases");
-  const testcases = await prisma.TestCase.findMany({
-    where: {
-      problemId: problem_id,
-    },
-    cacheStrategy: { ttl: 30 * 60 }, // cache for 30 seconds
-  });
+  try {
+    testcases = await prisma.TestCase.findMany({
+      where: {
+        problemId: problem_id,
+      },
+      cacheStrategy: { ttl: 30 * 60 }, // cache for 30 seconds
+    });
+  } catch (error) {
+    console.error("Error fetching test cases:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 
-  // fetch problem memory and time limits
-  const problem = await prisma.Problem.findUnique({
-    where: {
-      id: problem_id,
-    },
-    select: {
-      max_memory_limit: true, // in kBs
-      max_time_limit: true, // in seconds
-    },
-    cacheStrategy: { ttl: 30 * 60 }, // cache for 30 minutes
-  });
+  if (testcases.length === 0) {
+    return res.status(400).json({ error: "No test cases found for problem" });
+  }
+
   // console.log("Submissions:", submissions);
   const submissions = await Promise.all(
     testcases.map(async (testCase) => {
