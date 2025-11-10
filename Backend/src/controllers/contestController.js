@@ -87,12 +87,24 @@ async function registerContest(req, res) {
     if (currCount.participantsCount >= 150) {
       return res.status(400).json({ error: "Contest is already full." });
     }
-    const result = await prisma.contestUser.create({
-      data: {
-        contestId: contestId,
-        userId: userId,
-      },
-    });
+    let result;
+    try {
+      result = await prisma.contestUser.create({
+        data: {
+          contestId: contestId,
+          userId: userId,
+        },
+      });
+    } catch (err) {
+      // Handle unique constraint (already registered) and other errors
+      if (err.code === "P2002") {
+        return res
+          .status(400)
+          .json({ error: "User is already registered for this contest." });
+      }
+      console.error("Error registering user:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
     // console.log("Result:", result);
     return res.status(200).json(result);
   } catch (error) {
