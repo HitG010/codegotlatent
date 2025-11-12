@@ -64,7 +64,7 @@ async function getUserDetailsFromUsername(req, res) {
         pastRatings: true,
         submissions: {
           orderBy: { createdAt: "desc" },
-          // take: 10, // Fetch only the last 10 submissions
+          take: 10, // Fetch only the last 10 submissions
           select: {
             id: true,
             verdict: true,
