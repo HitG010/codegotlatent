@@ -18,6 +18,7 @@ import ProblemTab from "../components/ProblemTab";
 import ProblemSubmissions from "../components/ProblemSubmissions";
 import { ClockFading, File } from "lucide-react";
 import { avatars } from "../components/Avatars";
+import axios from "axios";
 
 function Problem() {
   const user = useUserStore((state) => state.user);
@@ -47,6 +48,7 @@ function Problem() {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [resultLoading, setResultLoading] = useState(false);
   const [runLoading, setRunLoading] = useState(false);
+  const [acceptedData, setAcceptedData] = useState(null);
   const containerRef = useRef(null);
 
   const [tabId, setTabId] = useState(0);
@@ -70,6 +72,11 @@ function Problem() {
     try {
       const response = await fetchProblem(id, user.id);
       setData(response);
+      // console.log("Problem Data:", response);
+      const url = `${import.meta.env.VITE_BASE_URL}/problem/${id}/acceptance`;
+      const acceptanceRate = await axios.get(url);
+      // console.log("Acceptance Rate Data:", acceptanceRate.data.acceptedSubmissions);
+      setAcceptedData(acceptanceRate.data);
     } catch (err) {
       setError(err);
     } finally {
@@ -449,7 +456,7 @@ const startVerticalDrag = (e) => {
                 />
               </div>
             </div>
-            {tabId === 0 && <ProblemDescription data={data} />}
+            {tabId === 0 && <ProblemDescription data={data} submissionsData={acceptedData}/>}
             {tabId === 1 && (
               <ProblemSubmissions problemId={id} userId={user.id} />
             )}
@@ -571,7 +578,7 @@ const startVerticalDrag = (e) => {
         <div className="flex-1 overflow-hidden">
           {tabId === 0 && (
             <div className="h-full p-4 bg-[#212121] overflow-auto scrollbar">
-              <ProblemDescription data={data} />
+              <ProblemDescription data={data} submissionsData={acceptedData} />
             </div>
           )}
           {tabId === 1 && (
