@@ -7,7 +7,8 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 
-const ProblemDescription = ({ data }) => {
+const ProblemDescription = ({ data, submissionsData }) => {
+  console.log(submissionsData);
   // Helper: try to parse description which may be a JSON-stringified array
   const parseSlides = (desc) => {
     desc = desc.replace(/\n/g, "\\n");
@@ -88,6 +89,14 @@ const ProblemDescription = ({ data }) => {
         )}
 
       </article>
+
+      {/* adding the accepted count section */}
+      <div className="mt-6 px-2 py-1 pb-6 rounded-lg flex items-center gap-4 flex items-center">
+        <span className="text-white/70">Accepted Submissions:</span>
+        <span className="text-white font-mono font-semibold">{submissionsData.acceptedSubmissions}</span>
+        <span className="text-white/70">Total Submissions:</span>
+        <span className="text-white font-mono font-semibold">{submissionsData.totalSubmissions}</span>
+      </div>
     </div>
   );
 };
