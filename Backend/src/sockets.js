@@ -1,109 +1,61 @@
-const cron = require("node-cron");
 const schedule = require("node-schedule");
 const prisma = require("./services/prisma");
 const { submitContest } = require("./services/contest");
-// const { io } = require("./server");
 
-// console.log("Scheduling module loaded", io);
+// Contests whose endTime passed longer ago than this are closed out on boot
+// without running the rating update — computing ratings for a contest that
+// never actually ran would corrupt real user ratings.
+const STALE_CONTEST_GRACE_MS = 60 * 60 * 1000; // 1 hour
 
-// async function scheduleUpcomingContests(io) {
-//   const contests = await prisma.Contest.findMany({
-//     where: {
-//       status: "Upcoming",
-//       isScheduled: false, // Only schedule contests that are not already scheduled
-//     },
-//     select: {
-//       rankGuessStartTime: true,
-//       id: true,
-//     },
-//   });
-//   console.log("Contests:", contests);
-//   contests.forEach(async (contest) => {
-//     const rankGuessStartTime = new Date(contest.rankGuessStartTime);
-//     console.log("Rank Guess Start Time:", rankGuessStartTime);
+// One in-memory timer per contest. Re-arming a contest (e.g. after an admin
+// edits its times) must cancel the old timer, otherwise both would fire.
+const jobs = new Map();
 
-//     // Mark the contest as scheduled
-//     await prisma.Contest.update({
-//       where: {
-//         id: contest.id,
-//       },
-//       data: {
-//         isScheduled: true, // Set isScheduled to true to avoid rescheduling
-//       },
-//     });
-
-//     const date = rankGuessStartTime.getDate();
-//     const month = rankGuessStartTime.getMonth(); // 0-11
-//     const year = rankGuessStartTime.getFullYear();
-//     const hour = rankGuessStartTime.getHours();
-//     const minute = rankGuessStartTime.getMinutes();
-//     const second = rankGuessStartTime.getSeconds();
-//     // console.log("start time:", startTime);
-//     // const date = new Date(start);
-//     const RankGuessDate = new Date(year, month, date, hour, minute, second);
-//     // console.log("Start Time:", startTime);
-//     schedule.scheduleJob(RankGuessDate, async () => {
-//       console.log("Contest Rank Guess phase started:", contest.name);
-//       // Update the contest status to "Ongoing"
-//       const updatedContest = await prisma.Contest.update({
-//         where: {
-//           id: contest.id,
-//         },
-//         data: {
-//           status: "Rank Guess Phase",
-//           isScheduled: false,
-//         },
-//       });
-//       console.log("Contest updated:", updatedContest);
-//       io.emit("contestRankGuessPhaseStarted", {
-//         contestId: contest.id,
-//         updatedContest,
-//       });
-//     });
-//   });
-// }
+function armContestJob(contestId, date, transition) {
+  const existing = jobs.get(contestId);
+  if (existing) {
+    existing.cancel();
+    jobs.delete(contestId);
+  }
+  const run = () => {
+    jobs.delete(contestId);
+    transition().catch((err) =>
+      console.error("Contest transition failed:", contestId, err)
+    );
+  };
+  // node-schedule silently ignores past dates — run missed transitions now
+  if (!date || date.getTime() <= Date.now()) {
+    setImmediate(run);
+    return;
+  }
+  jobs.set(contestId, schedule.scheduleJob(date, run));
+}
 
 async function scheduleUpcomingContest(io, contestId) {
-  const contest = await prisma.Contest.findUnique({
-    where: {
-      id: contestId,
-      isScheduled: false, // Only schedule contests that are not already scheduled
-    },
-    select: {
-      rankGuessStartTime: true,
-    },
+  const contest = await prisma.contest.findUnique({
+    where: { id: contestId, isScheduled: false },
+    select: { rankGuessStartTime: true, startTime: true },
   });
-
   if (!contest) {
-    console.error("Contest not found:", contestId);
+    console.error("Contest not found or already scheduled:", contestId);
     return;
   }
 
-  // Mark the contest as scheduled
-  await prisma.Contest.update({
-    where: {
-      id: contestId,
-    },
-    data: {
-      isScheduled: true, // Set isScheduled to true to avoid rescheduling
-    },
+  await prisma.contest.update({
+    where: { id: contestId },
+    data: { isScheduled: true },
   });
 
-  const rankGuessStartTime = new Date(contest.rankGuessStartTime);
-  // console.log("Rank Guess Start Time:", rankGuessStartTime);
+  // Contests without a rank guess phase go straight to the start transition
+  const rankGuessStartTime = new Date(
+    contest.rankGuessStartTime ?? contest.startTime
+  );
 
-  schedule.scheduleJob(rankGuessStartTime, async () => {
-    // Update the contest status to "Rank Guess Phase"
-    const updatedContest = await prisma.Contest.update({
-      where: {
-        id: contestId,
-      },
-      data: {
-        status: "Rank Guess Phase",
-        isScheduled: false, // Set isScheduled to false to avoid rescheduling
-      },
+  armContestJob(contestId, rankGuessStartTime, async () => {
+    const updatedContest = await prisma.contest.update({
+      where: { id: contestId },
+      data: { status: "Rank Guess Phase", isScheduled: false },
     });
-    console.log("Contest updated:", updatedContest);
     console.log("Contest Rank Guess phase started:", contestId);
     io.emit("contestRankGuessPhaseStarted", {
       contestId: contestId,
@@ -113,97 +65,25 @@ async function scheduleUpcomingContest(io, contestId) {
   });
 }
 
-// async function scheduleRankGuessContests(io) {
-//   const contests = await prisma.Contest.findMany({
-//     where: {
-//       status: "Rank Guess Phase",
-//       isScheduled: false, // Only schedule contests that are not already scheduled
-//     },
-//     select: {
-//       startTime: true,
-//       id: true,
-//     },
-//   });
-//   console.log("Contests:", contests);
-//   contests.forEach(async (contest) => {
-//     const startTime = new Date(contest.startTime);
-//     console.log("Start Time:", startTime);
-
-//     // Mark the contest as scheduled
-//     await prisma.Contest.update({
-//       where: {
-//         id: contest.id,
-//       },
-//       data: {
-//         isScheduled: true, // Set isScheduled to true to avoid rescheduling
-//       },
-//     });
-
-//     const date = startTime.getDate();
-//     const month = startTime.getMonth(); // 0-11
-//     const year = startTime.getFullYear();
-//     const hour = startTime.getHours();
-//     const minute = startTime.getMinutes();
-//     const second = startTime.getSeconds();
-//     // console.log("start time:", startTime);
-//     // const date = new Date(start);
-//     const StartDate = new Date(year, month, date, hour, minute, second);
-//     // console.log("Start Time:", startTime);
-//     schedule.scheduleJob(StartDate, async () => {
-//       console.log("Contest started:", contest.name);
-//       // Update the contest status to "Ongoing"
-//       const updatedContest = await prisma.Contest.update({
-//         where: {
-//           id: contest.id,
-//         },
-//         data: {
-//           status: "Ongoing",
-//           isScheduled: false, // Set isScheduled to false to avoid rescheduling
-//         },
-//       });
-//       console.log("Contest updated:", updatedContest);
-//       io.emit("contestStarted", { contestId: contest.id, updatedContest });
-//     });
-//   });
-// }
-
 async function scheduleRankGuessContest(io, contestId) {
-  const contest = await prisma.Contest.findUnique({
-    where: {
-      id: contestId,
-      isScheduled: false, // Only schedule contests that are not already scheduled
-    },
-    select: {
-      startTime: true,
-    },
+  const contest = await prisma.contest.findUnique({
+    where: { id: contestId, isScheduled: false },
+    select: { startTime: true },
   });
   if (!contest) {
-    console.error("Contest not found:", contestId);
+    console.error("Contest not found or already scheduled:", contestId);
     return;
   }
 
-  // Mark the contest as scheduled
-  await prisma.Contest.update({
-    where: {
-      id: contestId,
-    },
-    data: {
-      isScheduled: true, // Set isScheduled to true to avoid rescheduling
-    },
+  await prisma.contest.update({
+    where: { id: contestId },
+    data: { isScheduled: true },
   });
 
-  const startTime = new Date(contest.startTime);
-  // console.log("Start Time:", startTime);
-  schedule.scheduleJob(startTime, async () => {
-    // Update the contest status to "Ongoing"
-    const updatedContest = await prisma.Contest.update({
-      where: {
-        id: contestId,
-      },
-      data: {
-        status: "Ongoing",
-        isScheduled: false, // Set isScheduled to false to avoid rescheduling
-      },
+  armContestJob(contestId, new Date(contest.startTime), async () => {
+    const updatedContest = await prisma.contest.update({
+      where: { id: contestId },
+      data: { status: "Ongoing", isScheduled: false },
     });
     console.log("Contest started:", contestId);
     io.emit("contestStarted", {
@@ -214,108 +94,33 @@ async function scheduleRankGuessContest(io, contestId) {
   });
 }
 
-// async function scheduleOngoingContests(io) {
-//   const contests = await prisma.Contest.findMany({
-//     where: {
-//       status: "Ongoing",
-//       isScheduled: false, // Only schedule contests that are not already scheduled
-//     },
-//     select: {
-//       endTime: true,
-//       id: true,
-//     },
-//   });
-//   console.log("Contests:", contests);
-//   contests.forEach(async (contest) => {
-//     const endTime = new Date(contest.endTime);
-//     console.log("End Time:", endTime);
-
-//     // Mark the contest as scheduled
-//     await prisma.Contest.update({
-//       where: {
-//         id: contest.id,
-//       },
-//       data: {
-//         isScheduled: true, // Set isScheduled to true to avoid rescheduling
-//       },
-//     });
-//     const date = endTime.getDate();
-//     const month = endTime.getMonth(); // 0-11
-//     const year = endTime.getFullYear();
-//     const hour = endTime.getHours();
-//     const minute = endTime.getMinutes();
-//     const second = endTime.getSeconds();
-//     // console.log("end time:", endTime);
-//     // const date = new Date(end);
-//     const EndDate = new Date(year, month, date, hour, minute, second);
-//     // console.log("End Time:", endTime);
-//     schedule.scheduleJob(EndDate, async () => {
-//       console.log("Contest rating update phase started:", contest.name);
-//       // Update the contest status to "Ended"
-//       const updatedContest = await prisma.Contest.update({
-//         where: {
-//           id: contest.id,
-//         },
-//         data: {
-//           status: "Rating Update Pending",
-//           isScheduled: false, // Set isScheduled to false to avoid rescheduling
-//         },
-//       });
-//       console.log("Contest updated:", updatedContest);
-//       // call the ranking update
-//       console.log("Submitting contest for rating update:", contest.id);
-//       submitContest(contest.id);
-//       io.emit("contestRatingPending", {
-//         contestId: contest.id,
-//         updatedContest,
-//       });
-//     });
-//   });
-// }
-
 async function scheduleOngoingContest(io, contestId) {
-  const contest = await prisma.Contest.findUnique({
-    where: {
-      id: contestId,
-      isScheduled: false, // Only schedule contests that are not already scheduled
-    },
-    select: {
-      endTime: true,
-    },
+  const contest = await prisma.contest.findUnique({
+    where: { id: contestId, isScheduled: false },
+    select: { endTime: true },
   });
   if (!contest) {
-    console.error("Contest not found:", contestId);
+    console.error("Contest not found or already scheduled:", contestId);
     return;
   }
 
-  // Mark the contest as scheduled
-  await prisma.Contest.update({
-    where: {
-      id: contestId,
-    },
-    data: {
-      isScheduled: true, // Set isScheduled to true to avoid rescheduling
-    },
+  await prisma.contest.update({
+    where: { id: contestId },
+    data: { isScheduled: true },
   });
 
-  const endTime = new Date(contest.endTime);
-  // console.log("End Time:", endTime);
-  schedule.scheduleJob(endTime, async () => {
-    console.log("Contest rating update phase started:", contestId);
-    // Update the contest status to "Ended"
-    const updatedContest = await prisma.Contest.update({
-      where: {
-        id: contestId,
-      },
-      data: {
-        status: "Rating Update Pending",
-        isScheduled: false, // Set isScheduled to false to avoid rescheduling
-      },
+  armContestJob(contestId, new Date(contest.endTime), async () => {
+    const updatedContest = await prisma.contest.update({
+      where: { id: contestId },
+      data: { status: "Rating Update Pending", isScheduled: false },
     });
-    console.log("Contest updated:", updatedContest);
-    // call the ranking update
-    console.log("Submitting contest for rating update:", contestId);
-    submitContest(contestId);
+    console.log("Contest ended, computing ratings:", contestId);
+    try {
+      await submitContest(contestId);
+    } catch (err) {
+      // A failed rating run (e.g. no participants) must not stall the contest
+      console.error("Rating update failed for contest:", contestId, err);
+    }
     io.emit("contestRatingPending", {
       contestId: contestId,
       updatedContest: updatedContest,
@@ -324,132 +129,97 @@ async function scheduleOngoingContest(io, contestId) {
   });
 }
 
-// async function scheduleRatingPendingContests(io) {
-//   const contests = await prisma.Contest.findMany({
-//     where: {
-//       status: "Rating Update Pending",
-//       isScheduled: false, // Only schedule contests that are not already scheduled
-//     },
-//     select: {
-//       endTime: true,
-//       id: true,
-//     },
-//   });
-//   console.log("Contests:", contests);
-//   contests.forEach(async (contest) => {
-//     const endTime = new Date(contest.endTime);
-//     console.log("End Time:", endTime);
-
-//     // Mark the contest as scheduled
-//     await prisma.Contest.update({
-//       where: {
-//         id: contest.id,
-//       },
-//       data: {
-//         isScheduled: true, // Set isScheduled to true to avoid rescheduling
-//       },
-//     });
-//     const date = endTime.getDate();
-//     const month = endTime.getMonth(); // 0-11
-//     const year = endTime.getFullYear();
-//     const hour = endTime.getHours();
-//     const minute = endTime.getMinutes();
-//     const second = endTime.getSeconds();
-//     // console.log("end time:", endTime);
-//     // const date = new Date(end);
-//     const EndDate = new Date(year, month, date, hour, minute, second);
-//     // console.log("End Time:", endTime);
-//     schedule.scheduleJob(
-//       new Date(EndDate.getTime() + 2 * 60 * 1000),
-//       async () => {
-//         console.log("Contest Rating Update Phase Started:", contest.name);
-//         // Update the contest status to "Ended"
-//         const updatedContest = await prisma.Contest.update({
-//           where: {
-//             id: contest.id,
-//           },
-//           data: {
-//             status: "Ended",
-//             // isScheduled: false, // Set isScheduled to false to avoid rescheduling
-//           },
-//         });
-//         console.log("Contest updated:", updatedContest);
-//         io.emit("contestEnded", { contestId: contest.id, updatedContest });
-//       }
-//     );
-//   });
-// }
-
 async function scheduleRatingPendingContest(io, contestId) {
-  const contest = await prisma.Contest.findUnique({
-    where: {
-      id: contestId,
-      isScheduled: false, // Only schedule contests that are not already scheduled
-    },
-    select: {
-      endTime: true,
-    },
+  const contest = await prisma.contest.findUnique({
+    where: { id: contestId, isScheduled: false },
+    select: { endTime: true },
   });
   if (!contest) {
-    console.error("Contest not found:", contestId);
+    console.error("Contest not found or already scheduled:", contestId);
     return;
   }
 
-  // Mark the contest as scheduled
-  await prisma.Contest.update({
-    where: {
-      id: contestId,
-    },
-    data: {
-      isScheduled: true, // Set isScheduled to true to avoid rescheduling
-    },
+  await prisma.contest.update({
+    where: { id: contestId },
+    data: { isScheduled: true },
   });
 
   const endTime = new Date(contest.endTime);
-  // console.log("End Time:", endTime);
-  schedule.scheduleJob(
-    new Date(endTime.getTime() + 2 * 60 * 1000),
-    async () => {
-      console.log("Contest Rating Update Phase Started:", contestId);
-      // Update the contest status to "Ended"
-      const updatedContest = await prisma.Contest.update({
-        where: {
-          id: contestId,
-        },
-        data: {
-          status: "Ended",
-          // isScheduled: false, // Set isScheduled to false to avoid rescheduling
-        },
-      });
-      console.log("Contest updated:", updatedContest);
-      io.emit("contestEnded", {
-        contestId: contestId,
-        updatedContest: updatedContest,
-      });
-    }
-  );
+  armContestJob(contestId, new Date(endTime.getTime() + 2 * 60 * 1000), async () => {
+    const updatedContest = await prisma.contest.update({
+      where: { id: contestId },
+      data: { status: "Ended" },
+    });
+    console.log("Contest ended:", contestId);
+    io.emit("contestEnded", {
+      contestId: contestId,
+      updatedContest: updatedContest,
+    });
+  });
 }
 
-// async function scheduler(io) {
-//   cron.schedule("*/1 * * * *", async () => {
-//     console.log("Scheduling contests");
-//     // status -> upcoming, rank guess, ongoing, rating pending, ended
-//     // await scheduleUpcomingContests(io);
-//     // await scheduleRankGuessContests(io);
-//     // await scheduleOngoingContests(io);
-//     // await scheduleRatingPendingContests(io);
-//     console.log("Contests scheduled");
-//   });
-// }
+// Re-arm every non-Ended contest on boot. In-memory timers die with the
+// process and leave isScheduled stuck at true, which otherwise blocks all
+// rescheduling of those contests forever.
+async function reconcileContests(io) {
+  await prisma.contest.updateMany({
+    where: { status: { not: "Ended" }, isScheduled: true },
+    data: { isScheduled: false },
+  });
+
+  const contests = await prisma.contest.findMany({
+    where: { status: { not: "Ended" } },
+    select: { id: true, name: true, status: true, endTime: true },
+  });
+
+  for (const contest of contests) {
+    try {
+      const missedBy = Date.now() - new Date(contest.endTime).getTime();
+      if (missedBy > STALE_CONTEST_GRACE_MS) {
+        // The contest window was missed entirely while no server was running.
+        // Close it out without touching ratings; an admin can reschedule it
+        // via the edit endpoint if it should run for real.
+        await prisma.contest.update({
+          where: { id: contest.id },
+          data: { status: "Ended", isScheduled: false },
+        });
+        console.warn(
+          `Reconcile: closed stale contest without rating update: ${contest.name} (${contest.id}), ended ${Math.round(missedBy / 3600000)}h ago`
+        );
+        continue;
+      }
+
+      switch (contest.status) {
+        case "Upcoming":
+          await scheduleUpcomingContest(io, contest.id);
+          break;
+        case "Rank Guess Phase":
+          await scheduleRankGuessContest(io, contest.id);
+          break;
+        case "Ongoing":
+          await scheduleOngoingContest(io, contest.id);
+          break;
+        case "Rating Update Pending":
+          await scheduleRatingPendingContest(io, contest.id);
+          break;
+        default:
+          console.error(
+            "Reconcile: unknown contest status:",
+            contest.id,
+            contest.status
+          );
+      }
+    } catch (err) {
+      console.error("Reconcile failed for contest:", contest.id, err);
+    }
+  }
+  console.log(`Contest scheduler: reconciled ${contests.length} contest(s)`);
+}
 
 module.exports = {
-  // scheduleUpcomingContests,
-  // scheduleRankGuessContests,
-  // scheduleOngoingContests,
-  // scheduleRatingPendingContests,
   scheduleUpcomingContest,
   scheduleRankGuessContest,
   scheduleOngoingContest,
   scheduleRatingPendingContest,
-  // scheduler,
+  reconcileContests,
 };

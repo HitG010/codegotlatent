@@ -1,17 +1,18 @@
 const getSubmissionStatus = async (
   tokens,
-  maxRetries = 1000,
-  delayMs = 1000
+  maxWaitMs = 120000,
+  initialDelayMs = 300
 ) => {
   const url = `${process.env.JUDGE0_API}/submissions/batch?tokens=${tokens}&base64_encoded=true`;
-  let retries = 0;
+  const startedAt = Date.now();
+  let delayMs = initialDelayMs;
 
   const decode = (base64Str) => {
     if (!base64Str) return "";
     return Buffer.from(base64Str, "base64").toString("utf-8");
   };
 
-  while (retries < maxRetries) {
+  while (Date.now() - startedAt < maxWaitMs) {
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -41,11 +42,12 @@ const getSubmissionStatus = async (
       return submissions;
     }
 
-    retries++;
     await new Promise((r) => setTimeout(r, delayMs));
+    // Back off gently: fast first polls for quick verdicts, less chatter on slow ones
+    delayMs = Math.min(delayMs * 1.5, 1500);
   }
 
-  throw new Error("Timeout: Submissions not finished after max retries.");
+  throw new Error("Timeout: Submissions not finished within max wait time.");
 };
 
 module.exports = {

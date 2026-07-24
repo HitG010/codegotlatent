@@ -5,11 +5,9 @@ const redis = require("../services/redis");
 const userLimiter = new RateLimiterRedis({
   storeClient: redis,
   keyPrefix: "user",
-  points: 2, // 2 requests
+  points: 4, // 4 requests
   duration: 10, // per 10 seconds
-  execEvenlyly: true, // Execute evenly over the duration
-  execEvenlyMinDelayMs: 100, // Minimum delay between executions
-  blockDuration: 20, // Block for 20 seconds if limit is reached
+  blockDuration: 10, // Block for 10 seconds if limit is reached
 });
 
 const globalLimiter = new RateLimiterRedis({
@@ -24,13 +22,12 @@ const globalLimiter = new RateLimiterRedis({
 
 const rateLimiterMiddleware = async (req, res, next) => {
   try {
-    // Check user rate limit
     const userId = req.body.userId || req.ip; // Use user ID if authenticated, else use IP address
-    const userRateLimit = await userLimiter.consume(userId);
-    // console.log("User Rate Limit:", userRateLimit);
-    // Check global rate limit
-    const globalRateLimit = await globalLimiter.consume("global");
-    // console.log("Global Rate Limit:", globalRateLimit);
+    // Check user and global limits in one Redis round trip's worth of time
+    await Promise.all([
+      userLimiter.consume(userId),
+      globalLimiter.consume("global"),
+    ]);
     next();
   } catch (err) {
     res.set("Retry-After", Math.ceil(err.msBeforeNext / 1000));

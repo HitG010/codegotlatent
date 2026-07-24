@@ -7,12 +7,12 @@ const redis = require("./services/redis");
 const cookieParser = require("cookie-parser");
 const prisma = require("./services/prisma");
 const { isAdmin } = require("./middlewares/admin");
-const { scheduler } = require("./sockets");
 const {
   scheduleUpcomingContest,
   scheduleOngoingContest,
   scheduleRankGuessContest,
   scheduleRatingPendingContest,
+  reconcileContests,
 } = require("./sockets");
 
 const problemRouter = require("./routes/problems");
@@ -29,7 +29,7 @@ const app = express();
 const server = require("http").createServer(app);
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json({ limit: "50mb" })); // Increase the limit to handle larger requests
+app.use(express.json({ limit: "10mb" })); // Large enough for admin test case uploads, small enough to not be a DoS surface
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
@@ -81,7 +81,7 @@ app.post("/contests/new", isAdmin, async (req, res) => {
     });
     console.log("Contest created:", contest);
     // Schedule the contest based on its status
-    await scheduleContest(id);
+    await scheduleContest(contest.id);
     return res.status(201).json(contest);
   } catch (error) {
     console.error("Error creating contest:", error);
@@ -158,4 +158,8 @@ async function scheduleContest(contestId) {
 
 server.listen(PORT, () => {
   console.log(`Socket server is running on port ${PORT}`);
+  // Re-arm contest timers lost when the previous process exited
+  reconcileContests(io).catch((err) =>
+    console.error("Contest reconciliation failed:", err)
+  );
 });
