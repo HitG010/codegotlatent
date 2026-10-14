@@ -10,9 +10,11 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "problems:import": "tsx --env-file-if-exists=.env src/cli/import-problems.ts"
   },
   "dependencies": {
+    "@cgl/problem-package": "workspace:*",
     "@cgl/rating": "workspace:*",
     "@cgl/shared": "workspace:*",
     "@prisma/adapter-pg": "7.10.0",

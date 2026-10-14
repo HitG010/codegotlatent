@@ -12,15 +12,6 @@ export const CONTEST_PHASES = [
 export const contestPhaseSchema = z.enum(CONTEST_PHASES);
 export type ContestPhase = z.infer<typeof contestPhaseSchema>;
 
-// Status strings stored by the v1 app, for the data migration.
-export const LEGACY_STATUS_TO_PHASE: Record<string, ContestPhase> = {
-  Upcoming: "SCHEDULED",
-  "Rank Guess Phase": "GUESS_WINDOW",
-  Ongoing: "LIVE",
-  "Rating Update Pending": "JUDGING",
-  Ended: "RESULTS",
-};
-
 /**
  * A percentile range guess: "I'll finish between top `best`% and top `worst`%".
  * Percentiles are "top X%" — smaller is better — so best ≤ worst.

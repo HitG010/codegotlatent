@@ -8,6 +8,9 @@ coverage
 # Generated Prisma client (rebuilt on install)
 apps/api/src/generated/
 
+# Local blob store and other dev data
+.data/
+
 # Logs
 logs
 *.log

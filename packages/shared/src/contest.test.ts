@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CONTEST_PHASES, LEGACY_STATUS_TO_PHASE, percentileGuessSchema } from "./contest.js";
+import { percentileGuessSchema } from "./contest.js";
 
 describe("percentileGuessSchema", () => {
   it("accepts a range from better to worse percentile", () => {
@@ -17,12 +17,5 @@ describe("percentileGuessSchema", () => {
     ]) {
       expect(percentileGuessSchema.safeParse(guess).success).toBe(false);
     }
-  });
-});
-
-describe("LEGACY_STATUS_TO_PHASE", () => {
-  it("maps every v1 status onto a phase", () => {
-    const mapped = new Set(Object.values(LEGACY_STATUS_TO_PHASE));
-    expect([...mapped].sort()).toEqual([...CONTEST_PHASES].sort());
   });
 });

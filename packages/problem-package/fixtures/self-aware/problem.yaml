@@ -1,0 +1,7 @@
+problem_format_version: "2025-09"
+name: Self-Aware
+uuid: 6f1d2c4e-8a3b-4f0e-9c1a-2b7d5e3f9a10
+limits:
+  time_limit: 1.0
+  memory: 256
+keywords: [implementation]

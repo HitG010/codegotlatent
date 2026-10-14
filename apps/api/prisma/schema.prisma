@@ -1,5 +1,8 @@
-// CodeGotLatent v2 schema. v1 data is copied in by scripts/migrate-v1.ts —
-// this database starts empty; nothing here is applied to the v1 database.
+// CodeGotLatent v2. Starts empty: nothing is migrated from v1.
+//
+// Problems are authored as ICPC-format packages (see packages/problem-package)
+// and published here as immutable versions. Test files live in a blob store,
+// addressed by SHA-256; this database only records their hashes.
 
 generator client {
   provider = "prisma-client"
@@ -59,6 +62,8 @@ enum RatingKind {
   FORM
 }
 
+// ─── People ──────────────────────────────────────────────────────────────
+
 model User {
   id       String  @id @default(uuid(7))
   username String  @unique
@@ -68,7 +73,6 @@ model User {
   name     String?
   bio      String?
   location String?
-  avatarId Int?
 
   latentRating   Int @default(1500)
   latentContests Int @default(0)
@@ -101,29 +105,20 @@ model Session {
   @@index([userId])
 }
 
-model Tag {
-  id       String    @id @default(uuid(7))
-  slug     String    @unique
-  name     String    @unique
-  problems Problem[]
-}
+// ─── Problems ────────────────────────────────────────────────────────────
 
 model Problem {
-  id            String     @id @default(uuid(7))
-  slug          String     @unique
-  title         String
-  statement     String // markdown
-  editorial     String? // markdown
-  difficulty    Difficulty
-  timeLimitMs   Int        @default(2000)
-  memoryLimitKb Int        @default(262144)
-  isPublic      Boolean    @default(false)
-  // Bumped whenever test cases change, so judge workers drop cached copies
-  testsVersion  Int        @default(1)
+  id          String     @id @default(uuid(7))
+  // The package's uuid from problem.yaml; survives renames and slug changes
+  packageUuid String     @unique
+  slug        String     @unique
+  title       String
+  difficulty  Difficulty
+  // Listed in practice from this moment. Null while it's a draft or waiting
+  // for its contest; the contest engine sets it when the contest ends.
+  publishedAt DateTime?
 
-  contestId    String?
-  contestIndex Int? // position within the contest: 0 = A, 1 = B, …
-  points       Int     @default(0) // contest score for solving it
+  currentVersionId String? @unique
 
   // Maintained on each judged submission so the problem list is one cheap query
   submissionCount Int @default(0)
@@ -133,32 +128,95 @@ model Problem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  contest        Contest?               @relation(fields: [contestId], references: [id])
+  currentVersion ProblemVersion?        @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  versions       ProblemVersion[]       @relation("Versions")
   tags           Tag[]
-  testCases      TestCase[]
+  contests       ContestProblem[]
   submissions    Submission[]
   progress       ProblemProgress[]
   contestResults ContestProblemResult[]
 
-  @@unique([contestId, contestIndex])
-  @@index([isPublic, difficulty])
+  @@index([publishedAt])
 }
 
-// Small tests live inline; large ones in object storage under *Key.
-model TestCase {
-  id        String  @id @default(uuid(7))
-  problemId String
-  ordinal   Int
-  isSample  Boolean @default(false)
-  input     String?
-  output    String?
-  inputKey  String?
-  outputKey String?
+// An immutable snapshot of a published package. Fixing a statement typo or a
+// test makes a new version; submissions keep pointing at the one they were
+// judged against.
+model ProblemVersion {
+  id            String  @id @default(uuid(7))
+  problemId     String
+  number        Int // 1, 2, 3… within the problem
+  packageHash   String
+  // Rendered once at publish, so problem pages need no Markdown or KaTeX JS
+  statementHtml String
+  editorialHtml String?
+  // [{ input, output }] for the problem page and the Run button
+  samples       Json
+  timeLimitMs   Int // for C++; other languages get LANGUAGES[*].timeMultiplier
+  memoryLimitMb Int
+  // A Checker from @cgl/shared
+  checker       Json
 
-  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
-  @@unique([problemId, ordinal])
+  problem     Problem       @relation("Versions", fields: [problemId], references: [id])
+  currentOf   Problem?      @relation("CurrentVersion")
+  tests       ProblemTest[]
+  submissions Submission[]
+
+  @@unique([problemId, number])
 }
+
+// Judged in ordinal order: samples first, then secret tests.
+model ProblemTest {
+  versionId  String
+  ordinal    Int
+  name       String // path under data/, e.g. "secret/03"
+  isSample   Boolean
+  inputHash  String
+  answerHash String
+
+  version ProblemVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  input   Blob           @relation("TestInput", fields: [inputHash], references: [hash])
+  answer  Blob           @relation("TestAnswer", fields: [answerHash], references: [hash])
+
+  @@id([versionId, ordinal])
+}
+
+// A file in the blob store, named by its SHA-256. A file shared by several
+// tests, versions or problems is stored once.
+model Blob {
+  hash      String   @id
+  size      Int
+  createdAt DateTime @default(now())
+
+  inputOf  ProblemTest[] @relation("TestInput")
+  answerOf ProblemTest[] @relation("TestAnswer")
+}
+
+model Tag {
+  id       String    @id @default(uuid(7))
+  slug     String    @unique
+  name     String    @unique
+  problems Problem[]
+}
+
+// Practice progress, outside contests.
+model ProblemProgress {
+  userId         String
+  problemId      String
+  attempts       Int       @default(0)
+  firstAttemptAt DateTime  @default(now())
+  solvedAt       DateTime?
+
+  user    User    @relation(fields: [userId], references: [id])
+  problem Problem @relation(fields: [problemId], references: [id])
+
+  @@id([userId, problemId])
+  @@index([problemId])
+}
+
+// ─── Contests ────────────────────────────────────────────────────────────
 
 model Contest {
   id          String       @id @default(uuid(7))
@@ -181,12 +239,27 @@ model Contest {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  problems     Problem[]
+  problems     ContestProblem[]
   participants ContestParticipant[]
   submissions  Submission[]
   ratingEvents RatingEvent[]
 
   @@index([phase, startsAt])
+}
+
+// A problem's slot in a contest. A problem can appear in several contests
+// (and later in private rooms) without being copied.
+model ContestProblem {
+  contestId String
+  problemId String
+  label     String // "A", "B", …
+  points    Int
+
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id])
+
+  @@id([contestId, problemId])
+  @@unique([contestId, label])
 }
 
 model ContestParticipant {
@@ -236,28 +309,16 @@ model ContestProblemResult {
   @@id([participantId, problemId])
 }
 
-// Practice progress, outside contests.
-model ProblemProgress {
-  userId         String
-  problemId      String
-  attempts       Int       @default(0)
-  firstAttemptAt DateTime  @default(now())
-  solvedAt       DateTime?
-
-  user    User    @relation(fields: [userId], references: [id])
-  problem Problem @relation(fields: [problemId], references: [id])
-
-  @@id([userId, problemId])
-  @@index([problemId])
-}
+// ─── Judging and ratings ─────────────────────────────────────────────────
 
 model Submission {
-  id        String   @id @default(uuid(7))
-  userId    String
-  problemId String
-  contestId String?
-  language  Language
-  code      String
+  id               String   @id @default(uuid(7))
+  userId           String
+  problemId        String
+  problemVersionId String
+  contestId        String?
+  language         Language
+  code             String
 
   status        SubmissionStatus @default(QUEUED)
   verdict       Verdict?
@@ -268,14 +329,14 @@ model Submission {
   // Per-test verdict, time and memory. Never includes hidden test data.
   results       Json?
   compileOutput String?
-  testsVersion  Int
 
   createdAt  DateTime  @default(now())
   finishedAt DateTime?
 
-  user    User     @relation(fields: [userId], references: [id])
-  problem Problem  @relation(fields: [problemId], references: [id])
-  contest Contest? @relation(fields: [contestId], references: [id])
+  user           User           @relation(fields: [userId], references: [id])
+  problem        Problem        @relation(fields: [problemId], references: [id])
+  problemVersion ProblemVersion @relation(fields: [problemVersionId], references: [id])
+  contest        Contest?       @relation(fields: [contestId], references: [id])
 
   @@index([userId, problemId, createdAt(sort: Desc)])
   @@index([problemId, verdict])

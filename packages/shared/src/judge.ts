@@ -19,11 +19,12 @@ export const SUBMISSION_STATUSES = ["QUEUED", "RUNNING", "FINISHED"] as const;
 export const submissionStatusSchema = z.enum(SUBMISSION_STATUSES);
 export type SubmissionStatus = z.infer<typeof submissionStatusSchema>;
 
+// timeMultiplier scales a problem's time limit, which is set for C++
 export const LANGUAGES = {
-  cpp: { label: "C++", judge0Id: 54 },
-  python: { label: "Python", judge0Id: 71 },
-  javascript: { label: "JavaScript", judge0Id: 63 },
-  java: { label: "Java", judge0Id: 62 },
+  cpp: { label: "C++", judge0Id: 54, timeMultiplier: 1 },
+  python: { label: "Python", judge0Id: 71, timeMultiplier: 3 },
+  javascript: { label: "JavaScript", judge0Id: 63, timeMultiplier: 2 },
+  java: { label: "Java", judge0Id: 62, timeMultiplier: 2 },
 } as const;
 
 export type Language = keyof typeof LANGUAGES;
@@ -36,3 +37,19 @@ export function languageFromJudge0Id(id: number): Language | undefined {
     (lang) => LANGUAGES[lang].judge0Id === id,
   );
 }
+
+/**
+ * How a test's output is compared with its answer file. Mirrors the default
+ * output validator of the ICPC problem package format: token by token,
+ * ignoring whitespace and case unless told otherwise, with optional float
+ * tolerances.
+ */
+export const checkerSchema = z.object({
+  kind: z.literal("default"),
+  caseSensitive: z.boolean(),
+  spaceSensitive: z.boolean(),
+  floatAbsoluteTolerance: z.number().positive().optional(),
+  floatRelativeTolerance: z.number().positive().optional(),
+});
+
+export type Checker = z.infer<typeof checkerSchema>;

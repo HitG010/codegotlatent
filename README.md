@@ -19,6 +19,7 @@ The rules live in [`packages/rating`](packages/rating/src/rate-contest.ts).
 | --- | --- |
 | `apps/api` | Express 5 API, Prisma 7 + Postgres |
 | `packages/rating` | Contest standings, interval scoring, Latent and Form ratings (pure, tested) |
+| `packages/problem-package` | Problem format: loading, statement rendering, output checking ([how to write a problem](packages/problem-package/README.md)) |
 | `packages/shared` | Schemas and constants shared by client and server |
 | `infra` | Local Postgres, Redis and Judge0 via Docker Compose |
 
@@ -32,8 +33,10 @@ Requires Node 22+ and Docker. pnpm comes through corepack.
 corepack enable
 pnpm install
 docker compose -f infra/docker-compose.yml up -d app-db
+docker compose -f infra/docker-compose.yml exec app-db createdb -U cgl cgl_test
 cp apps/api/.env.example apps/api/.env   # then set ACCESS_TOKEN_SECRET
 pnpm --filter @cgl/api db:migrate
+pnpm --filter @cgl/api problems:import --practice packages/problem-package/fixtures/self-aware
 pnpm dev:api
 ```
 
