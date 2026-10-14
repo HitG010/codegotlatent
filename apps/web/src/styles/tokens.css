@@ -1,0 +1,124 @@
+/*
+  Code's Got Latent — design tokens.
+
+  The identity lives in the prediction mechanic: two boundary marks for
+  your guessed range and a dot for where you finished, drawn the same way
+  on every screen. Colour supports that; it doesn't carry the design alone.
+
+  Rules
+  - Neutral graphite surfaces with clear elevation steps.
+  - Signal gold means "you": your range, your row, your next action.
+  - Stage oxblood is for show moments only: the next-round strip, the
+    contest header, your result. It never tints working surfaces.
+  - On-air pink appears only while a contest is live.
+  - Verdict colours are semantic and never decorative.
+
+  Type
+  - Display (Barlow Condensed): competition headings and headline numbers.
+    Never in paragraphs, filters or table headers.
+  - Sans (IBM Plex Sans): all interface and reading text.
+  - Mono (JetBrains Mono): code, timers and compact numeric data.
+
+  Dark is the design and applies whatever the OS or host page prefers.
+  Light is an opt-in, data-cgl-theme="light". Selectors are html:root so
+  they outrank a host page's own :root reset.
+*/
+
+html:root {
+  color-scheme: dark;
+
+  --bg: #121012;
+  --raised: #1f1b1e;
+  --sunken: #0b0a0b;
+  --hover: #2b2629;
+  --line: #3a3437;
+  --line-strong: #514a4e;
+
+  --fg: #f4efe9;
+  --fg-muted: #bfb5af;
+  --fg-faint: #9a908b;
+
+  --signal: #ffc952;
+  --signal-fg: #ffc952;
+  --on-signal: #2b1404;
+  --signal-wash: rgb(255 201 82 / 0.12);
+  --signal-line: rgb(255 201 82 / 0.65);
+  --focus: #ffc952;
+
+  --stage: #3b1120;
+  --stage-raised: #4b1729;
+  --stage-line: #6a2538;
+  --stage-fg: #fbeee6;
+  --stage-muted: #dcbcb6;
+  --stage-accent: #ffc952;
+
+  --onair: #ff4b86;
+
+  --ok: #6fdc9f;
+  --bad: #ff6a5f;
+  --slow: #ffa04a;
+  --crash: #d99bff;
+  --neutral: #aaa09b;
+
+  --syn-keyword: #f5a3b5;
+  --syn-string: #b7e1a1;
+  --syn-number: #ffc98a;
+  --syn-type: #a6d4e8;
+  --syn-comment: #958a85;
+
+  --shadow-pop: 0 16px 40px rgb(0 0 0 / 0.55), 0 0 0 1px var(--line-strong);
+
+  --face-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --face-sans: "IBM Plex Sans Variable", "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --face-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-1: 3px;
+  --r-2: 6px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* House lights up */
+html:root[data-cgl-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f5f2f0;
+  --raised: #ffffff;
+  --sunken: #ece6e3;
+  --hover: #efe9e6;
+  --line: #ddd3cf;
+  --line-strong: #c4b8b3;
+
+  --fg: #22161a;
+  --fg-muted: #5f5155;
+  --fg-faint: #76686c;
+
+  --signal: #f2b631;
+  --signal-fg: #865600;
+  --on-signal: #2b1404;
+  --signal-wash: rgb(242 182 49 / 0.22);
+  --signal-line: rgb(150 98 0 / 0.75);
+  --focus: #9a6400;
+
+  --stage: #5a1528;
+  --stage-raised: #6b1c31;
+  --stage-line: #85304a;
+  --stage-fg: #fbeee6;
+  --stage-muted: #ecccc6;
+  --stage-accent: #ffc952;
+
+  --onair: #c4155a;
+
+  --ok: #127a49;
+  --bad: #c0302e;
+  --slow: #a05003;
+  --crash: #8a3dc2;
+  --neutral: #6d6064;
+
+  --syn-keyword: #a12d55;
+  --syn-string: #2f7a3a;
+  --syn-number: #9a5a00;
+  --syn-type: #1f6b8a;
+  --syn-comment: #85777b;
+
+  --shadow-pop: 0 10px 30px rgb(34 22 26 / 0.14), 0 0 0 1px var(--line-strong);
+}

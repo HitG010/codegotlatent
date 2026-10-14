@@ -1,0 +1,211 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./fonts.css";
+@import "katex/dist/katex.min.css";
+
+/* Only CGL's tokens exist: no default palette, radii or shadows to drift into */
+@theme {
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+
+  /* 12–13px is for secondary metadata only; interface text starts at 14–15px */
+  --text-2xs: 12px;
+  --text-2xs--line-height: 16px;
+  --text-xs: 13px;
+  --text-xs--line-height: 18px;
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+  --text-base: 15px;
+  --text-base--line-height: 22px;
+  --text-md: 16px;
+  --text-md--line-height: 24px;
+  --text-lg: 20px;
+  --text-lg--line-height: 28px;
+  --text-xl: 26px;
+  --text-xl--line-height: 32px;
+  --text-2xl: 34px;
+  --text-2xl--line-height: 38px;
+  --text-3xl: 48px;
+  --text-3xl--line-height: 48px;
+  --text-4xl: 64px;
+  --text-4xl--line-height: 62px;
+
+  --tracking-tight: -0.01em;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-raised: var(--raised);
+  --color-sunken: var(--sunken);
+  --color-hover: var(--hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-faint: var(--fg-faint);
+  --color-signal: var(--signal);
+  --color-signal-fg: var(--signal-fg);
+  --color-on-signal: var(--on-signal);
+  --color-signal-wash: var(--signal-wash);
+  --color-stage: var(--stage);
+  --color-stage-raised: var(--stage-raised);
+  --color-stage-line: var(--stage-line);
+  --color-stage-fg: var(--stage-fg);
+  --color-stage-muted: var(--stage-muted);
+  --color-stage-accent: var(--stage-accent);
+  --color-onair: var(--onair);
+  --color-ok: var(--ok);
+  --color-bad: var(--bad);
+  --color-slow: var(--slow);
+  --color-crash: var(--crash);
+  --color-neutral: var(--neutral);
+
+  --font-display: var(--face-display);
+  --font-sans: var(--face-sans);
+  --font-mono: var(--face-mono);
+  --radius-sm: var(--r-1);
+  --radius-md: var(--r-2);
+  --shadow-pop: var(--shadow-pop);
+  --ease-out: var(--ease);
+}
+
+/*
+  The page's ground. Deliberately unlayered and a notch more specific than a
+  bare `body`: pages that embed us (the artifact viewer, for one) ship an
+  unlayered body reset with a white background, black text and the system
+  font, and unlayered CSS beats anything inside @layer.
+*/
+html,
+html body,
+#root {
+  height: 100%;
+}
+
+html body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--face-sans);
+  font-size: 15px;
+  line-height: 22px;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--signal-wash);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      transition-duration: 1ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Competition headings and headline numbers only */
+  .display {
+    font-family: var(--face-display);
+    font-weight: 600;
+    letter-spacing: 0.002em;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  /* A caption above a value */
+  .label {
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: 500;
+    color: var(--fg-muted);
+  }
+
+  /* Timers, ranks and figures in tables */
+  .num {
+    font-family: var(--face-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gutter {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  @media (min-width: 768px) {
+    .gutter {
+      padding-left: max(32px, env(safe-area-inset-left, 0px));
+      padding-right: max(32px, env(safe-area-inset-right, 0px));
+    }
+  }
+
+  /* Problem statements and editorials: a reading treatment, not interface text */
+  .statement {
+    font-size: 17px;
+    line-height: 28px;
+    max-width: 68ch;
+    color: var(--fg);
+  }
+  .statement > * + * {
+    margin-top: 16px;
+  }
+  .statement h2 {
+    margin-top: 32px;
+    font-size: 17px;
+    line-height: 26px;
+    font-weight: 600;
+  }
+  .statement strong {
+    font-weight: 600;
+  }
+  .statement code {
+    font-family: var(--face-mono);
+    font-size: 15px;
+    padding: 1px 5px;
+    border-radius: var(--r-1);
+    background: var(--sunken);
+  }
+  .statement .katex {
+    font-size: 1.02em;
+  }
+  .statement .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  @keyframes tally {
+    50% {
+      opacity: 0.35;
+    }
+  }
+  .tally {
+    animation: tally 1.6s steps(2, jump-none) infinite;
+  }
+
+  @keyframes land {
+    from {
+      transform: translate(-50%, -50%) scale(0.2);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+  }
+}

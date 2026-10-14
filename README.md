@@ -17,6 +17,7 @@ The rules live in [`packages/rating`](packages/rating/src/rate-contest.ts).
 
 | Path | What |
 | --- | --- |
+| `apps/web` | React 19 + Vite web app; design tokens in [`src/styles/tokens.css`](apps/web/src/styles/tokens.css) |
 | `apps/api` | Express 5 API, Prisma 7 + Postgres |
 | `packages/rating` | Contest standings, interval scoring, Latent and Form ratings (pure, tested) |
 | `packages/problem-package` | Problem format: loading, statement rendering, output checking ([how to write a problem](packages/problem-package/README.md)) |
@@ -38,6 +39,7 @@ cp apps/api/.env.example apps/api/.env   # then set ACCESS_TOKEN_SECRET
 pnpm --filter @cgl/api db:migrate
 pnpm --filter @cgl/api problems:import --practice packages/problem-package/fixtures/self-aware
 pnpm dev:api
+pnpm --filter @cgl/web dev             # the web app, currently on sample data
 ```
 
 `pnpm test` and `pnpm typecheck` run across every package.
