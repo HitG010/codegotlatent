@@ -11,6 +11,19 @@ x-judge0: &judge0
   restart: unless-stopped
 
 services:
+  # Postgres for the v2 app in local dev — never point dev at production.
+  app-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: cgl
+      POSTGRES_PASSWORD: cgl
+      POSTGRES_DB: cgl
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - app-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
   # Redis used by the CodeGotLatent backend itself (rate limiting).
   # Separate from Judge0's internal Redis so the two never fight.
   app-redis:
@@ -55,5 +68,6 @@ services:
     restart: unless-stopped
 
 volumes:
+  app-db-data:
   app-redis-data:
   j0-db-data:

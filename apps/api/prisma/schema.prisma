@@ -1,0 +1,301 @@
+// CodeGotLatent v2 schema. v1 data is copied in by scripts/migrate-v1.ts —
+// this database starts empty; nothing here is applied to the v1 database.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+// Mirrors CONTEST_PHASES in @cgl/shared
+enum ContestPhase {
+  SCHEDULED
+  GUESS_WINDOW
+  LIVE
+  JUDGING
+  RESULTS
+}
+
+// Mirrors LANGUAGES in @cgl/shared
+enum Language {
+  cpp
+  python
+  javascript
+  java
+}
+
+enum SubmissionStatus {
+  QUEUED
+  RUNNING
+  FINISHED
+}
+
+enum Verdict {
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+  INTERNAL_ERROR
+}
+
+enum RatingKind {
+  LATENT
+  FORM
+}
+
+model User {
+  id       String  @id @default(uuid(7))
+  username String  @unique
+  email    String  @unique
+  googleId String? @unique
+  role     Role    @default(USER)
+  name     String?
+  bio      String?
+  location String?
+  avatarId Int?
+
+  latentRating   Int @default(1500)
+  latentContests Int @default(0)
+  formRating     Int @default(1500)
+  formContests   Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions       Session[]
+  participations ContestParticipant[]
+  submissions    Submission[]
+  progress       ProblemProgress[]
+  ratingEvents   RatingEvent[]
+}
+
+// One row per signed-in device. Only a hash of the refresh token is stored.
+model Session {
+  id         String    @id @default(uuid(7))
+  userId     String
+  tokenHash  String    @unique
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Tag {
+  id       String    @id @default(uuid(7))
+  slug     String    @unique
+  name     String    @unique
+  problems Problem[]
+}
+
+model Problem {
+  id            String     @id @default(uuid(7))
+  slug          String     @unique
+  title         String
+  statement     String // markdown
+  editorial     String? // markdown
+  difficulty    Difficulty
+  timeLimitMs   Int        @default(2000)
+  memoryLimitKb Int        @default(262144)
+  isPublic      Boolean    @default(false)
+  // Bumped whenever test cases change, so judge workers drop cached copies
+  testsVersion  Int        @default(1)
+
+  contestId    String?
+  contestIndex Int? // position within the contest: 0 = A, 1 = B, …
+  points       Int     @default(0) // contest score for solving it
+
+  // Maintained on each judged submission so the problem list is one cheap query
+  submissionCount Int @default(0)
+  acceptedCount   Int @default(0)
+  solverCount     Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contest        Contest?               @relation(fields: [contestId], references: [id])
+  tags           Tag[]
+  testCases      TestCase[]
+  submissions    Submission[]
+  progress       ProblemProgress[]
+  contestResults ContestProblemResult[]
+
+  @@unique([contestId, contestIndex])
+  @@index([isPublic, difficulty])
+}
+
+// Small tests live inline; large ones in object storage under *Key.
+model TestCase {
+  id        String  @id @default(uuid(7))
+  problemId String
+  ordinal   Int
+  isSample  Boolean @default(false)
+  input     String?
+  output    String?
+  inputKey  String?
+  outputKey String?
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([problemId, ordinal])
+}
+
+model Contest {
+  id          String       @id @default(uuid(7))
+  slug        String       @unique
+  title       String
+  description String? // markdown
+  rules       String? // markdown
+  phase       ContestPhase @default(SCHEDULED)
+  isPublic    Boolean      @default(true)
+  isRated     Boolean      @default(true)
+
+  guessOpensAt DateTime
+  startsAt     DateTime
+  endsAt       DateTime
+  publishedAt  DateTime? // when results and ratings went out
+
+  maxParticipants Int?
+  penaltyMinutes  Int  @default(5)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  problems     Problem[]
+  participants ContestParticipant[]
+  submissions  Submission[]
+  ratingEvents RatingEvent[]
+
+  @@index([phase, startsAt])
+}
+
+model ContestParticipant {
+  id           String   @id @default(uuid(7))
+  contestId    String
+  userId       String
+  registeredAt DateTime @default(now())
+
+  // Percentile range guess ("top best%–worst%"), locked during GUESS_WINDOW
+  guessBest  Int?
+  guessWorst Int?
+  guessedAt  DateTime?
+
+  // Live totals, kept in sync from ContestProblemResult
+  score           Int @default(0)
+  penaltyTimeMs   Int @default(0)
+  solvedCount     Int @default(0)
+  submissionCount Int @default(0)
+
+  // Written once at JUDGING → RESULTS by @cgl/rating
+  rank          Int?
+  percentile    Float?
+  intervalScore Float?
+  latentDelta   Int?
+  formDelta     Int?
+
+  contest Contest                @relation(fields: [contestId], references: [id])
+  user    User                   @relation(fields: [userId], references: [id])
+  results ContestProblemResult[]
+
+  @@unique([contestId, userId])
+  @@index([userId])
+  @@index([contestId, rank])
+}
+
+// One cell of the standings grid: a participant's state on one problem.
+model ContestProblemResult {
+  participantId String
+  problemId     String
+  // Rejected submissions before the first accept; later ones don't count
+  wrongAttempts Int       @default(0)
+  solvedAt      DateTime?
+
+  participant ContestParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  problem     Problem            @relation(fields: [problemId], references: [id])
+
+  @@id([participantId, problemId])
+}
+
+// Practice progress, outside contests.
+model ProblemProgress {
+  userId         String
+  problemId      String
+  attempts       Int       @default(0)
+  firstAttemptAt DateTime  @default(now())
+  solvedAt       DateTime?
+
+  user    User    @relation(fields: [userId], references: [id])
+  problem Problem @relation(fields: [problemId], references: [id])
+
+  @@id([userId, problemId])
+  @@index([problemId])
+}
+
+model Submission {
+  id        String   @id @default(uuid(7))
+  userId    String
+  problemId String
+  contestId String?
+  language  Language
+  code      String
+
+  status        SubmissionStatus @default(QUEUED)
+  verdict       Verdict?
+  testsPassed   Int              @default(0)
+  testsTotal    Int              @default(0)
+  timeMs        Int? // slowest test
+  memoryKb      Int? // hungriest test
+  // Per-test verdict, time and memory. Never includes hidden test data.
+  results       Json?
+  compileOutput String?
+  testsVersion  Int
+
+  createdAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  user    User     @relation(fields: [userId], references: [id])
+  problem Problem  @relation(fields: [problemId], references: [id])
+  contest Contest? @relation(fields: [contestId], references: [id])
+
+  @@index([userId, problemId, createdAt(sort: Desc)])
+  @@index([problemId, verdict])
+  @@index([contestId, createdAt])
+}
+
+// One row per rating change. The unique key makes publishing a contest's
+// ratings idempotent: a retried publish can't apply a change twice.
+model RatingEvent {
+  id        String     @id @default(uuid(7))
+  userId    String
+  contestId String?
+  kind      RatingKind
+  before    Int
+  after     Int
+  createdAt DateTime   @default(now())
+
+  user    User     @relation(fields: [userId], references: [id])
+  contest Contest? @relation(fields: [contestId], references: [id])
+
+  @@unique([userId, contestId, kind])
+  @@index([userId, kind, createdAt])
+}

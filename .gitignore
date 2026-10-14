@@ -1,28 +1,29 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
+# Dependencies & build output
 node_modules
 dist
 dist-ssr
-*.local
+coverage
+*.tsbuildinfo
 
-# Editor directories and files
+# Generated Prisma client (rebuilt on install)
+apps/api/src/generated/
+
+# Logs
+logs
+*.log
+
+# Env & credentials — never commit these
+.env
+.env.*
+!.env.example
+*.env
+gcp-*.json
+infra/judge0.conf
+
+# Editors & OS
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
+*.local
 *.sw?
-*.env
-
-# Judge0 credentials (local infra)
-infra/judge0.conf

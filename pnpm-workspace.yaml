@@ -1,0 +1,6 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Supply-chain guard: never install a version published less than a week ago
+minimumReleaseAge: 10080
