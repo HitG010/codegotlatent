@@ -1,7 +1,10 @@
 import { pino } from "pino";
 import { createApp } from "./app.js";
+import { createGoogleVerifier } from "./auth/google.js";
+import { authRouter } from "./auth/routes.js";
 import { createDb } from "./db.js";
 import { loadEnv } from "./env.js";
+import { meRouter } from "./me/routes.js";
 
 const env = loadEnv();
 const logger = pino({
@@ -15,6 +18,16 @@ const app = createApp({
   clientOrigin: env.CLIENT_ORIGIN,
   logger,
   pingDb: () => db.$queryRaw`SELECT 1`,
+  routers: [
+    authRouter({
+      db,
+      verifyGoogle: createGoogleVerifier(env.GOOGLE_CLIENT_ID),
+      accessTokenSecret: env.ACCESS_TOKEN_SECRET,
+      clientOrigin: env.CLIENT_ORIGIN,
+      secureCookies: env.NODE_ENV === "production",
+    }),
+    meRouter({ db, accessTokenSecret: env.ACCESS_TOKEN_SECRET }),
+  ],
 });
 
 const server = app.listen(env.PORT, () => {

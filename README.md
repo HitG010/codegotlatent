@@ -35,11 +35,16 @@ corepack enable
 pnpm install
 docker compose -f infra/docker-compose.yml up -d app-db
 docker compose -f infra/docker-compose.yml exec app-db createdb -U cgl cgl_test
-cp apps/api/.env.example apps/api/.env   # then set ACCESS_TOKEN_SECRET
+cp apps/api/.env.example apps/api/.env       # set ACCESS_TOKEN_SECRET and GOOGLE_CLIENT_ID
+cp apps/web/.env.example apps/web/.env.local # same Google client ID
 pnpm --filter @cgl/api db:migrate
 pnpm --filter @cgl/api problems:import --practice packages/problem-package/fixtures/self-aware
-pnpm dev:api
-pnpm --filter @cgl/web dev             # the web app, currently on sample data
+pnpm dev:api   # http://localhost:4000
+pnpm dev:web   # http://localhost:5173
 ```
 
 `pnpm test` and `pnpm typecheck` run across every package.
+
+Sign-in uses a Google OAuth web client: add `http://localhost:5173` (and the
+production origin) to its authorized JavaScript origins. Without
+`VITE_API_URL` the web app runs on sample data, as the published prototype does.

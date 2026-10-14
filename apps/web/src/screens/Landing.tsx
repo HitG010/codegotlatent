@@ -1,10 +1,13 @@
 import type { PercentileGuess } from "@cgl/shared";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { ThemeButton } from "../components/AppShell";
+import { GoogleButton } from "../components/GoogleButton";
 import { missBy, predictionScore, RangeRuler, ScoringDetails } from "../components/Range";
 import { Countdown, Tally, Wordmark } from "../components/show";
 import { Button, ButtonLink, Icon } from "../components/ui";
+import { ApiError } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { duration, showTime } from "../lib/format";
 import { ROUND_12, SAMPLE_CONTESTANT as S } from "../mock/data";
 
@@ -24,9 +27,7 @@ export function Landing() {
         <Wordmark />
         <div className="flex items-center gap-2">
           <ThemeButton />
-          <ButtonLink to="/problems" variant="secondary" size="sm">
-            Sign in
-          </ButtonLink>
+          <HeaderAction />
         </div>
       </header>
 
@@ -39,9 +40,7 @@ export function Landing() {
               not only how many problems you solved. AI tools are allowed, which makes the prediction the hard part.
             </p>
             <div className="flex flex-wrap items-center gap-4 pt-1">
-              <ButtonLink to="/problems" variant="primary" size="lg">
-                Continue with Google
-              </ButtonLink>
+              <SignInAction />
               <a href="#ratings" className="text-base text-muted underline decoration-line-strong underline-offset-4 hover:text-fg">
                 How ratings work
               </a>
@@ -98,6 +97,61 @@ export function Landing() {
           <span>Made in India</span>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function HeaderAction() {
+  const { state, live } = useAuth();
+  if (!live) {
+    return (
+      <ButtonLink to="/problems" variant="secondary" size="sm">
+        Sign in
+      </ButtonLink>
+    );
+  }
+  return state.status === "signed-in" ? (
+    <ButtonLink to="/problems" variant="secondary" size="sm">
+      Go to problems
+    </ButtonLink>
+  ) : null;
+}
+
+/** Google's button when signed out, a way in when signed in. The prototype just links through. */
+function SignInAction() {
+  const { state, live, signIn } = useAuth();
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+
+  if (!live) {
+    return (
+      <ButtonLink to="/problems" variant="primary" size="lg">
+        Continue with Google
+      </ButtonLink>
+    );
+  }
+  if (state.status === "loading") return <div className="h-11 w-[280px]" />;
+  if (state.status === "signed-in") {
+    return (
+      <ButtonLink to="/problems" variant="primary" size="lg">
+        Go to problems
+      </ButtonLink>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-2">
+      <GoogleButton
+        onCredential={async (credential) => {
+          setError(null);
+          try {
+            const user = await signIn(credential);
+            navigate(user.handleConfirmed ? "/problems" : "/welcome");
+          } catch (err) {
+            setError(err instanceof ApiError ? err.message : "Sign-in didn't go through. Try again.");
+          }
+        }}
+      />
+      {error ? <p className="text-sm text-bad">{error}</p> : null}
     </div>
   );
 }

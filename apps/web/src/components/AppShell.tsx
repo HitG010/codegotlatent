@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { Link, NavLink, Outlet } from "react-router";
+import { Link, NavLink, Outlet, useNavigate } from "react-router";
+import { useAuth, useUser } from "../lib/auth";
 import { useTheme } from "../lib/hooks";
-import { ME, ROUND_12 } from "../mock/data";
+import { ROUND_12 } from "../mock/data";
 import { Countdown, Tally, Wordmark } from "./show";
 import { Icon } from "./ui";
 
@@ -72,12 +73,47 @@ export function TopBar({ children }: { children?: ReactNode }) {
             <Countdown to={ROUND_12.startsAt} className="text-fg" />
           </Link>
           <ThemeButton />
-          <Link to={`/u/${ME.handle}`} aria-label="Your profile">
-            <Avatar name={ME.name} />
-          </Link>
+          <AccountMenu />
         </div>
       </div>
     </header>
+  );
+}
+
+/** Signed in: your initials, opening profile and sign-out. Signed out: a way to sign in. */
+export function AccountMenu() {
+  const user = useUser();
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  if (!user) {
+    return (
+      <Link to="/" className="inline-flex h-9 items-center rounded-sm border border-line-strong px-3 text-sm font-semibold hover:bg-hover">
+        Sign in
+      </Link>
+    );
+  }
+  return (
+    <details className="relative">
+      <summary className="list-none rounded-sm [&::-webkit-details-marker]:hidden" aria-label="Account">
+        <Avatar name={user.name ?? user.handle} />
+      </summary>
+      <div className="absolute right-0 z-40 mt-2 flex w-56 flex-col rounded-md border border-line-strong bg-raised p-1 shadow-pop">
+        <span className="px-3 pt-2 pb-1 text-sm font-semibold">{user.handle}</span>
+        <Link to={`/u/${user.handle}`} className="rounded-sm px-3 py-2 text-sm text-muted hover:bg-hover hover:text-fg">
+          Profile
+        </Link>
+        <button
+          type="button"
+          onClick={async () => {
+            await signOut();
+            navigate("/");
+          }}
+          className="rounded-sm px-3 py-2 text-left text-sm text-muted hover:bg-hover hover:text-fg"
+        >
+          Sign out
+        </button>
+      </div>
+    </details>
   );
 }
 

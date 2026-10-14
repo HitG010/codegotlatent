@@ -65,14 +65,16 @@ enum RatingKind {
 // ─── People ──────────────────────────────────────────────────────────────
 
 model User {
-  id       String  @id @default(uuid(7))
-  username String  @unique
-  email    String  @unique
-  googleId String? @unique
-  role     Role    @default(USER)
-  name     String?
-  bio      String?
-  location String?
+  id                String    @id @default(uuid(7))
+  username          String    @unique
+  // Set when the user picks their own handle; new accounts start with a generated one
+  handleConfirmedAt DateTime?
+  email             String    @unique
+  googleId          String?   @unique
+  role              Role      @default(USER)
+  name              String?
+  bio               String?
+  location          String?
 
   latentRating   Int @default(1500)
   latentContests Int @default(0)

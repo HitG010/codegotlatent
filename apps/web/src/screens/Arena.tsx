@@ -2,11 +2,11 @@ import { checkOutput } from "@cgl/problem-package/checker";
 import { LANGUAGES, type Language, type Verdict } from "@cgl/shared";
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { Link } from "react-router";
-import { Avatar, ThemeButton } from "../components/AppShell";
+import { AccountMenu, ThemeButton } from "../components/AppShell";
 import { CodeEditor } from "../components/CodeEditor";
 import { Wordmark } from "../components/show";
 import { Button, Icon, VERDICT_LABEL, VERDICT_TEXT, VerdictChip } from "../components/ui";
-import { ME, RECENT_SUBMISSIONS } from "../mock/data";
+import { RECENT_SUBMISSIONS } from "../mock/data";
 import PROBLEM from "../mock/self-aware.json";
 
 const STARTER: Record<Language, string> = {
@@ -201,9 +201,9 @@ export function Arena() {
         <div className="ml-auto flex items-center gap-2">
           <div className="hidden md:block">{toolbar}</div>
           <ThemeButton />
-          <Link to={`/u/${ME.handle}`} aria-label="Your profile" className="hidden sm:block">
-            <Avatar name={ME.name} />
-          </Link>
+          <div className="hidden sm:block">
+            <AccountMenu />
+          </div>
         </div>
       </header>
 

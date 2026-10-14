@@ -9,7 +9,8 @@
     "build": "pnpm -r build",
     "dev:api": "pnpm --filter @cgl/api dev",
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "dev:web": "pnpm --filter @cgl/web dev"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

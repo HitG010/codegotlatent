@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, createMemoryRouter, RouterProvider, type RouteObject } from "react-router";
 import { AppShell } from "./components/AppShell";
+import { AuthProvider } from "./lib/auth";
 import { applyTheme, readTheme } from "./lib/hooks";
 import { PrototypeDock } from "./prototype/PrototypeDock";
 import { Arena } from "./screens/Arena";
@@ -10,6 +11,7 @@ import { Landing } from "./screens/Landing";
 import { ProblemList } from "./screens/ProblemList";
 import { Profile } from "./screens/Profile";
 import { Reveal } from "./screens/Reveal";
+import { Welcome } from "./screens/Welcome";
 import "./styles/app.css";
 
 // Before the first paint, so a light-theme visitor never sees a dark flash
@@ -36,6 +38,7 @@ function withDock(element: React.ReactNode) {
 
 const routes: RouteObject[] = [
   { path: "/", element: withDock(<Landing />) },
+  { path: "/welcome", element: <Welcome /> },
   { path: "/problems/:slug", element: withDock(<Arena />) },
   {
     element: withDock(<AppShell />),
@@ -53,6 +56,8 @@ const router = import.meta.env.MODE === "prototype" ? createMemoryRouter(routes)
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>,
 );
