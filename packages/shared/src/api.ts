@@ -189,3 +189,48 @@ export interface ContestResults {
   } | null;
   rows: ContestResultRow[];
 }
+
+// ─── Profiles ──────────────────────────────────────────────────────────────
+
+/** One finished round on a player's profile. */
+export interface ProfileContest {
+  slug: string;
+  title: string;
+  startsAt: string;
+  /** Ranked entrants. */
+  field: number;
+  rank: number;
+  /** "Top X%" finish. */
+  finish: number;
+  guess: PercentileGuess | null;
+  predictionScore: number | null;
+  points: number;
+  solved: number;
+  /** Null for unrated rounds. */
+  latent: RatingChange | null;
+  form: RatingChange | null;
+}
+
+export interface ProfileSubmission {
+  id: string;
+  problemSlug: string;
+  problemTitle: string;
+  language: Language;
+  status: SubmissionStatus;
+  verdict: Verdict | null;
+  createdAt: string;
+}
+
+export interface UserProfile {
+  handle: string;
+  joinedAt: string;
+  /** True on your own profile. */
+  you: boolean;
+  latent: { rating: number; contests: number };
+  form: { rating: number; contests: number };
+  /** Oldest first. */
+  contests: ProfileContest[];
+  practice: Record<Difficulty, { solved: number; total: number }>;
+  /** Your latest submissions, on your own profile only; null on anyone else's. */
+  recentSubmissions: ProfileSubmission[] | null;
+}

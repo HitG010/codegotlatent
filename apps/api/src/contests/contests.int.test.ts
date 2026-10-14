@@ -4,7 +4,16 @@ import type { Server } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadPackage } from "@cgl/problem-package";
-import type { ContestDetail, ContestResults, ContestSummary, ProblemDetail, ProblemListResponse, SubmissionView, Verdict } from "@cgl/shared";
+import type {
+  ContestDetail,
+  ContestResults,
+  ContestSummary,
+  ProblemDetail,
+  ProblemListResponse,
+  SubmissionView,
+  UserProfile,
+  Verdict,
+} from "@cgl/shared";
 import { pino } from "pino";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "../app.js";
@@ -15,6 +24,7 @@ import { claimNext, judgeSubmission } from "../judge/worker.js";
 import { publishProblem } from "../problems/publish.js";
 import { judgeLimits, problemsRouter } from "../problems/routes.js";
 import { FsBlobStore } from "../storage/blob-store.js";
+import { usersRouter } from "../users/routes.js";
 import { createContest, parseDuration } from "./create.js";
 import { finalizeContest, findFinalizable } from "./finalize.js";
 import { contestsRouter } from "./routes.js";
@@ -69,7 +79,11 @@ describe.skipIf(!TEST_DATABASE_URL)("contests (database)", () => {
       clientOrigin: "http://localhost:5173",
       logger: pino({ level: "silent" }),
       pingDb: async () => undefined,
-      routers: [problemsRouter({ db, sandbox, accessTokenSecret: SECRET }, limits), contestsRouter({ db, sandbox, accessTokenSecret: SECRET }, limits)],
+      routers: [
+        problemsRouter({ db, sandbox, accessTokenSecret: SECRET }, limits),
+        contestsRouter({ db, sandbox, accessTokenSecret: SECRET }, limits),
+        usersRouter({ db, accessTokenSecret: SECRET }),
+      ],
     });
     server = app.listen(0);
     await new Promise((resolve) => server.once("listening", resolve));
@@ -324,6 +338,47 @@ describe.skipIf(!TEST_DATABASE_URL)("contests (database)", () => {
       ["arjun", 1, 0, 0],
       ["riya", 2, 0, 0],
     ]);
+  });
+
+  it("shows each player's finished rounds on their profile", async () => {
+    const riya = await get<UserProfile>("/users/Riya", "riya");
+    expect(riya.status).toBe(200);
+    expect(riya.body).toMatchObject({ handle: "riya", you: true, latent: { contests: 1 }, form: { contests: 1 } });
+    expect(riya.body.contests.map((c) => [c.slug, c.rank, c.field, c.points, c.solved])).toEqual([
+      ["round-1", 1, 2, 1500, 2],
+      ["warmup", 2, 2, 0, 0],
+    ]);
+    const [round1, warmup] = riya.body.contests;
+    expect(round1!.guess).toEqual({ best: 0, worst: 40 });
+    expect(round1!.latent!.after).toBe(riya.body.latent.rating);
+    expect(warmup).toMatchObject({ guess: null, latent: null, form: null }); // unrated
+    expect(riya.body.practice.EASY.total + riya.body.practice.MEDIUM.total).toBe(2);
+    // Her own submissions show on her own profile only
+    expect(riya.body.recentSubmissions?.map((s) => s.problemSlug)).toEqual(["self-aware"]);
+    expect((await get<UserProfile>("/users/riya", "arjun")).body).toMatchObject({ you: false, recentSubmissions: null });
+    expect((await get<UserProfile>("/users/riya")).body.recentSubmissions).toBeNull();
+
+    // A no-show has no rounds, and unknown handles 404
+    expect((await get<UserProfile>("/users/meera")).body.contests).toEqual([]);
+    expect((await get("/users/nobody")).status).toBe(404);
+  });
+
+  it("keeps a running round off profiles", async () => {
+    await createContest(db, { slug: "round-3", title: "Round 3", starts: "in 2h", duration: "1h", problems: [{ slug: "self-aware", label: "A", points: 100 }] });
+    await send("POST", "/contests/round-3/registration", "riya");
+    await moveTo("round-3", "LIVE");
+    await send("POST", "/contests/round-3/problems/A/submissions", "riya", code);
+
+    const riya = await get<UserProfile>("/users/riya", "riya");
+    expect(riya.body.contests.map((c) => c.slug)).not.toContain("round-3");
+    // Its problem is out of practice, so it drops out of the counts and the submissions list
+    expect(riya.body.practice.EASY.total).toBe(0);
+    expect(riya.body.recentSubmissions).toEqual([]);
+
+    await moveTo("round-3", "ENDED");
+    const contest = await db.contest.findUniqueOrThrow({ where: { slug: "round-3" }, select: { id: true } });
+    await db.submission.updateMany({ where: { contestId: contest.id }, data: { status: "FINISHED", verdict: "WRONG_ANSWER" } });
+    await finalizeContest(db, contest.id);
   });
 
   describe.skipIf(!TEST_JUDGE_URL)("with the sandbox", () => {

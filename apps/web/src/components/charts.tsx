@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "../lib/hooks";
-import { type ContestRecord, isHit } from "../mock/data";
+import type { PercentileGuess } from "@cgl/shared";
 
 /** A headline number that counts from `from` to `to` once per `run`. */
 export function CountUp({ to, from, run, durationMs = 1100 }: { to: number; from: number; run: number; durationMs?: number }) {
@@ -32,14 +32,26 @@ export function CountUp({ to, from, run, durationMs = 1100 }: { to: number; from
  * guess ruler turned upright: the range between ⊓ and ⊔, the finish as a dot.
  * Rounds are selectable.
  */
+export interface TimelineRecord {
+  id: string;
+  /** Under the column: "R12". */
+  label: string;
+  /** For screen readers: "Round 12". */
+  name: string;
+  guess: PercentileGuess;
+  finish: number;
+}
+
+export const isHit = (r: { guess: PercentileGuess; finish: number }) => r.finish >= r.guess.best && r.finish <= r.guess.worst;
+
 export function RangeTimeline({
   records,
   selected,
   onSelect,
 }: {
-  records: ContestRecord[];
-  selected: number;
-  onSelect: (round: number) => void;
+  records: TimelineRecord[];
+  selected: string;
+  onSelect: (id: string) => void;
 }) {
   // Show down to the next quarter below the worst value plotted, so the guesses fill the chart
   const deepest = Math.max(...records.flatMap((r) => [r.guess.worst, r.finish]));
@@ -64,16 +76,16 @@ export function RangeTimeline({
           <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${records.length}, minmax(0, 1fr))` }}>
             {records.map((record) => {
               const hit = isHit(record);
-              const active = record.round === selected;
+              const active = record.id === selected;
               const marks = hit ? "border-signal" : "border-muted";
               const nearest = record.finish < record.guess.best ? record.guess.best : record.guess.worst;
               return (
                 <button
-                  key={record.round}
+                  key={record.id}
                   type="button"
                   aria-pressed={active}
-                  aria-label={`Round ${record.round}: guessed top ${record.guess.best}–${record.guess.worst}%, finished top ${record.finish}%`}
-                  onClick={() => onSelect(record.round)}
+                  aria-label={`${record.name}: guessed top ${record.guess.best}–${record.guess.worst}%, finished top ${Math.round(record.finish)}%`}
+                  onClick={() => onSelect(record.id)}
                   className={`relative transition-colors ${active ? "bg-hover" : "hover:bg-raised"}`}
                 >
                   <span
@@ -103,8 +115,8 @@ export function RangeTimeline({
         <div />
         <div className="grid pt-2" style={{ gridTemplateColumns: `repeat(${records.length}, minmax(0, 1fr))` }}>
           {records.map((record) => (
-            <span key={record.round} className={`num text-center text-2xs ${record.round === selected ? "text-fg" : "text-faint"}`}>
-              R{record.round}
+            <span key={record.id} className={`num text-center text-2xs ${record.id === selected ? "text-fg" : "text-faint"}`}>
+              {record.label}
             </span>
           ))}
         </div>

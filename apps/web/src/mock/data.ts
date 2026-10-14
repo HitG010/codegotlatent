@@ -40,9 +40,6 @@ export const HISTORY: ContestRecord[] = [
   { round: 12, field: 143, guess: { best: 15, worst: 30 }, finish: 22, solved: 3, of: 4, latentAfter: 1527, latentDelta: 18, formAfter: 1536, formDelta: 7 },
 ];
 
-export const isHit = (r: Pick<ContestRecord, "guess" | "finish">) =>
-  r.finish >= r.guess.best && r.finish <= r.guess.worst;
-
 export interface ContestProblemSummary {
   label: string;
   title: string;

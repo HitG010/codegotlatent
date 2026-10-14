@@ -8,6 +8,7 @@ import { authRouter } from "./auth/routes.js";
 import { createDb } from "./db.js";
 import { loadEnv } from "./env.js";
 import { meRouter } from "./me/routes.js";
+import { usersRouter } from "./users/routes.js";
 
 const env = loadEnv();
 const logger = pino({
@@ -35,6 +36,7 @@ const app = createApp({
     meRouter({ db, accessTokenSecret: env.ACCESS_TOKEN_SECRET }),
     problemsRouter({ db, sandbox, accessTokenSecret: env.ACCESS_TOKEN_SECRET }, limits),
     contestsRouter({ db, sandbox, accessTokenSecret: env.ACCESS_TOKEN_SECRET }, limits),
+    usersRouter({ db, accessTokenSecret: env.ACCESS_TOKEN_SECRET }),
   ],
 });
 
