@@ -1,0 +1,19 @@
+# A contest spec for `pnpm --filter @cgl/api contests:create contests/example.yaml`.
+# Problems must be imported first (problems:import, without --practice), so
+# nobody has seen them before the contest.
+slug: round-1
+title: Round 1
+description: |
+  The first CGL round. Guess your rank, then prove it.
+rules: |
+  - Registration closes when the guess window opens.
+  - Lock in the range you think you'll finish in (top X% to top Y%).
+  - Problems are revealed at the start. Wrong answers cost 5 minutes each.
+starts: in 45m            # or an ISO date: 2026-10-20T14:30:00+05:30
+duration: 90m
+guess_window: 30m         # before the start
+penalty_minutes: 5
+rated: true
+problems:
+  - { slug: self-aware, label: A, points: 500 }
+  - { slug: applause-meter, label: B, points: 1000 }

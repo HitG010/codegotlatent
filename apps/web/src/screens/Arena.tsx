@@ -1,12 +1,12 @@
 import { LANGUAGES, type Language, type ProblemDetail, type RunCase, type RunResponse, type SubmissionView, type Verdict } from "@cgl/shared";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { Link, useParams } from "react-router";
 import { AccountMenu, ThemeButton } from "../components/AppShell";
 import { CodeEditor } from "../components/CodeEditor";
-import { Wordmark } from "../components/show";
+import { Countdown, Tally, Wordmark } from "../components/show";
 import { Button, Icon, VERDICT_LABEL, VERDICT_TEXT, VerdictChip } from "../components/ui";
-import { getSubmission, runCode, submitCode, useProblem, useProblemSubmissions } from "../data/problems";
+import { getSubmission, type ProblemRef, refKey, runCode, submitCode, useProblem, useProblemSubmissions } from "../data/problems";
 import { ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
@@ -90,9 +90,12 @@ function useSplit(initial: number, axis: "x" | "y", min: number, max: number) {
   return { size, container, start };
 }
 
+/** A problem from practice (/problems/:slug) or from a contest (/contests/:slug/problems/:label). */
 export function Arena() {
-  const { slug = "" } = useParams();
-  const problem = useProblem(slug);
+  const { slug = "", label } = useParams();
+  const ref = useMemo<ProblemRef>(() => (label ? { contest: slug, label } : { slug }), [slug, label]);
+  const problem = useProblem(ref);
+  const back = "contest" in ref ? { to: `/contests/${ref.contest}`, text: "Back to the contest" } : { to: "/problems", text: "Back to problems" };
 
   if (problem.isPending) {
     return (
@@ -103,33 +106,45 @@ export function Arena() {
     );
   }
   if (problem.isError) {
-    const missing = problem.error instanceof ApiError && problem.error.status === 404;
+    const error = problem.error instanceof ApiError ? problem.error : null;
     return (
       <div className="flex h-full flex-col">
         <ArenaHeader title="" />
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-base text-muted">
-          {missing ? "This problem doesn't exist, or isn't released yet." : "Couldn't load this problem."}
-          <Link to="/problems" className="text-fg underline underline-offset-4">
-            Back to problems
+        <div className="gutter flex flex-1 flex-col items-center justify-center gap-3 text-center text-base text-muted">
+          <p className="max-w-[48ch]">
+            {error?.status === 403
+              ? error.message
+              : error?.status === 404
+                ? "This problem doesn't exist, or isn't released yet."
+                : "Couldn't load this problem."}
+          </p>
+          <Link to={back.to} className="text-fg underline underline-offset-4">
+            {back.text}
           </Link>
         </div>
       </div>
     );
   }
   // Keyed so switching problems resets the workspace
-  return <Workspace key={problem.data.slug} problem={problem.data} />;
+  return <Workspace key={refKey(ref)} problemRef={ref} problem={problem.data} />;
 }
 
-function ArenaHeader({ title, actions }: { title: string; actions?: ReactNode }) {
+function ArenaHeader({ title, contest, actions }: { title: string; contest?: ProblemDetail["contest"]; actions?: ReactNode }) {
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line px-3 sm:px-4">
       <Link to="/problems" className="flex items-center gap-2 text-sm text-muted hover:text-fg" aria-label="Back to problems">
         <Wordmark compact />
       </Link>
       <span className="text-faint">/</span>
-      <Link to="/problems" className="hidden text-sm text-muted hover:text-fg sm:inline">
-        Problems
-      </Link>
+      {contest ? (
+        <Link to={`/contests/${contest.slug}`} className="hidden text-sm text-muted hover:text-fg sm:inline">
+          {contest.title}
+        </Link>
+      ) : (
+        <Link to="/problems" className="hidden text-sm text-muted hover:text-fg sm:inline">
+          Problems
+        </Link>
+      )}
       {title ? (
         <>
           <span className="hidden text-faint sm:inline">/</span>
@@ -137,6 +152,7 @@ function ArenaHeader({ title, actions }: { title: string; actions?: ReactNode })
         </>
       ) : null}
       <div className="ml-auto flex items-center gap-2">
+        {contest ? <ContestClock endsAt={contest.endsAt} /> : null}
         {actions ? <div className="hidden md:block">{actions}</div> : null}
         <ThemeButton />
         <div className="hidden sm:block">
@@ -147,9 +163,28 @@ function ArenaHeader({ title, actions }: { title: string; actions?: ReactNode })
   );
 }
 
+/** Time left in the round, while it's running. */
+function ContestClock({ endsAt }: { endsAt: string }) {
+  const end = useMemo(() => new Date(endsAt), [endsAt]);
+  const [over, setOver] = useState(() => end.getTime() <= Date.now());
+  useEffect(() => {
+    const left = end.getTime() - Date.now();
+    if (left <= 0) return;
+    const timer = setTimeout(() => setOver(true), left);
+    return () => clearTimeout(timer);
+  }, [end]);
+  if (over) return <span className="text-sm text-muted">Contest over</span>;
+  return (
+    <span className="flex items-center gap-2 text-sm text-muted">
+      <Tally tone="onair" />
+      <Countdown to={end} className="font-semibold text-fg" />
+    </span>
+  );
+}
+
 type RunState = { pending: true; custom: boolean } | { pending: false; custom: boolean; response?: RunResponse; error?: string };
 
-function Workspace({ problem }: { problem: ProblemDetail }) {
+function Workspace({ problemRef, problem }: { problemRef: ProblemRef; problem: ProblemDetail }) {
   const { state, live } = useAuth();
   const canJudge = !live || state.status === "signed-in";
   const queryClient = useQueryClient();
@@ -183,7 +218,7 @@ function Workspace({ problem }: { problem: ProblemDetail }) {
     setRun({ pending: true, custom });
     setMobileTab("tests");
     try {
-      const response = await runCode(problem.slug, language, code, custom ? customInput : undefined);
+      const response = await runCode(problemRef, language, code, custom ? customInput : undefined);
       setRun({ pending: false, custom, response });
     } catch (error) {
       setRun({ pending: false, custom, error: errorMessage(error) });
@@ -194,7 +229,7 @@ function Workspace({ problem }: { problem: ProblemDetail }) {
     if (!canJudge || (submission && submission.status !== "FINISHED")) return;
     setSubmitError(null);
     try {
-      setSubmission(await submitCode(problem.slug, language, code));
+      setSubmission(await submitCode(problemRef, language, code));
     } catch (error) {
       setSubmitError(errorMessage(error));
     }
@@ -209,15 +244,16 @@ function Workspace({ problem }: { problem: ProblemDetail }) {
         setSubmission(next);
         if (next.status === "FINISHED") {
           void queryClient.invalidateQueries({ queryKey: ["problems"] });
-          void queryClient.invalidateQueries({ queryKey: ["problem", problem.slug] });
-          void queryClient.invalidateQueries({ queryKey: ["submissions", problem.slug] });
+          void queryClient.invalidateQueries({ queryKey: ["problem", refKey(problemRef)] });
+          void queryClient.invalidateQueries({ queryKey: ["submissions", refKey(problemRef)] });
+          if (problem.contest) void queryClient.invalidateQueries({ queryKey: ["contest", problem.contest.slug] });
         }
       } catch {
         setSubmission({ ...submission }); // try again on the next tick
       }
     }, 450);
     return () => clearTimeout(timer);
-  }, [submission, problem.slug, queryClient]);
+  }, [submission, problemRef, problem.contest, queryClient]);
 
   const statusLine = submission ? <SubmissionStatusLine submission={submission} sampleCount={problem.samples.length} /> : run ? <RunStatusLine run={run} /> : null;
 
@@ -287,12 +323,12 @@ function Workspace({ problem }: { problem: ProblemDetail }) {
 
   return (
     <div className="flex h-full flex-col">
-      <ArenaHeader title={problem.title} actions={toolbar} />
+      <ArenaHeader title={problem.title} contest={problem.contest} actions={toolbar} />
 
       {/* Desktop: statement | editor over tests */}
       <div ref={horizontal.container} className="hidden min-h-0 flex-1 md:flex">
         <section className="flex min-w-0 flex-col" style={{ width: `${horizontal.size}%` }}>
-          <ProblemTabs problem={problem} tab={leftTab} onTab={setLeftTab} />
+          <ProblemTabs problemRef={problemRef} problem={problem} tab={leftTab} onTab={setLeftTab} />
         </section>
         <div
           role="separator"
@@ -332,7 +368,7 @@ function Workspace({ problem }: { problem: ProblemDetail }) {
           ))}
         </div>
         <div className="min-h-0 flex-1">
-          {mobileTab === "problem" ? <ProblemTabs problem={problem} tab={leftTab} onTab={setLeftTab} /> : null}
+          {mobileTab === "problem" ? <ProblemTabs problemRef={problemRef} problem={problem} tab={leftTab} onTab={setLeftTab} /> : null}
           {mobileTab === "code" ? editor : null}
           {mobileTab === "tests" ? tests : null}
         </div>
@@ -344,7 +380,7 @@ function Workspace({ problem }: { problem: ProblemDetail }) {
 
 type LeftTab = "statement" | "editorial" | "submissions";
 
-function ProblemTabs({ problem, tab, onTab }: { problem: ProblemDetail; tab: LeftTab; onTab: (t: LeftTab) => void }) {
+function ProblemTabs({ problemRef, problem, tab, onTab }: { problemRef: ProblemRef; problem: ProblemDetail; tab: LeftTab; onTab: (t: LeftTab) => void }) {
   return (
     <>
       <div role="tablist" aria-label="Problem" className="flex h-10 shrink-0 items-end gap-5 border-b border-line px-5">
@@ -366,10 +402,12 @@ function ProblemTabs({ problem, tab, onTab }: { problem: ProblemDetail; tab: Lef
           problem.editorialHtml ? (
             <div className="statement" dangerouslySetInnerHTML={{ __html: problem.editorialHtml }} />
           ) : (
-            <p className="text-base text-muted">There's no editorial for this problem yet.</p>
+            <p className="text-base text-muted">
+              {problem.contest ? "Editorials open in practice once results are out." : "There's no editorial for this problem yet."}
+            </p>
           )
         ) : null}
-        {tab === "submissions" ? <SubmissionsList slug={problem.slug} /> : null}
+        {tab === "submissions" ? <SubmissionsList problemRef={problemRef} /> : null}
       </div>
     </>
   );
@@ -453,10 +491,10 @@ const timeAgo = (iso: string) => {
   return hours < 24 ? `${hours} h ago` : new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 };
 
-function SubmissionsList({ slug }: { slug: string }) {
+function SubmissionsList({ problemRef }: { problemRef: ProblemRef }) {
   const { state, live } = useAuth();
   const signedIn = !live || state.status === "signed-in";
-  const submissions = useProblemSubmissions(slug, signedIn);
+  const submissions = useProblemSubmissions(problemRef, signedIn);
   if (!signedIn) return <p className="text-base text-muted">Sign in to see your submissions.</p>;
   if (submissions.isPending) return <p className="text-base text-muted">Loading…</p>;
   if (submissions.isError) return <p className="text-base text-muted">Couldn't load your submissions.</p>;

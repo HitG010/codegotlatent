@@ -2,7 +2,8 @@ import { pino } from "pino";
 import { createApp } from "./app.js";
 import { createGoogleVerifier } from "./auth/google.js";
 import { GoJudge } from "./judge/gojudge.js";
-import { problemsRouter } from "./problems/routes.js";
+import { judgeLimits, problemsRouter } from "./problems/routes.js";
+import { contestsRouter } from "./contests/routes.js";
 import { authRouter } from "./auth/routes.js";
 import { createDb } from "./db.js";
 import { loadEnv } from "./env.js";
@@ -15,6 +16,9 @@ const logger = pino({
   redact: ["req.headers.authorization", "req.headers.cookie", 'res.headers["set-cookie"]'],
 });
 const db = createDb(env.DATABASE_URL);
+const sandbox = new GoJudge(env.JUDGE_URL);
+// Practice and contest judging share one budget per user
+const limits = judgeLimits();
 
 const app = createApp({
   clientOrigin: env.CLIENT_ORIGIN,
@@ -29,7 +33,8 @@ const app = createApp({
       secureCookies: env.NODE_ENV === "production",
     }),
     meRouter({ db, accessTokenSecret: env.ACCESS_TOKEN_SECRET }),
-    problemsRouter({ db, sandbox: new GoJudge(env.JUDGE_URL), accessTokenSecret: env.ACCESS_TOKEN_SECRET }),
+    problemsRouter({ db, sandbox, accessTokenSecret: env.ACCESS_TOKEN_SECRET }, limits),
+    contestsRouter({ db, sandbox, accessTokenSecret: env.ACCESS_TOKEN_SECRET }, limits),
   ],
 });
 

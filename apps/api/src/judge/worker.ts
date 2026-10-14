@@ -1,5 +1,7 @@
 import { checkerSchema, type TestResult, type Verdict } from "@cgl/shared";
 import type { Logger } from "pino";
+import { finalizeContest, findFinalizable } from "../contests/finalize.js";
+import { recordContestSubmission } from "../contests/scoring.js";
 import type { Db } from "../db.js";
 import type { BlobStore } from "../storage/blob-store.js";
 import { execute } from "./execute.js";
@@ -38,13 +40,18 @@ export async function requeueStale(db: Db, olderThanMs: number): Promise<number>
   return count;
 }
 
-/** Judges one claimed submission and records the result, the user's progress and the problem's counters. */
+/**
+ * Judges one claimed submission and records the result, the user's progress,
+ * the problem's counters and, for a contest submission, the standings.
+ */
 export async function judgeSubmission({ db, sandbox, blobs }: WorkerDeps, id: string): Promise<Verdict> {
   const submission = await db.submission.findUniqueOrThrow({
     where: { id },
     select: {
       userId: true,
       problemId: true,
+      contestId: true,
+      createdAt: true,
       language: true,
       code: true,
       problemVersion: {
@@ -116,12 +123,22 @@ export async function judgeSubmission({ db, sandbox, blobs }: WorkerDeps, id: st
         ...(firstSolve ? { solverCount: { increment: 1 } } : {}),
       },
     });
+    if (submission.contestId) {
+      await recordContestSubmission(tx, { ...submission, contestId: submission.contestId }, verdict);
+    }
   });
   return verdict;
 }
 
-/** Runs `concurrency` judging loops until stopped. */
-export function startWorker(deps: WorkerDeps, { concurrency = 2, idleMs = 250 } = {}) {
+/** Publishes results for every contest that has ended and been fully judged. */
+export async function finalizeDue(deps: WorkerDeps): Promise<void> {
+  for (const contestId of await findFinalizable(deps.db)) {
+    if (await finalizeContest(deps.db, contestId)) deps.logger.info({ contest: contestId }, "results published");
+  }
+}
+
+/** Runs `concurrency` judging loops, and a loop that publishes finished contests, until stopped. */
+export function startWorker(deps: WorkerDeps, { concurrency = 2, idleMs = 250, finalizeEveryMs = 5_000 } = {}) {
   let stopped = false;
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -150,7 +167,18 @@ export function startWorker(deps: WorkerDeps, { concurrency = 2, idleMs = 250 } 
     }
   };
 
-  const loops = Array.from({ length: concurrency }, loop);
+  const publisher = async () => {
+    while (!stopped) {
+      try {
+        await finalizeDue(deps);
+      } catch (error) {
+        deps.logger.error({ err: error }, "publishing contest results failed");
+      }
+      await sleep(finalizeEveryMs);
+    }
+  };
+
+  const loops = [...Array.from({ length: concurrency }, loop), publisher()];
   return {
     stop: async () => {
       stopped = true;

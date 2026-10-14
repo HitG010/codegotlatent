@@ -13,7 +13,7 @@ import type {
 import { useQuery } from "@tanstack/react-query";
 import { api, API_URL } from "../lib/api";
 import { useAuth, useUser } from "../lib/auth";
-import { PRACTICE, PRACTICE_TOTALS, RECENT_SUBMISSIONS } from "../mock/data";
+import { PRACTICE, PRACTICE_TOTALS, RECENT_SUBMISSIONS, ROUND_12 } from "../mock/data";
 import SAMPLE_PROBLEM from "../mock/self-aware.json";
 
 const live = API_URL !== undefined;
@@ -34,39 +34,48 @@ export function useProblemList() {
   });
 }
 
-export function useProblem(slug: string) {
+/** Where a problem is opened: from practice, or as one of a contest's problems. */
+export type ProblemRef = { slug: string } | { contest: string; label: string };
+
+const pathOf = (ref: ProblemRef) =>
+  "slug" in ref
+    ? `/problems/${encodeURIComponent(ref.slug)}`
+    : `/contests/${encodeURIComponent(ref.contest)}/problems/${encodeURIComponent(ref.label)}`;
+
+/** Query-key part for a problem; contest and practice views of one problem are cached apart. */
+export const refKey = (ref: ProblemRef) => ("slug" in ref ? ref.slug : `${ref.contest}/${ref.label}`);
+
+export function useProblem(ref: ProblemRef) {
   const user = useUser();
   const settled = useAuthSettled();
   return useQuery({
-    queryKey: ["problem", slug, user?.id ?? null],
+    queryKey: ["problem", refKey(ref), user?.id ?? null],
     enabled: settled,
-    queryFn: () => (live ? api<ProblemDetail>(`/problems/${encodeURIComponent(slug)}`) : Promise.resolve(sampleProblem(slug))),
+    queryFn: () => (live ? api<ProblemDetail>(pathOf(ref)) : Promise.resolve(sampleProblem(ref))),
   });
 }
 
-export function useProblemSubmissions(slug: string, enabled: boolean) {
+export function useProblemSubmissions(ref: ProblemRef, enabled: boolean) {
   const user = useUser();
   return useQuery({
-    queryKey: ["submissions", slug, user?.id ?? null],
+    queryKey: ["submissions", refKey(ref), user?.id ?? null],
     enabled,
     queryFn: async () =>
-      live
-        ? (await api<{ submissions: SubmissionView[] }>(`/problems/${encodeURIComponent(slug)}/submissions`)).submissions
-        : sampleSubmissions(slug),
+      live ? (await api<{ submissions: SubmissionView[] }>(`${pathOf(ref)}/submissions`)).submissions : sampleSubmissions("slug" in ref ? ref.slug : "self-aware"),
   });
 }
 
-export function runCode(slug: string, language: Language, code: string, input?: string): Promise<RunResponse> {
+export function runCode(ref: ProblemRef, language: Language, code: string, input?: string): Promise<RunResponse> {
   if (!live) return simulateRun(code, input);
-  return api<RunResponse>(`/problems/${encodeURIComponent(slug)}/runs`, {
+  return api<RunResponse>(`${pathOf(ref)}/runs`, {
     method: "POST",
     body: JSON.stringify(input === undefined ? { language, code } : { language, code, input }),
   });
 }
 
-export function submitCode(slug: string, language: Language, code: string): Promise<SubmissionView> {
-  if (!live) return Promise.resolve(simulateSubmission(slug, language, code));
-  return api<SubmissionView>(`/problems/${encodeURIComponent(slug)}/submissions`, {
+export function submitCode(ref: ProblemRef, language: Language, code: string): Promise<SubmissionView> {
+  if (!live) return Promise.resolve(simulateSubmission("slug" in ref ? ref.slug : "self-aware", language, code));
+  return api<SubmissionView>(`${pathOf(ref)}/submissions`, {
     method: "POST",
     body: JSON.stringify({ language, code }),
   });
@@ -78,6 +87,9 @@ export function getSubmission(id: string): Promise<SubmissionView> {
 }
 
 // ─── Sample data for the prototype ─────────────────────────────────────────
+
+/** The sample contest is always 72 minutes from its end, so its clock reads like a live round. */
+const sampleEnd = () => new Date(Date.now() + 72 * 60_000);
 
 const SAMPLE_CHECKER = { kind: "default", caseSensitive: false, spaceSensitive: false } as const;
 
@@ -91,9 +103,10 @@ function sampleList(): ProblemListResponse {
   return { problems: PRACTICE.map(({ acceptance, solvers, ...rest }) => ({ ...rest, acceptance, solvers })), totals };
 }
 
-function sampleProblem(slug: string): ProblemDetail {
+function sampleProblem(ref: ProblemRef): ProblemDetail {
   // Every sample problem page shows the one fully written sample problem
-  const summary = PRACTICE.find((p) => p.slug === slug);
+  const summary = "slug" in ref ? PRACTICE.find((p) => p.slug === ref.slug) : undefined;
+  const slot = "label" in ref ? ROUND_12.problems.find((p) => p.label === ref.label) : undefined;
   return {
     slug: SAMPLE_PROBLEM.slug,
     title: SAMPLE_PROBLEM.title,
@@ -105,8 +118,11 @@ function sampleProblem(slug: string): ProblemDetail {
     editorialHtml: SAMPLE_PROBLEM.editorialHtml,
     samples: SAMPLE_PROBLEM.samples,
     testCount: SAMPLE_PROBLEM.samples.length + SAMPLE_PROBLEM.secretTestCount,
-    from: summary?.from ?? "Round 12 · A",
+    from: slot ? `${ROUND_12.title} · ${slot.label}` : (summary?.from ?? "Round 12 · A"),
     status: summary?.status ?? null,
+    contest: slot
+      ? { slug: ROUND_12.slug, title: ROUND_12.title, label: slot.label, points: slot.points, endsAt: sampleEnd().toISOString() }
+      : null,
   };
 }
 

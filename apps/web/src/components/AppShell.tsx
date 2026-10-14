@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router";
 import { useAuth, useUser } from "../lib/auth";
 import { useTheme } from "../lib/hooks";
-import { ROUND_12 } from "../mock/data";
+import { useContests } from "../data/contests";
 import { Countdown, Tally, Wordmark } from "./show";
 import { Icon } from "./ui";
 
@@ -58,25 +58,39 @@ export function TopBar({ children }: { children?: ReactNode }) {
           <NavLink to="/problems" className={navClass}>
             Problems
           </NavLink>
-          <NavLink to={`/contests/${ROUND_12.slug}`} className={navClass}>
+          <NavLink to="/contests" className={navClass}>
             Contests
           </NavLink>
         </nav>
         <div className="ml-auto flex items-center gap-2">
           {children}
-          <Link
-            to={`/contests/${ROUND_12.slug}`}
-            className="hidden h-9 items-center gap-2 rounded-sm border border-line px-3 text-sm text-muted hover:bg-hover hover:text-fg lg:inline-flex"
-          >
-            <Tally tone="signal" />
-            <span>{ROUND_12.title} starts in</span>
-            <Countdown to={ROUND_12.startsAt} className="text-fg" />
-          </Link>
+          <NextRoundChip />
           <ThemeButton />
           <AccountMenu />
         </div>
       </div>
     </header>
+  );
+}
+
+/** The next round, or the one that's on, with its clock. */
+function NextRoundChip() {
+  const contests = useContests();
+  // The list is newest first, so the last unfinished one is the soonest
+  const next = contests.data?.filter((c) => c.phase !== "RESULTS" && c.phase !== "JUDGING").at(-1);
+  if (!next) return null;
+  const isLive = next.phase === "LIVE";
+  return (
+    <Link
+      to={`/contests/${next.slug}`}
+      className="hidden h-9 items-center gap-2 rounded-sm border border-line px-3 text-sm text-muted hover:bg-hover hover:text-fg lg:inline-flex"
+    >
+      <Tally tone={isLive ? "onair" : "signal"} />
+      <span>
+        {next.title} {isLive ? "ends in" : "starts in"}
+      </span>
+      <Countdown to={new Date(isLive ? next.endsAt : next.startsAt)} className="text-fg" />
+    </Link>
   );
 }
 

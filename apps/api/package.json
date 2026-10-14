@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "postinstall": "prisma generate",
     "problems:import": "tsx --env-file-if-exists=.env src/cli/import-problems.ts",
+    "contests:create": "tsx --env-file-if-exists=.env src/cli/create-contest.ts",
     "worker": "tsx --env-file-if-exists=.env src/worker.ts",
     "dev:worker": "tsx watch --env-file-if-exists=.env src/worker.ts"
   },
@@ -29,6 +30,7 @@
     "jsonwebtoken": "^9.0.3",
     "pino": "^10.4.0",
     "pino-http": "^11.0.0",
+    "yaml": "^2.9.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {

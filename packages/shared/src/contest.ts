@@ -29,3 +29,24 @@ export const percentileGuessSchema = z
   });
 
 export type PercentileGuess = z.infer<typeof percentileGuessSchema>;
+
+export interface ContestTimes {
+  guessOpensAt: Date;
+  startsAt: Date;
+  endsAt: Date;
+  /** When results and ratings went out; null until then. */
+  publishedAt: Date | null;
+}
+
+/**
+ * A contest's phase follows from its times, so nothing has to flip it on
+ * schedule and a restart can't lose track. Only publishing results is an
+ * action (the judge worker does it once every submission is judged).
+ */
+export function phaseAt(contest: ContestTimes, now: Date = new Date()): ContestPhase {
+  if (contest.publishedAt) return "RESULTS";
+  if (now < contest.guessOpensAt) return "SCHEDULED";
+  if (now < contest.startsAt) return "GUESS_WINDOW";
+  if (now < contest.endsAt) return "LIVE";
+  return "JUDGING";
+}

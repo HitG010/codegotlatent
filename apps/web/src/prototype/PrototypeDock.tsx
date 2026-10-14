@@ -6,12 +6,13 @@ const SCREENS = [
   { to: "/", label: "Landing" },
   { to: "/problems", label: "Problems" },
   { to: "/problems/self-aware", label: "Editor" },
+  { to: "/contests", label: "Contests" },
   { to: "/contests/round-12", label: "Lobby" },
   { to: "/contests/round-12/results", label: "Reveal" },
   { to: "/u/hitesh", label: "Profile" },
 ];
 
-/** Review chrome for the prototype build only: jump between the six screens. */
+/** Review chrome for the prototype build only: jump between the screens. */
 export function PrototypeDock() {
   const location = useLocation();
   const [open, setOpen] = useState(true);

@@ -9,7 +9,8 @@ import { Button, ButtonLink, Icon } from "../components/ui";
 import { ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { duration, showTime } from "../lib/format";
-import { ROUND_12, SAMPLE_CONTESTANT as S } from "../mock/data";
+import { useContests } from "../data/contests";
+import { SAMPLE_CONTESTANT as S } from "../mock/data";
 
 // The order is the point here, so each step carries its time relative to the start
 const ROUND_STEPS = [
@@ -208,41 +209,48 @@ function TryIt() {
 
 /** A show moment: the next round, on the stage colour. */
 function NextRound() {
+  const contests = useContests();
+  // Newest first, so the last unfinished one is the soonest
+  const next = contests.data?.filter((c) => c.phase !== "RESULTS" && c.phase !== "JUDGING").at(-1);
+  if (!next) return null;
+  const startsAt = new Date(next.startsAt);
+  const isLive = next.phase === "LIVE";
+  const minutes = Math.round((new Date(next.endsAt).getTime() - startsAt.getTime()) / 60_000);
   return (
     <section className="bg-stage text-stage-fg">
       <div className="gutter mx-auto flex max-w-[1240px] flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
           <Tally tone="signal" />
           <div className="flex flex-col">
-            <span className="text-sm text-stage-muted">Next round</span>
+            <span className="text-sm text-stage-muted">{isLive ? "On now" : "Next round"}</span>
             <span className="display text-2xl">
-              {ROUND_12.title} · {showTime(ROUND_12.startsAt)}
+              {next.title} · {showTime(startsAt)}
             </span>
           </div>
         </div>
         <dl className="flex flex-wrap gap-x-10 gap-y-3">
           <div className="flex flex-col">
-            <dt className="text-sm text-stage-muted">Starts in</dt>
+            <dt className="text-sm text-stage-muted">{isLive ? "Ends in" : "Starts in"}</dt>
             <dd>
-              <Countdown to={ROUND_12.startsAt} className="text-lg" />
+              <Countdown to={isLive ? new Date(next.endsAt) : startsAt} className="text-lg" />
             </dd>
           </div>
           <div className="flex flex-col">
             <dt className="text-sm text-stage-muted">Registered</dt>
-            <dd className="num text-lg">{ROUND_12.registered}</dd>
+            <dd className="num text-lg">{next.registered}</dd>
           </div>
           <div className="flex flex-col">
             <dt className="text-sm text-stage-muted">Format</dt>
             <dd className="text-lg">
-              {ROUND_12.problems.length} problems · {ROUND_12.durationMinutes} min
+              {next.problemCount} problems · {minutes} min
             </dd>
           </div>
         </dl>
         <Link
-          to={`/contests/${ROUND_12.slug}`}
+          to={`/contests/${next.slug}`}
           className="inline-flex h-11 items-center gap-2 self-start rounded-sm bg-stage-accent px-4 text-base font-semibold text-on-signal md:self-auto"
         >
-          Register <Icon name="arrow" />
+          {next.phase === "SCHEDULED" && !next.you?.registered ? "Register" : "Open the round"} <Icon name="arrow" />
         </Link>
       </div>
     </section>

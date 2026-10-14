@@ -1,5 +1,6 @@
 // Shapes of the problems and judging API, shared by the server and the web app.
 import { z } from "zod";
+import type { ContestPhase, PercentileGuess } from "./contest.js";
 import { languageSchema, type Language, type SubmissionStatus, type Verdict } from "./judge.js";
 
 export type Difficulty = "EASY" | "MEDIUM" | "HARD";
@@ -42,6 +43,8 @@ export interface ProblemDetail {
   testCount: number;
   from: string | null;
   status: ProblemStatus;
+  /** Set when the problem is being viewed as part of a contest. */
+  contest: { slug: string; title: string; label: string; points: number; endsAt: string } | null;
 }
 
 export const MAX_CODE_BYTES = 64 * 1024;
@@ -98,4 +101,91 @@ export interface SubmissionView {
   timeMs: number | null;
   memoryKb: number | null;
   createdAt: string;
+}
+
+// ─── Contests ──────────────────────────────────────────────────────────────
+
+export interface ContestSummary {
+  slug: string;
+  title: string;
+  phase: ContestPhase;
+  guessOpensAt: string;
+  startsAt: string;
+  endsAt: string;
+  isRated: boolean;
+  registered: number;
+  /** How many problems, though not which, before it starts. */
+  problemCount: number;
+  /** The signed-in user's part in it; null when signed out. */
+  you: { registered: boolean; guess: PercentileGuess | null } | null;
+}
+
+export interface ContestListResponse {
+  contests: ContestSummary[];
+}
+
+export interface ContestProblemSummary {
+  label: string;
+  /** Its practice page, once results are out. */
+  slug: string;
+  title: string;
+  points: number;
+  /** Contestants who have solved it. */
+  solvedBy: number;
+  you: ProblemStatus;
+}
+
+export interface ContestDetail extends ContestSummary {
+  descriptionHtml: string | null;
+  rulesHtml: string | null;
+  penaltyMinutes: number;
+  maxParticipants: number | null;
+  /** Null until the contest is live, and while live for anyone not registered. */
+  problems: ContestProblemSummary[] | null;
+  /** Your running totals, once you've entered. */
+  standing: { points: number; penaltyMinutes: number; solved: number } | null;
+}
+
+export interface ContestResultCell {
+  label: string;
+  solved: boolean;
+  wrongAttempts: number;
+  /** Minutes from the start to the accepted submission. */
+  minute: number | null;
+}
+
+export interface ContestResultRow {
+  rank: number;
+  handle: string;
+  you: boolean;
+  points: number;
+  penaltyMinutes: number;
+  cells: ContestResultCell[];
+  guess: PercentileGuess | null;
+  /** "Top X%" finish. */
+  finish: number;
+  latentDelta: number;
+  formDelta: number;
+}
+
+export interface RatingChange {
+  before: number;
+  after: number;
+  delta: number;
+}
+
+export interface ContestResults {
+  contest: { slug: string; title: string; field: number; isRated: boolean; problems: Array<{ label: string; title: string; points: number }> };
+  you: {
+    rank: number;
+    finish: number;
+    guess: PercentileGuess | null;
+    predictionScore: number | null;
+    latent: RatingChange | null;
+    form: RatingChange | null;
+    points: number;
+    solved: number;
+    penaltyMinutes: number;
+  } | null;
+  rows: ContestResultRow[];
 }

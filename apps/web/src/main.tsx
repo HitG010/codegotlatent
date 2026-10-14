@@ -7,6 +7,7 @@ import { AuthProvider } from "./lib/auth";
 import { applyTheme, readTheme } from "./lib/hooks";
 import { PrototypeDock } from "./prototype/PrototypeDock";
 import { Arena } from "./screens/Arena";
+import { ContestList } from "./screens/ContestList";
 import { ContestLobby } from "./screens/ContestLobby";
 import { Landing } from "./screens/Landing";
 import { ProblemList } from "./screens/ProblemList";
@@ -41,10 +42,12 @@ const routes: RouteObject[] = [
   { path: "/", element: withDock(<Landing />) },
   { path: "/welcome", element: <Welcome /> },
   { path: "/problems/:slug", element: withDock(<Arena />) },
+  { path: "/contests/:slug/problems/:label", element: withDock(<Arena />) },
   {
     element: withDock(<AppShell />),
     children: [
       { path: "/problems", element: <ProblemList /> },
+      { path: "/contests", element: <ContestList /> },
       { path: "/contests/:slug", element: <ContestLobby /> },
       { path: "/contests/:slug/results", element: <Reveal /> },
       { path: "/u/:handle", element: <Profile /> },
