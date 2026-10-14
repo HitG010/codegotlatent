@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, createMemoryRouter, RouterProvider, type RouteObject } from "react-router";
@@ -54,10 +55,15 @@ const routes: RouteObject[] = [
 // The published prototype lives at a URL we don't control, so it routes in memory
 const router = import.meta.env.MODE === "prototype" ? createMemoryRouter(routes) : createBrowserRouter(routes);
 
+// Cached data is shown instantly when you come back to a page, then refreshed in the background
+const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } });
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </QueryClientProvider>
   </StrictMode>,
 );

@@ -1,0 +1,1 @@
+Slide a window of width $K$: add the reading entering on the right, subtract the one leaving on the left, and keep the best total. Use 64-bit integers, since a sum can reach $2 \cdot 10^{14}$. $O(N)$.

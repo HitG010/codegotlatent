@@ -22,7 +22,7 @@ The rules live in [`packages/rating`](packages/rating/src/rate-contest.ts).
 | `packages/rating` | Contest standings, interval scoring, Latent and Form ratings (pure, tested) |
 | `packages/problem-package` | Problem format: loading, statement rendering, output checking ([how to write a problem](packages/problem-package/README.md)) |
 | `packages/shared` | Schemas and constants shared by client and server |
-| `infra` | Local Postgres, Redis and Judge0 via Docker Compose |
+| `infra` | Local Postgres, Redis and the go-judge code sandbox via Docker Compose |
 
 The original app is preserved, unchanged, on the [`v1`](../../tree/v1) branch.
 
@@ -39,8 +39,11 @@ cp apps/api/.env.example apps/api/.env       # set ACCESS_TOKEN_SECRET and GOOGL
 cp apps/web/.env.example apps/web/.env.local # same Google client ID
 pnpm --filter @cgl/api db:migrate
 pnpm --filter @cgl/api problems:import --practice packages/problem-package/fixtures/self-aware
-pnpm dev:api   # http://localhost:4000
-pnpm dev:web   # http://localhost:5173
+docker compose -f infra/docker-compose.yml up -d judge   # code sandbox (go-judge)
+pnpm --filter @cgl/api problems:import --practice packages/problem-package/fixtures/applause-meter
+pnpm dev:api      # http://localhost:4000
+pnpm dev:worker   # judges queued submissions
+pnpm dev:web      # http://localhost:5173
 ```
 
 `pnpm test` and `pnpm typecheck` run across every package.

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { PageHeader } from "../components/AppShell";
 import { Icon, Kbd, Meter } from "../components/ui";
-import { type Difficulty, PRACTICE, PRACTICE_TOTALS, type PracticeProblem } from "../mock/data";
+import type { Difficulty, ProblemStatus, ProblemSummary } from "@cgl/shared";
+import { useProblemList } from "../data/problems";
 
 const DIFFICULTY_LABEL: Record<Difficulty, string> = { EASY: "Easy", MEDIUM: "Medium", HARD: "Hard" };
 const DIFFICULTY_BARS: Record<Difficulty, number> = { EASY: 1, MEDIUM: 2, HARD: 3 };
@@ -22,7 +23,7 @@ function DifficultyMark({ level }: { level: Difficulty }) {
   );
 }
 
-function StatusMark({ status }: { status: PracticeProblem["status"] }) {
+function StatusMark({ status }: { status: ProblemStatus }) {
   if (status === "solved") return <Icon name="check" className="size-4 text-ok" />;
   if (status === "attempted") return <span title="Attempted" className="block size-2 rounded-full border-[1.5px] border-slow" />;
   return null;
@@ -35,17 +36,19 @@ export function ProblemList() {
   const [difficulty, setDifficulty] = useState<Difficulty | "all">("all");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [cursor, setCursor] = useState(0);
+  const list = useProblemList();
+  const all: ProblemSummary[] = list.data?.problems ?? [];
 
   const problems = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return PRACTICE.filter((p) => {
+    return all.filter((p) => {
       if (difficulty !== "all" && p.difficulty !== difficulty) return false;
       if (status === "solved" && p.status !== "solved") return false;
       if (status === "attempted" && p.status !== "attempted") return false;
       if (status === "new" && p.status !== null) return false;
-      return !q || p.title.toLowerCase().includes(q) || p.tags.some((tag) => tag.includes(q));
+      return !q || p.title.toLowerCase().includes(q) || p.tags.some((tag) => tag.toLowerCase().includes(q));
     });
-  }, [query, difficulty, status]);
+  }, [all, query, difficulty, status]);
 
   useEffect(() => {
     setCursor(0);
@@ -74,7 +77,7 @@ export function ProblemList() {
     return () => document.removeEventListener("keydown", onKey);
   }, [problems, cursor, navigate]);
 
-  const solved = (level: Difficulty) => PRACTICE.filter((p) => p.difficulty === level && p.status === "solved").length;
+  const totals = list.data?.totals;
 
   return (
     <div className="gutter mx-auto flex max-w-[1240px] flex-col gap-8 py-10">
@@ -84,10 +87,10 @@ export function ProblemList() {
             <div key={level} className="flex flex-col gap-2">
               <dt className="label">{DIFFICULTY_LABEL[level]}</dt>
               <dd className="num text-base">
-                {solved(level)}
-                <span className="text-faint">/{PRACTICE_TOTALS[level]}</span>
+                {totals?.[level].solved ?? "–"}
+                <span className="text-faint">/{totals?.[level].total ?? "–"}</span>
               </dd>
-              <Meter value={solved(level)} total={PRACTICE_TOTALS[level]} />
+              <Meter value={totals?.[level].solved ?? 0} total={totals?.[level].total ?? 0} />
             </div>
           ))}
         </dl>
@@ -165,18 +168,43 @@ export function ProblemList() {
                       <span className="text-sm text-faint">{problem.tags.join(" · ")}</span>
                     </Link>
                   </td>
-                  <td className="hidden py-3 pr-4 text-sm text-muted md:table-cell">{problem.from}</td>
+                  <td className="hidden py-3 pr-4 text-sm text-muted md:table-cell">{problem.from ?? "Practice"}</td>
                   <td className="py-3 pr-4 text-sm">
                     <DifficultyMark level={problem.difficulty} />
                   </td>
-                  <td className="num py-3 text-right text-sm text-muted">{problem.acceptance}%</td>
+                  <td className="num py-3 text-right text-sm text-muted">{problem.acceptance === null ? "–" : `${problem.acceptance}%`}</td>
                   <td className="num py-3 pr-4 text-right text-sm text-muted">{problem.solvers}</td>
                 </tr>
               ))}
-              {problems.length === 0 ? (
+              {list.isPending
+                ? Array.from({ length: 6 }, (_, i) => (
+                    <tr key={i} className="border-b border-line last:border-b-0" aria-hidden="true">
+                      <td className="py-3 pl-4" />
+                      <td className="py-3 pr-4">
+                        <span className="block h-4 w-48 rounded-sm bg-raised" />
+                        <span className="mt-1.5 block h-3 w-28 rounded-sm bg-raised" />
+                      </td>
+                      <td colSpan={4} />
+                    </tr>
+                  ))
+                : null}
+              {list.isError ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-12 text-center text-base text-muted">
-                    Nothing matches “{query}”. Try a tag like <span className="num">dp</span> or <span className="num">graphs</span>.
+                    Couldn't load problems. <button type="button" onClick={() => void list.refetch()} className="text-fg underline underline-offset-4">Try again</button>
+                  </td>
+                </tr>
+              ) : null}
+              {list.isSuccess && problems.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-12 text-center text-base text-muted">
+                    {all.length === 0 ? (
+                      "No problems are published yet."
+                    ) : (
+                      <>
+                        Nothing matches your filters{query ? ` for “${query}”` : ""}.
+                      </>
+                    )}
                   </td>
                 </tr>
               ) : null}

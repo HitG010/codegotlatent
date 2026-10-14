@@ -1,7 +1,8 @@
 import type { SessionUser } from "@cgl/shared";
 
-/** Unset in the prototype build, which runs on sample data. */
-export const API_URL: string | undefined = import.meta.env.VITE_API_URL || undefined;
+/** Unset in the prototype build, which always runs on sample data (even with a local .env.local). */
+export const API_URL: string | undefined =
+  import.meta.env.MODE === "prototype" ? undefined : import.meta.env.VITE_API_URL || undefined;
 
 export class ApiError extends Error {
   readonly status: number;

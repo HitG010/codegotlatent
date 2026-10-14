@@ -1,0 +1,7 @@
+problem_format_version: "2025-09"
+name: Applause Meter
+uuid: 3b9e1f7a-5c2d-4e8b-a1f6-0d4c7b2e9a58
+limits:
+  time_limit: 1.0
+  memory: 256
+keywords: [sliding window, prefix sums]

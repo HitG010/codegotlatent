@@ -54,6 +54,18 @@ export function requireUser(secret: string): RequestHandler {
   };
 }
 
+/**
+ * For pages anyone can read but signed-in users see more of. No token means
+ * anonymous; a bad or expired token is still a 401, so the client renews it.
+ */
+export function optionalUser(secret: string): RequestHandler {
+  const required = requireUser(secret);
+  return (req, res, next) => {
+    if (!req.headers.authorization) return next();
+    required(req, res, next);
+  };
+}
+
 export const requireAdmin: RequestHandler = (req, _res, next) => {
   if (req.user?.role !== "ADMIN") throw new HttpError(403, "forbidden", "Admins only");
   next();

@@ -1,6 +1,8 @@
 import { pino } from "pino";
 import { createApp } from "./app.js";
 import { createGoogleVerifier } from "./auth/google.js";
+import { GoJudge } from "./judge/gojudge.js";
+import { problemsRouter } from "./problems/routes.js";
 import { authRouter } from "./auth/routes.js";
 import { createDb } from "./db.js";
 import { loadEnv } from "./env.js";
@@ -27,6 +29,7 @@ const app = createApp({
       secureCookies: env.NODE_ENV === "production",
     }),
     meRouter({ db, accessTokenSecret: env.ACCESS_TOKEN_SECRET }),
+    problemsRouter({ db, sandbox: new GoJudge(env.JUDGE_URL), accessTokenSecret: env.ACCESS_TOKEN_SECRET }),
   ],
 });
 

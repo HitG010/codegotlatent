@@ -10,6 +10,8 @@ const envSchema = z.object({
   CLIENT_ORIGIN: z.url(),
   // OAuth client ID from Google Cloud Console; the web app uses the same one
   GOOGLE_CLIENT_ID: z.string().min(1),
+  // go-judge sandbox (infra/docker-compose.yml, service "judge")
+  JUDGE_URL: z.url().default("http://localhost:5050"),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -10,7 +10,8 @@
     "dev:api": "pnpm --filter @cgl/api dev",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "dev:web": "pnpm --filter @cgl/web dev"
+    "dev:web": "pnpm --filter @cgl/web dev",
+    "dev:worker": "pnpm --filter @cgl/api dev:worker"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

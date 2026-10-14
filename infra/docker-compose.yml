@@ -24,6 +24,16 @@ services:
       - app-db-data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  # Code execution sandbox for v2 (go-judge). Runs untrusted code, so it is
+  # only ever published on localhost; the API and judge worker talk to it.
+  judge:
+    build: ./judge
+    privileged: true
+    shm_size: 256m
+    ports:
+      - "127.0.0.1:5050:5050"
+    restart: unless-stopped
+
   # Redis used by the CodeGotLatent backend itself (rate limiting).
   # Separate from Judge0's internal Redis so the two never fight.
   app-redis:
