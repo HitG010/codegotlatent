@@ -141,7 +141,7 @@ describe.skipIf(!TEST_DATABASE_URL)("problems and judging (database)", () => {
       expect(created.body).toMatchObject({ status: "QUEUED", testsTotal: 5, verdict: null });
 
       const claimed = await claimNext(db);
-      expect(claimed).toBe(created.body.id);
+      expect(claimed?.id).toBe(created.body.id);
       expect(await judgeSubmission(deps, claimed!)).toBe("ACCEPTED");
 
       const done = await get<SubmissionView>(`/submissions/${created.body.id}`, riya);

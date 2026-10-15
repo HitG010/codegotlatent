@@ -13,7 +13,7 @@ import type { Db } from "../db.js";
 import type { Prisma } from "../generated/prisma/client.js";
 import { HttpError } from "../http/errors.js";
 import { execute } from "../judge/execute.js";
-import type { GoJudge } from "../judge/gojudge.js";
+import type { Sandbox } from "../judge/gojudge.js";
 
 /**
  * Problems a contest is using right now: from its guess window until its
@@ -117,7 +117,7 @@ export async function loadJudgeable(db: Db, where: Prisma.ProblemWhereInput): Pr
 
 /** Runs code on the samples, or once on custom input, without recording anything. */
 export async function runOnce(
-  sandbox: GoJudge,
+  sandbox: Sandbox,
   problem: Judgeable,
   body: { language: Language; code: string; input?: string | undefined },
   log: { error: (obj: object, msg: string) => void },

@@ -1,6 +1,6 @@
 import { checkOutput } from "@cgl/problem-package/checker";
 import { type Checker, LANGUAGES, type Language, type Verdict } from "@cgl/shared";
-import type { GoJudge, SandboxResult } from "./gojudge.js";
+import type { Sandbox, SandboxResult } from "./gojudge.js";
 
 interface LanguageSetup {
   source: string;
@@ -91,7 +91,7 @@ function verdictFor(result: SandboxResult): Verdict | null {
  * real judge. `onOutcome` reports each test as it finishes.
  */
 export async function execute(
-  sandbox: GoJudge,
+  sandbox: Sandbox,
   options: {
     language: Language;
     code: string;

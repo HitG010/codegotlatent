@@ -18,13 +18,13 @@ import { Router } from "express";
 import type { Db } from "../db.js";
 import { optionalUser, requireUser } from "../http/auth.js";
 import { HttpError } from "../http/errors.js";
-import type { GoJudge } from "../judge/gojudge.js";
+import type { Sandbox } from "../judge/gojudge.js";
 import { judgeLimits, param } from "../problems/routes.js";
 import { createSubmission, loadDetail, loadJudgeable, runOnce, SUBMISSION_FIELDS, toView } from "../problems/service.js";
 
 export interface ContestDeps {
   db: Db;
-  sandbox: GoJudge;
+  sandbox: Sandbox;
   accessTokenSecret: string;
 }
 

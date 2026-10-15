@@ -9,6 +9,7 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends g++ python3 openjdk-21-jdk-headless nodejs \
  && rm -rf /var/lib/apt/lists/*
 
-# Only reachable on the private network / localhost; see docker-compose.yml
+# Only reachable on localhost (infra/docker-compose.yml) or the private network
+# (infra/deploy/judge), and requires ES_AUTH_TOKEN there
 EXPOSE 5050
 ENTRYPOINT ["/opt/go-judge", "-http-addr", ":5050"]

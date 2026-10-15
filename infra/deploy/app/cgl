@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Day-to-day operations on the app server.
+#
+#   cgl import [--practice] <package>...   publish problem packages (paths inside PROBLEMS_DIR)
+#   cgl contest <spec.yaml>                schedule a contest from a spec inside PROBLEMS_DIR
+#   cgl psql                               database shell
+#   cgl logs [service...]                  follow logs
+#
+# Problem packages and contest specs live in the private problems repository,
+# checked out at PROBLEMS_DIR (set in .env). They're mounted read-only into a
+# one-off container; nothing from them is copied into an image.
+set -euo pipefail
+
+here=$(pwd)
+cd "$(dirname "$(realpath "$0")")"
+compose() { docker compose "$@"; }
+
+problems_dir() {
+  local dir
+  dir=$(sed -n 's/^PROBLEMS_DIR=//p' .env 2>/dev/null | tail -n 1)
+  [[ -n $dir && -d $dir ]] || { echo "cgl: set PROBLEMS_DIR in .env to the problems repo checkout" >&2; exit 1; }
+  realpath -- "$dir"
+}
+
+# A host path inside PROBLEMS_DIR, as the container sees it
+in_container() {
+  local path
+  path=$(cd "$here" && realpath -- "$1")
+  case "$path/" in
+    "$problems/"*) echo "/problems${path#"$problems"}" ;;
+    *) echo "cgl: $1 is not inside PROBLEMS_DIR ($problems)" >&2; exit 1 ;;
+  esac
+}
+
+run_cli() {
+  compose run --rm --no-deps -e TZ="${TZ:-Asia/Kolkata}" -v "$problems:/problems:ro" worker node "$@"
+}
+
+case "${1:-}" in
+  import)
+    shift
+    problems=$(problems_dir)
+    args=()
+    for arg in "$@"; do
+      if [[ $arg == --* ]]; then args+=("$arg"); else args+=("$(in_container "$arg")"); fi
+    done
+    run_cli dist/import-problems.js "${args[@]}"
+    ;;
+  contest)
+    [[ $# -eq 2 ]] || { echo "usage: cgl contest <spec.yaml>" >&2; exit 1; }
+    problems=$(problems_dir)
+    spec=$(in_container "$2")
+    run_cli dist/create-contest.js "$spec"
+    ;;
+  psql)
+    compose exec db psql -U cgl cgl
+    ;;
+  logs)
+    shift
+    compose logs -f --tail=100 "$@"
+    ;;
+  *)
+    sed -n '2,8s/^# \{0,1\}//p' "$0"
+    exit 1
+    ;;
+esac

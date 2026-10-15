@@ -1,0 +1,99 @@
+# The app server: Postgres, the API, the judging worker, and a Cloudflare
+# Tunnel that carries API traffic in. Nothing listens on a public port; the
+# only way in is through Cloudflare. Settings come from .env next to this
+# file (see .env.example); see ../README.md for the whole setup.
+#
+#   docker compose up -d --build     build here and start (or `pull` once CI publishes images)
+name: cgl
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: 10m, max-file: "5" }
+
+x-database-url: &database-url postgresql://cgl:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/cgl
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: cgl
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: cgl
+    volumes:
+      - db:/var/lib/postgresql/data
+    shm_size: 256m
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "cgl", "-d", "cgl"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *logging
+    restart: unless-stopped
+
+  # Applies pending migrations, then exits; the API and worker wait for it
+  migrate:
+    image: &image ${API_IMAGE:-ghcr.io/hitg010/cgl-api:main}
+    build:
+      context: ../../..
+      dockerfile: apps/api/Dockerfile
+    command: ["node_modules/.bin/prisma", "migrate", "deploy"]
+    environment:
+      DATABASE_URL: *database-url
+    depends_on:
+      db: { condition: service_healthy }
+    logging: *logging
+    restart: "no"
+
+  api:
+    image: *image
+    environment:
+      DATABASE_URL: *database-url
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:?set ACCESS_TOKEN_SECRET in .env}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:?set CLIENT_ORIGIN in .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set GOOGLE_CLIENT_ID in .env}
+      JUDGE_URL: ${JUDGE_URL:?set JUDGE_URL in .env}
+      JUDGE_TOKEN: ${JUDGE_TOKEN:?set JUDGE_TOKEN in .env}
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging: *logging
+    restart: unless-stopped
+
+  worker:
+    image: *image
+    command: ["node", "dist/worker.js"]
+    environment:
+      DATABASE_URL: *database-url
+      JUDGE_URL: ${JUDGE_URL:?set JUDGE_URL in .env}
+      JUDGE_TOKEN: ${JUDGE_TOKEN:?set JUDGE_TOKEN in .env}
+      # One per sandbox core
+      JUDGE_CONCURRENCY: ${JUDGE_CONCURRENCY:-2}
+    volumes:
+      - blobs:/data/blobs
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    # Lets the submissions being judged finish on a redeploy
+    stop_grace_period: 2m
+    logging: *logging
+    restart: unless-stopped
+
+  # Outbound-only connection to Cloudflare; route the API hostname to http://api:4000
+  tunnel:
+    image: cloudflare/cloudflared:2026.9.3
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set TUNNEL_TOKEN in .env}
+    depends_on:
+      api: { condition: service_healthy }
+    logging: *logging
+    restart: unless-stopped
+
+volumes:
+  db:
+  # Test files for every problem, hidden tests included: back up privately
+  blobs:

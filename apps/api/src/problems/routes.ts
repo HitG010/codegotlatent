@@ -4,7 +4,7 @@ import type { Db } from "../db.js";
 import { optionalUser, requireUser } from "../http/auth.js";
 import { HttpError } from "../http/errors.js";
 import { perUserLimit } from "../http/rate-limit.js";
-import type { GoJudge } from "../judge/gojudge.js";
+import type { Sandbox } from "../judge/gojudge.js";
 import {
   CONTEST_SLOTS,
   createSubmission,
@@ -20,7 +20,7 @@ import {
 
 export interface ProblemDeps {
   db: Db;
-  sandbox: GoJudge;
+  sandbox: Sandbox;
   accessTokenSecret: string;
 }
 

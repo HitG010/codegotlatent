@@ -1,0 +1,19 @@
+# Only the API image builds from the repo root. Keep secrets, local data and
+# anything the image doesn't need out of the build context.
+**/node_modules
+**/dist
+**/dist-*
+**/.data
+**/.env
+**/.env.*
+**/*.env
+**/gcp-*.json
+.git
+.github
+apps/web
+apps/api/src/generated
+infra
+# Contest specs name a round's problems before it starts
+apps/api/contests
+**/*.test.ts
+packages/problem-package/fixtures

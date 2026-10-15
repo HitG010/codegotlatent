@@ -4,13 +4,14 @@ import { pino } from "pino";
 import { z } from "zod";
 import { createDb } from "./db.js";
 import { GoJudge } from "./judge/gojudge.js";
-import { requeueStale, startWorker } from "./judge/worker.js";
+import { startWorker } from "./judge/worker.js";
 import { FsBlobStore } from "./storage/blob-store.js";
 
 const env = z
   .object({
     DATABASE_URL: z.string().min(1),
     JUDGE_URL: z.url().default("http://localhost:5050"),
+    JUDGE_TOKEN: z.string().optional(),
     BLOB_DIR: z.string().default(".data/blobs"),
     JUDGE_CONCURRENCY: z.coerce.number().int().positive().default(2),
   })
@@ -19,12 +20,8 @@ const env = z
 const logger = pino({ level: "info" });
 const db = createDb(env.DATABASE_URL);
 
-// A submission still RUNNING after two minutes was left behind by a crashed worker
-const requeued = await requeueStale(db, 2 * 60_000);
-if (requeued) logger.warn(`requeued ${requeued} stale submission(s)`);
-
 const worker = startWorker(
-  { db, sandbox: new GoJudge(env.JUDGE_URL), blobs: new FsBlobStore(env.BLOB_DIR), logger },
+  { db, sandbox: new GoJudge(env.JUDGE_URL, { token: env.JUDGE_TOKEN }), blobs: new FsBlobStore(env.BLOB_DIR), logger },
   { concurrency: env.JUDGE_CONCURRENCY },
 );
 logger.info(`judge worker running (${env.JUDGE_CONCURRENCY} at a time)`);

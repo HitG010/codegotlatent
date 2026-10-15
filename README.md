@@ -22,7 +22,7 @@ The rules live in [`packages/rating`](packages/rating/src/rate-contest.ts).
 | `packages/rating` | Contest standings, interval scoring, Latent and Form ratings (pure, tested) |
 | `packages/problem-package` | Problem format: loading, statement rendering, output checking ([how to write a problem](packages/problem-package/README.md)) |
 | `packages/shared` | Schemas and constants shared by client and server |
-| `infra` | Local Postgres, Redis and the go-judge code sandbox via Docker Compose |
+| `infra` | Local Postgres and the go-judge code sandbox via Docker Compose; production in [`infra/deploy`](infra/deploy/README.md) |
 
 The original app is preserved, unchanged, on the [`v1`](../../tree/v1) branch.
 
@@ -47,6 +47,9 @@ pnpm dev:web      # http://localhost:5173
 ```
 
 `pnpm test` and `pnpm typecheck` run across every package.
+
+Deploying, and where real problem packages live (not in this repository), is
+covered in [`infra/deploy`](infra/deploy/README.md).
 
 Sign-in uses a Google OAuth web client: add `http://localhost:5173` (and the
 production origin) to its authorized JavaScript origins. Without

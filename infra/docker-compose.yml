@@ -1,17 +1,8 @@
 name: cgl-infra
 
-# Judge0's images are amd64-only; `platform` makes them run under Rosetta
-# emulation on Apple Silicon. On an x86 GCP VM the line is a harmless no-op.
-x-judge0: &judge0
-  image: judge0/judge0:1.13.1
-  platform: linux/amd64
-  volumes:
-    - ./judge0.conf:/judge0.conf:ro
-  privileged: true
-  restart: unless-stopped
-
+# Local development only; production is infra/deploy.
 services:
-  # Postgres for the v2 app in local dev — never point dev at production.
+  # Postgres for the app — never point dev at production.
   app-db:
     image: postgres:17-alpine
     environment:
@@ -24,8 +15,8 @@ services:
       - app-db-data:/var/lib/postgresql/data
     restart: unless-stopped
 
-  # Code execution sandbox for v2 (go-judge). Runs untrusted code, so it is
-  # only ever published on localhost; the API and judge worker talk to it.
+  # Code execution sandbox (go-judge). Runs untrusted code, so it is only
+  # ever published on localhost; the API and judge worker talk to it.
   judge:
     build: ./judge
     privileged: true
@@ -34,50 +25,5 @@ services:
       - "127.0.0.1:5050:5050"
     restart: unless-stopped
 
-  # Redis used by the CodeGotLatent backend itself (rate limiting).
-  # Separate from Judge0's internal Redis so the two never fight.
-  app-redis:
-    image: redis:7-alpine
-    command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "127.0.0.1:6379:6379"
-    volumes:
-      - app-redis-data:/data
-    restart: unless-stopped
-
-  # ---- Judge0 code execution engine (mirrors the official v1.13.1 deployment) ----
-  server:
-    <<: *judge0
-    ports:
-      - "127.0.0.1:2358:2358"
-    depends_on:
-      - db
-      - redis
-
-  workers:
-    <<: *judge0
-    command: ["./scripts/workers"]
-    depends_on:
-      - db
-      - redis
-
-  # Judge0's own Postgres — internal only, no host port published,
-  # so it can't collide with other Postgres instances on this machine.
-  db:
-    image: postgres:16.2
-    env_file: judge0.conf
-    volumes:
-      - j0-db-data:/var/lib/postgresql/data
-    restart: unless-stopped
-
-  # Judge0's own Redis (job queue) — internal only.
-  redis:
-    image: redis:7.2.4
-    command: ["bash", "-c", "docker-entrypoint.sh --appendonly no --requirepass \"$$REDIS_PASSWORD\""]
-    env_file: judge0.conf
-    restart: unless-stopped
-
 volumes:
   app-db-data:
-  app-redis-data:
-  j0-db-data:

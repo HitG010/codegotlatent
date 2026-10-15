@@ -12,6 +12,13 @@ apps/api/src/generated/
 # Local blob store and other dev data
 .data/
 
+# Real problem packages and contest specs live in the private problems
+# repository: committed here, hidden tests and upcoming rounds would be public
+/problems/
+/contests/
+apps/api/contests/*
+!apps/api/contests/example.yaml
+
 # Logs
 logs
 *.log

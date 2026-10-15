@@ -12,6 +12,8 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1),
   // go-judge sandbox (infra/docker-compose.yml, service "judge")
   JUDGE_URL: z.url().default("http://localhost:5050"),
+  // Bearer token the sandbox requires (its ES_AUTH_TOKEN); unset for a local sandbox
+  JUDGE_TOKEN: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -335,12 +335,20 @@ model Submission {
   createdAt  DateTime  @default(now())
   finishedAt DateTime?
 
+  // Judging. Every claim by a worker bumps `attempts`, which doubles as a
+  // fencing token: a worker whose claim was taken over can't write results.
+  // `heartbeatAt` moves on as tests finish; a stale one means a dead worker.
+  attempts    Int       @default(0)
+  heartbeatAt DateTime?
+
   user           User           @relation(fields: [userId], references: [id])
   problem        Problem        @relation(fields: [problemId], references: [id])
   problemVersion ProblemVersion @relation(fields: [problemVersionId], references: [id])
   contest        Contest?       @relation(fields: [contestId], references: [id])
 
   @@index([userId, problemId, createdAt(sort: Desc)])
+  // The queue: workers poll for the oldest QUEUED submission
+  @@index([status, createdAt])
   @@index([problemId, verdict])
   @@index([contestId, createdAt])
 }

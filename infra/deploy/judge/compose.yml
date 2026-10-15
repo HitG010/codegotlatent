@@ -1,0 +1,26 @@
+# The judge server: go-judge, which runs submitted code. It holds no
+# secrets and no data; the app server's worker sends it programs and inputs
+# over the private network and checks answers itself. Settings come from .env
+# next to this file (see .env.example); see ../README.md for the whole setup.
+#
+#   docker compose up -d --build
+name: cgl-judge
+
+services:
+  judge:
+    image: ${JUDGE_IMAGE:-ghcr.io/hitg010/cgl-judge:main}
+    build: ../../judge
+    # go-judge makes its own namespaces and cgroups for every program it runs
+    privileged: true
+    shm_size: 256m
+    environment:
+      ES_AUTH_TOKEN: ${JUDGE_TOKEN:?set JUDGE_TOKEN in .env}
+      # Frees compiled programs a crashed worker never released
+      ES_FILE_TIMEOUT: 30m
+      ES_RELEASE: "true"
+    ports:
+      - "${JUDGE_BIND_IP:?set JUDGE_BIND_IP in .env}:5050:5050"
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: "5" }
+    restart: unless-stopped

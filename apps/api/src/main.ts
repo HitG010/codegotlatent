@@ -17,7 +17,7 @@ const logger = pino({
   redact: ["req.headers.authorization", "req.headers.cookie", 'res.headers["set-cookie"]'],
 });
 const db = createDb(env.DATABASE_URL);
-const sandbox = new GoJudge(env.JUDGE_URL);
+const sandbox = new GoJudge(env.JUDGE_URL, { token: env.JUDGE_TOKEN });
 // Practice and contest judging share one budget per user
 const limits = judgeLimits();
 
