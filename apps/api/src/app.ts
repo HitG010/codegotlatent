@@ -8,18 +8,33 @@ import { errorHandler, notFound } from "./http/errors.js";
 
 export interface AppDeps {
   clientOrigin: string;
+  /**
+   * Header holding the visitor's IP, set by the proxy in front of the API
+   * (cf-connecting-ip behind Cloudflare). Becomes `req.ip`. Only safe when
+   * nothing can reach the API except through that proxy, which overwrites it.
+   */
+  clientIpHeader?: string | undefined;
   logger: Logger;
   /** Liveness probe for the database; resolves when it answers. */
   pingDb: () => Promise<unknown>;
   routers?: Router[];
 }
 
-export function createApp({ clientOrigin, logger, pingDb, routers = [] }: AppDeps): Express {
+export function createApp({ clientOrigin, clientIpHeader, logger, pingDb, routers = [] }: AppDeps): Express {
   const app = express();
   app.disable("x-powered-by");
+  // One proxy hop, for X-Forwarded-Proto and, without clientIpHeader, X-Forwarded-For
   app.set("trust proxy", 1);
 
-  app.use(pinoHttp({ logger }));
+  if (clientIpHeader) {
+    app.use((req, _res, next) => {
+      const ip = req.get(clientIpHeader)?.trim();
+      if (ip) Object.defineProperty(req, "ip", { value: ip, configurable: true, enumerable: true });
+      next();
+    });
+  }
+  // The socket's address is the proxy's; log the visitor's
+  app.use(pinoHttp({ logger, customProps: (req) => ({ clientIp: (req as express.Request).ip }) }));
   app.use(helmet());
   app.use(cors({ origin: clientOrigin, credentials: true }));
   // Largest legitimate body is a code submission; test data goes to object storage

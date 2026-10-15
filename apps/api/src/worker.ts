@@ -9,11 +9,16 @@ import { FsBlobStore } from "./storage/blob-store.js";
 
 const env = z
   .object({
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     DATABASE_URL: z.string().min(1),
     JUDGE_URL: z.url().default("http://localhost:5050"),
     JUDGE_TOKEN: z.string().optional(),
     BLOB_DIR: z.string().default(".data/blobs"),
     JUDGE_CONCURRENCY: z.coerce.number().int().positive().default(2),
+  })
+  .refine((env) => env.NODE_ENV !== "production" || (env.JUDGE_TOKEN?.length ?? 0) >= 32, {
+    path: ["JUDGE_TOKEN"],
+    message: "required in production: at least 32 random characters, matching the judge server",
   })
   .parse(process.env);
 

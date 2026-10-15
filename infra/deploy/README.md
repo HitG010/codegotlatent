@@ -7,6 +7,11 @@ Cloudflare in front:
 | --- | --- | --- |
 | **app** | Postgres, the API, the judging worker, a Cloudflare Tunnel ([`app/compose.yml`](app/compose.yml)) | Nowhere directly: API traffic arrives through the tunnel, which connects out to Cloudflare |
 | **judge** | go-judge, which runs submitted code ([`judge/compose.yml`](judge/compose.yml)) | The app server only, on the private network, with a token |
+| **web** | The static web app on Cloudflare Pages | Everyone |
+
+Serve the web app and the API from the same domain (`codegotlatent.com` and
+`api.codegotlatent.com`). Sign-in keeps its session in a cookie, which browsers
+only send reliably between sites on the same domain.
 
 The judge server holds no data and no secrets except its own token. The
 worker sends it programs and test inputs, then checks the output itself, so
@@ -47,6 +52,21 @@ Check it from the app server:
 curl -H "authorization: Bearer $JUDGE_TOKEN" http://<judge-private-ip>:5050/file   # {} means the judge is reachable
 curl https://api.codegotlatent.com/health                                           # {"ok":true,"db":"up"}
 ```
+
+**Web app.** Build it with the API's URL and the Google client ID. The build
+refuses to run without them, because the app would otherwise fall back to
+sample data:
+
+```sh
+VITE_API_URL=https://api.codegotlatent.com VITE_GOOGLE_CLIENT_ID=… pnpm --filter @cgl/web build
+```
+
+Publish `apps/web/dist` to Cloudflare Pages. It includes `_headers`: a content
+security policy that only allows our own code, the API and Google sign-in, plus
+long caching for the hashed assets. With no `404.html`, Pages serves
+`index.html` for every route, which the app's routing needs. In Google Cloud
+Console, add the site's origin to the OAuth client's authorized JavaScript
+origins.
 
 ## Updating
 

@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Db } from "../db.js";
 import { ACCESS_TOKEN_TTL_SECONDS, signAccessToken } from "../http/auth.js";
 import { HttpError } from "../http/errors.js";
+import { perUserLimit } from "../http/rate-limit.js";
 import type { VerifyGoogleToken } from "./google.js";
 import { clearSessionCookie, closeSession, openSession, resumeSession, SESSION_COOKIE, setSessionCookie } from "./sessions.js";
 import { findOrCreateGoogleUser, type SessionUserRow, toSessionUser } from "./users.js";
@@ -29,6 +30,8 @@ function requireOrigin(clientOrigin: string): RequestHandler {
 export function authRouter({ db, verifyGoogle, accessTokenSecret, clientOrigin, secureCookies }: AuthDeps): Router {
   const router = Router();
   const sameOrigin = requireOrigin(clientOrigin);
+  // Per IP: generous, since a whole campus can share one address at the start of a round
+  const signInLimit = perUserLimit({ max: 30, windowMs: 10 * 60_000, message: "Too many sign-ins from your network. Try again in a few minutes." });
 
   const signedIn = (user: SessionUserRow) => ({
     accessToken: signAccessToken({ id: user.id, role: user.role }, accessTokenSecret),
@@ -36,7 +39,7 @@ export function authRouter({ db, verifyGoogle, accessTokenSecret, clientOrigin, 
     user: toSessionUser(user),
   });
 
-  router.post("/auth/google", sameOrigin, async (req, res) => {
+  router.post("/auth/google", sameOrigin, signInLimit, async (req, res) => {
     const { credential } = z.object({ credential: z.string().min(1) }).parse(req.body);
     let identity;
     try {

@@ -53,6 +53,8 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set GOOGLE_CLIENT_ID in .env}
       JUDGE_URL: ${JUDGE_URL:?set JUDGE_URL in .env}
       JUDGE_TOKEN: ${JUDGE_TOKEN:?set JUDGE_TOKEN in .env}
+      # Cloudflare sets this on every request; the tunnel is the only way in
+      CLIENT_IP_HEADER: cf-connecting-ip
     depends_on:
       migrate: { condition: service_completed_successfully }
     healthcheck:

@@ -6,6 +6,7 @@ import { pino } from "pino";
 import { afterEach, describe, expect, it } from "vitest";
 import { createApp, type AppDeps } from "./app.js";
 import { requireAdmin, requireUser, signAccessToken } from "./http/auth.js";
+import { perUserLimit } from "./http/rate-limit.js";
 
 const SECRET = "test-secret-that-is-at-least-32-chars!";
 let server: Server | undefined;
@@ -14,6 +15,7 @@ async function start(overrides: Partial<AppDeps> = {}) {
   const probe = Router();
   probe.get("/probe/me", requireUser(SECRET), (req, res) => res.json(req.user));
   probe.get("/probe/admin", requireUser(SECRET), requireAdmin, (_req, res) => res.json({ ok: true }));
+  probe.get("/probe/ip", perUserLimit({ max: 2, windowMs: 60_000, message: "slow down" }), (req, res) => res.json({ ip: req.ip }));
 
   const app = createApp({
     clientOrigin: "http://localhost:5173",
@@ -101,5 +103,28 @@ describe("error handling", () => {
       body: "{not json",
     });
     expect(res.status).toBe(400);
+  });
+});
+
+describe("client IP", () => {
+  const from = (ip: string) => ({ headers: { "cf-connecting-ip": ip } });
+
+  it("comes from the proxy's header when one is configured", async () => {
+    const request = await start({ clientIpHeader: "cf-connecting-ip" });
+    expect(await (await request("/probe/ip", from("203.0.113.7"))).json()).toEqual({ ip: "203.0.113.7" });
+    // Without the header (a request that didn't come through the proxy), the socket's address
+    expect(await (await request("/probe/ip")).json()).toEqual({ ip: "::ffff:127.0.0.1" });
+  });
+
+  it("is never taken from that header otherwise", async () => {
+    const request = await start();
+    expect(await (await request("/probe/ip", from("203.0.113.7"))).json()).toEqual({ ip: "::ffff:127.0.0.1" });
+  });
+
+  it("gives each visitor their own rate limit", async () => {
+    const request = await start({ clientIpHeader: "cf-connecting-ip" });
+    for (let i = 0; i < 2; i++) expect((await request("/probe/ip", from("203.0.113.7"))).status).toBe(200);
+    expect((await request("/probe/ip", from("203.0.113.7"))).status).toBe(429);
+    expect((await request("/probe/ip", from("198.51.100.4"))).status).toBe(200);
   });
 });

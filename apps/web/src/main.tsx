@@ -1,3 +1,5 @@
+// First: configures zod before any module builds a schema
+import "./lib/no-eval";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

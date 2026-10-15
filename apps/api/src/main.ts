@@ -23,6 +23,7 @@ const limits = judgeLimits();
 
 const app = createApp({
   clientOrigin: env.CLIENT_ORIGIN,
+  clientIpHeader: env.CLIENT_IP_HEADER,
   logger,
   pingDb: () => db.$queryRaw`SELECT 1`,
   routers: [
